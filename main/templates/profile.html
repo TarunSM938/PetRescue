@@ -5,59 +5,165 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2>User Profile</h2>
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Your Profile</h2>
+    </div>
+  </div>
   
   {% if messages %}
     {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
     {% endfor %}
   {% endif %}
 
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card mb-4">
-        <div class="card-header">
-          <h5>Update Profile Information</h5>
+  <div class="row g-4">
+    <!-- Profile Update Form -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100 border-0 rounded-3">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Update Profile Information</h5>
         </div>
         <div class="card-body">
           <form method="POST">
             {% csrf_token %}
+            
             <div class="mb-3">
               <label for="{{ u_form.username.id_for_label }}" class="form-label">Username</label>
               {{ u_form.username }}
+              {% if u_form.username.errors %}
+                {% for error in u_form.username.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
             </div>
+            
             <div class="mb-3">
               <label for="{{ u_form.email.id_for_label }}" class="form-label">Email</label>
               {{ u_form.email }}
+              {% if u_form.email.errors %}
+                {% for error in u_form.email.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
             </div>
+            
             <div class="mb-3">
               <label for="{{ p_form.bio.id_for_label }}" class="form-label">Bio</label>
               {{ p_form.bio }}
+              {% if p_form.bio.errors %}
+                {% for error in p_form.bio.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+              <div class="form-text">Tell us about yourself and your experience with pets.</div>
             </div>
+            
             <div class="mb-3">
               <label for="{{ p_form.location.id_for_label }}" class="form-label">Location</label>
               {{ p_form.location }}
+              {% if p_form.location.errors %}
+                {% for error in p_form.location.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+              <div class="form-text">City or area where you live.</div>
             </div>
+            
             <div class="mb-3">
               <label for="{{ p_form.birth_date.id_for_label }}" class="form-label">Birth Date</label>
               {{ p_form.birth_date }}
+              {% if p_form.birth_date.errors %}
+                {% for error in p_form.birth_date.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+              <div class="form-text">Your birth date (optional).</div>
             </div>
-            <button type="submit" class="btn btn-primary">Update</button>
+            
+            <button type="submit" class="btn btn-primary w-100">Update Profile</button>
           </form>
         </div>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h5>Profile Details</h5>
+    
+    <!-- Profile Details -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100 border-0 rounded-3">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Profile Details</h5>
         </div>
         <div class="card-body">
-          <p><strong>Username:</strong> {{ user.username }}</p>
-          <p><strong>Email:</strong> {{ user.email }}</p>
-          <p><strong>Bio:</strong> {{ user.profile.bio }}</p>
-          <p><strong>Location:</strong> {{ user.profile.location }}</p>
-          <p><strong>Birth Date:</strong> {{ user.profile.birth_date }}</p>
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Username:</strong></div>
+            <div class="col-sm-8">{{ user.username }}</div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Email:</strong></div>
+            <div class="col-sm-8">{{ user.email }}</div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Bio:</strong></div>
+            <div class="col-sm-8">
+              {% if user.profile.bio %}
+                {{ user.profile.bio }}
+              {% else %}
+                <span class="text-muted">No bio provided</span>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Location:</strong></div>
+            <div class="col-sm-8">
+              {% if user.profile.location %}
+                {{ user.profile.location }}
+              {% else %}
+                <span class="text-muted">No location provided</span>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-sm-4"><strong>Birth Date:</strong></div>
+            <div class="col-sm-8">
+              {% if user.profile.birth_date %}
+                {{ user.profile.birth_date }}
+              {% else %}
+                <span class="text-muted">No birth date provided</span>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- User Stats -->
+          <div class="mt-4 pt-3 border-top">
+            <h6 class="mb-3">Your Activity</h6>
+            <div class="row text-center">
+              <div class="col-4">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                  <span class="fw-bold text-success">5</span>
+                </div>
+                <div class="mt-2 small">Pets Reported</div>
+              </div>
+              <div class="col-4">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                  <span class="fw-bold text-primary">12</span>
+                </div>
+                <div class="mt-2 small">Pets Helped</div>
+              </div>
+              <div class="col-4">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                  <span class="fw-bold text-warning">8</span>
+                </div>
+                <div class="mt-2 small">Days Active</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

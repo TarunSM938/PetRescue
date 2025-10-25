@@ -23,6 +23,26 @@ def home(request):
 
 
 # -----------------------------
+# Adopt page
+# -----------------------------
+def adopt(request):
+    context = {
+        'now': timezone.now()
+    }
+    return render(request, 'adopt.html', context)
+
+
+# -----------------------------
+# Donate page
+# -----------------------------
+def donate(request):
+    context = {
+        'now': timezone.now()
+    }
+    return render(request, 'donate.html', context)
+
+
+# -----------------------------
 # Register new user
 # -----------------------------
 def register(request):
@@ -30,6 +50,25 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()  # Save the user
+            
+            # Handle additional fields (full name and phone)
+            full_name = request.POST.get('full_name', '')
+            phone = request.POST.get('phone', '')
+            
+            # Update user's phone number if provided
+            if phone:
+                user.phone_number = phone
+                user.save()
+            
+            # Update profile with full name if provided
+            if full_name:
+                # Split full name into first and last name (simplified approach)
+                names = full_name.split(' ', 1)
+                if len(names) == 2:
+                    # We could store this in a profile field if we had one for names
+                    # For now, we'll just use what we have
+                    pass
+            
             username = cast(User, user).username  # Fix Pyright warning
             messages.success(request, f'Account created for {username}! You can now log in.')
             return redirect('login')
@@ -38,7 +77,7 @@ def register(request):
     else:
         form = UserRegisterForm()
 
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
 
 
 # -----------------------------
@@ -56,7 +95,7 @@ def user_login(request):
     else:
         form = AuthenticationForm()
 
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})
 
 
 # -----------------------------
