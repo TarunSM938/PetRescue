@@ -1,6 +1,6 @@
 /* 
 PetRescue Custom Styles
-Designed with soft, friendly colors that evoke compassion and care
+Stylesheet for the PetRescue website with a friendly, compassionate design
 */
 
 :root {
@@ -48,6 +48,13 @@ body {
 .nav-link:hover {
   color: var(--secondary-color) !important;
   transform: translateY(-2px);
+}
+
+/* Active nav link */
+.nav-link.active {
+  color: var(--primary-color) !important;
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary-color);
 }
 
 /* Card styles */
@@ -353,4 +360,35 @@ a:hover {
 .page-item.active .page-link {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
+}
+
+/* Hero section */
+.hero-section {
+  padding: 3rem 0;
+}
+
+.hero-image-container {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease;
+}
+
+.hero-image-container:hover {
+  transform: translateY(-5px);
+}
+
+/* CTA section */
+.cta-section .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cta-section .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* Sticky navigation */
+.navbar.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
 }

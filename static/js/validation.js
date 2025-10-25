@@ -1,6 +1,6 @@
 /*
-PetRescue Form Validation
-Client-side validation for registration and login forms
+PetRescue Form Validation and UI Enhancements
+Client-side validation for registration and login forms with UI enhancements
 */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -25,6 +25,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add any focus or animation effects here if needed
         });
     }
+    
+    // Add scroll animation to elements
+    setupScrollAnimations();
+    
+    // Add hover effects to buttons
+    setupButtonHoverEffects();
+    
+    // Set active nav link
+    setActiveNavLink();
     
     // Real-time validation setup
     function setupRealTimeValidation() {
@@ -173,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (fullName.value.trim().length < 2) {
             showInlineMessage(fullName, 'Full name should be at least 2 characters.', 'error');
         } else {
-            showInlineMessage(fullName, '✓ Looks good!', 'success');
+            showInlineMessage(fullName, 'Looks good!', 'success');
         }
     }
     
@@ -187,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (username.value.length < 3) {
             showInlineMessage(username, 'Username should be at least 3 characters.', 'error');
         } else {
-            showInlineMessage(username, '✓ Valid username', 'success');
+            showInlineMessage(username, 'Valid username', 'success');
         }
     }
     
@@ -199,9 +208,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (isValidPhone(phone.value)) {
-            showInlineMessage(phone, '✓ Valid phone number', 'success');
+            showInlineMessage(phone, 'Valid phone number', 'success');
         } else {
-            showInlineMessage(phone, '✗ Please enter a valid phone number', 'error');
+            showInlineMessage(phone, 'Please enter a valid phone number', 'error');
         }
     }
     
@@ -217,11 +226,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (isValidEmail(email.value)) {
             if (emailStatus) {
-                emailStatus.innerHTML = '<span style="color: green;">✓ Valid email format</span>';
+                emailStatus.innerHTML = '<span style="color: green;">Valid email format</span>';
             }
         } else {
             if (emailStatus) {
-                emailStatus.innerHTML = '<span style="color: red;">✗ Invalid email format</span>';
+                emailStatus.innerHTML = '<span style="color: red;">Invalid email format</span>';
             }
         }
     }
@@ -244,11 +253,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (password.value.length < 8) {
             if (passwordHelp) {
-                passwordHelp.innerHTML = '<span style="color: red;">✗ At least 8 characters required</span>';
+                passwordHelp.innerHTML = '<span style="color: red;">At least 8 characters required</span>';
             }
         } else {
             if (passwordHelp) {
-                passwordHelp.innerHTML = '<span style="color: green;">✓ Good password length</span>';
+                passwordHelp.innerHTML = '<span style="color: green;">Good password length</span>';
             }
         }
     }
@@ -275,9 +284,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (password1.value === password2.value) {
-            passwordMatch.innerHTML = '<span style="color: green;">✓ Passwords match</span>';
+            passwordMatch.innerHTML = '<span style="color: green;">Passwords match</span>';
         } else {
-            passwordMatch.innerHTML = '<span style="color: red;">✗ Passwords do not match</span>';
+            passwordMatch.innerHTML = '<span style="color: red;">Passwords do not match</span>';
         }
     }
     
@@ -332,5 +341,70 @@ document.addEventListener('DOMContentLoaded', function() {
     function clearErrorMessages() {
         const errorMessages = document.querySelectorAll('.error-message, .inline-message');
         errorMessages.forEach(error => error.remove());
+    }
+    
+    // Set up scroll animations
+    function setupScrollAnimations() {
+        // Add fade-in animation to elements when they come into view
+        const fadeElements = document.querySelectorAll('.feature-card, .pet-card, .cta-section .card');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        
+        fadeElements.forEach(element => {
+            observer.observe(element);
+        });
+    }
+    
+    // Set up button hover effects
+    function setupButtonHoverEffects() {
+        const buttons = document.querySelectorAll('.btn');
+        
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    }
+    
+    // Set active nav link based on current page
+    function setActiveNavLink() {
+        const links = document.querySelectorAll('.nav-link');
+        const currentPage = window.location.pathname;
+        const urlParams = new URLSearchParams(window.location.search);
+        const petType = urlParams.get('type');
+        
+        links.forEach(link => {
+            // Remove active class from all links
+            link.classList.remove('active');
+            
+            // Add active class to current page link
+            const linkHref = link.getAttribute('href');
+            
+            // Special handling for Report Lost Pet and Report Found Pet links
+            if (link.textContent === 'Report Lost Pet' && currentPage === '/adopt/' && petType === 'lost') {
+                link.classList.add('active');
+            } else if (link.textContent === 'Report Found Pet' && currentPage === '/adopt/' && petType === 'found') {
+                link.classList.add('active');
+            } else if (linkHref === currentPage) {
+                link.classList.add('active');
+            }
+            
+            // Special case for home page
+            if (currentPage === '/' && linkHref === '/') {
+                link.classList.add('active');
+            }
+        });
     }
 });

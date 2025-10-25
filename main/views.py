@@ -25,6 +25,7 @@ def home(request):
 # -----------------------------
 # Adopt page
 # -----------------------------
+@login_required
 def adopt(request):
     context = {
         'now': timezone.now()

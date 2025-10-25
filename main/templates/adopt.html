@@ -201,21 +201,21 @@
         <!-- Pet Card 5 -->
         <div class="col-md-6 col-lg-4">
           <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
-            <img src="https://images.unsplash.com/photo-1551377735-081065852d9d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-                 class="card-img-top" alt="Mittens the cat" style="height: 250px; object-fit: cover;">
+            <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                 class="card-img-top" alt="Bella the cat" style="height: 250px; object-fit: cover;">
             <div class="card-body d-flex flex-column">
               <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="card-title mb-0">Mittens</h5>
+                <h5 class="card-title mb-0">Bella</h5>
                 <span class="badge bg-warning">Cat</span>
               </div>
               <p class="card-text">
                 <small class="text-muted">
                   <i class="fas fa-paw me-1"></i> Siamese<br>
-                  <i class="fas fa-birthday-cake me-1"></i> 5 years old<br>
+                  <i class="fas fa-birthday-cake me-1"></i> 2 years old<br>
                   <i class="fas fa-map-marker-alt me-1"></i> Phoenix
                 </small>
               </p>
-              <p class="flex-grow-1">Vocal and social Siamese cat who craves attention and loves to "talk" with her humans throughout the day.</p>
+              <p class="flex-grow-1">Playful and curious Siamese cat who loves interactive toys and cuddling on the couch.</p>
               <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
             </div>
           </div>
@@ -224,21 +224,21 @@
         <!-- Pet Card 6 -->
         <div class="col-md-6 col-lg-4">
           <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
-            <img src="https://images.unsplash.com/photo-1473496169904-6586047c86b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-                 class="card-img-top" alt="Kiwi the bird" style="height: 250px; object-fit: cover;">
+            <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                 class="card-img-top" alt="Rocky the dog" style="height: 250px; object-fit: cover;">
             <div class="card-body d-flex flex-column">
               <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="card-title mb-0">Kiwi</h5>
-                <span class="badge bg-primary">Bird</span>
+                <h5 class="card-title mb-0">Rocky</h5>
+                <span class="badge bg-success">Dog</span>
               </div>
               <p class="card-text">
                 <small class="text-muted">
-                  <i class="fas fa-paw me-1"></i> Cockatiel<br>
-                  <i class="fas fa-birthday-cake me-1"></i> 3 years old<br>
-                  <i class="fas fa-map-marker-alt me-1"></i> New York
+                  <i class="fas fa-paw me-1"></i> Bulldog<br>
+                  <i class="fas fa-birthday-cake me-1"></i> 5 years old<br>
+                  <i class="fas fa-map-marker-alt me-1"></i> Philadelphia
                 </small>
               </p>
-              <p class="flex-grow-1">Colorful cockatiel who loves to whistle tunes and enjoys fresh fruits. Hand-tamed and very social.</p>
+              <p class="flex-grow-1">Calm and gentle Bulldog who enjoys short walks and relaxing in the yard.</p>
               <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
             </div>
           </div>
@@ -246,7 +246,7 @@
       </div>
       
       <!-- Pagination -->
-      <nav aria-label="Pet listings pagination" class="mt-5">
+      <nav aria-label="Pet listings pagination">
         <ul class="pagination justify-content-center">
           <li class="page-item disabled">
             <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
@@ -265,75 +265,9 @@
 {% endblock %}
 
 {% block head_extra %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-  .pet-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .pet-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
-  }
-  
   .card-img-overlay .bg-light {
     background-color: rgba(255,255,255,0.9) !important;
   }
-  
-  .btn-group .btn {
-    border-radius: 50% !important;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .btn-group .btn:first-child {
-    border-top-right-radius: 50% !important;
-    border-bottom-right-radius: 50% !important;
-  }
-  
-  .btn-group .btn:last-child {
-    border-top-left-radius: 50% !important;
-    border-bottom-left-radius: 50% !important;
-  }
-  
-  .btn-group .btn.active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-  }
 </style>
-{% endblock %}
-
-{% block scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // View toggle functionality
-    const gridView = document.getElementById('grid-view');
-    const listView = document.getElementById('list-view');
-    const petGrid = document.getElementById('pet-grid');
-    
-    gridView.addEventListener('click', function() {
-      gridView.classList.add('active');
-      listView.classList.remove('active');
-      petGrid.classList.remove('list-view');
-    });
-    
-    listView.addEventListener('click', function() {
-      listView.classList.add('active');
-      gridView.classList.remove('active');
-      petGrid.classList.add('list-view');
-    });
-    
-    // Search form submission
-    const searchForm = document.getElementById('pet-search-form');
-    searchForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      // In a real application, this would filter the pet listings
-      alert('In a real application, this would filter the pet listings based on your selections.');
-    });
-  });
-</script>
 {% endblock %}
