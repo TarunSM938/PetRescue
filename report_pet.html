@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Pet{% endblock %}
+
+{% block content %}
+<h2>Report a Pet</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  {% for field in form %}
+  <div>
+    {{ field.label_tag }}
+    {{ field }}
+    {{ field.errors }}
+  </div>
+  {% endfor %}
+  <button type="submit">Submit</button>
+ </form>
+{% endblock %}
+

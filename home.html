@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Pet Adoption{% endblock %}
+
+{% block content %}
+<section>
+  <h1>Welcome to Pet Adoption</h1>
+  <p>Find lost pets, report found ones, and help reunite families.</p>
+  <p>
+    <a href="/pets/">Search Pets</a>
+    {% if not request.user.is_authenticated %}
+      <a href="{% url 'accounts:register' %}">Get Started</a>
+    {% endif %}
+  </p>
+ </section>
+{% endblock %}
+
