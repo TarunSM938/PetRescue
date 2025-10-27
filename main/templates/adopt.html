@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Adopt a Pet | PetRescue{% endblock %}
+{% block title %}Find Pets | PetRescue{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -13,8 +13,8 @@
              class="card-img-top" alt="Featured pet for adoption" style="max-height: 500px; object-fit: cover;">
         <div class="card-img-overlay d-flex align-items-center justify-content-center">
           <div class="bg-light bg-opacity-75 p-4 rounded text-center" style="max-width: 600px;">
-            <h1 class="card-title mb-3">Find Your Perfect Companion</h1>
-            <p class="card-text mb-4">Discover loving pets waiting for their forever homes. Every adoption saves a life and brings joy to your family.</p>
+            <h1 class="card-title mb-3">Find Your Furry Family Member</h1>
+            <p class="card-text mb-4">Every pet waiting for adoption has a unique story and personality. Find your perfect companion today!</p>
             <a href="#search-section" class="btn btn-success btn-lg">Browse Available Pets</a>
           </div>
         </div>
@@ -27,7 +27,7 @@
     <div class="col-12">
       <div class="card shadow-sm border-0 rounded-3">
         <div class="card-header bg-white border-0">
-          <h2 class="mb-0 text-center">Find Your Perfect Pet</h2>
+          <h2 class="mb-0 text-center">Find Your Perfect Companion</h2>
         </div>
         <div class="card-body">
           <form id="pet-search-form">
@@ -78,7 +78,7 @@
             </div>
             <div class="row mt-4">
               <div class="col-12 text-center">
-                <button type="submit" class="btn btn-primary btn-lg px-5">Search Pets</button>
+                <button type="submit" class="btn btn-primary btn-lg px-5">Find Pets</button>
               </div>
             </div>
           </form>
@@ -87,11 +87,11 @@
     </div>
   </div>
 
-  <!-- Pet Listings Section -->
+  <!-- Featured Pets Section -->
   <div class="row mb-5">
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Pets Available for Adoption</h2>
+        <h2 class="mb-0">Pets Looking for Homes</h2>
         <div>
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-outline-secondary active" id="grid-view">
@@ -124,7 +124,7 @@
                 </small>
               </p>
               <p class="flex-grow-1">Friendly and energetic Golden Retriever who loves playing fetch and going on long walks. Great with kids!</p>
-              <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+              <a href="#" class="btn btn-outline-primary mt-auto">Learn More</a>
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@
                 </small>
               </p>
               <p class="flex-grow-1">Gentle and affectionate Persian cat who enjoys lounging in sunny spots and being pampered with brushes.</p>
-              <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+              <a href="#" class="btn btn-outline-primary mt-auto">Learn More</a>
             </div>
           </div>
         </div>
@@ -170,7 +170,7 @@
                 </small>
               </p>
               <p class="flex-grow-1">Playful Holland Lop rabbit who loves fresh vegetables and exploring his enclosure. House-trained!</p>
-              <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+              <a href="#" class="btn btn-outline-primary mt-auto">Learn More</a>
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@
                 </small>
               </p>
               <p class="flex-grow-1">Loyal and protective German Shepherd looking for an active family. Great with training and outdoor activities.</p>
-              <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+              <a href="#" class="btn btn-outline-primary mt-auto">Learn More</a>
             </div>
           </div>
         </div>
@@ -216,7 +216,7 @@
                 </small>
               </p>
               <p class="flex-grow-1">Playful and curious Siamese cat who loves interactive toys and cuddling on the couch.</p>
-              <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+              <a href="#" class="btn btn-outline-primary mt-auto">Learn More</a>
             </div>
           </div>
         </div>
@@ -239,14 +239,14 @@
                 </small>
               </p>
               <p class="flex-grow-1">Calm and gentle Bulldog who enjoys short walks and relaxing in the yard.</p>
-              <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+              <a href="#" class="btn btn-outline-primary mt-auto">Learn More</a>
             </div>
           </div>
         </div>
       </div>
       
       <!-- Pagination -->
-      <nav aria-label="Pet listings pagination">
+      <nav aria-label="Pet listings pagination" class="mt-4">
         <ul class="pagination justify-content-center">
           <li class="page-item disabled">
             <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
@@ -259,6 +259,33 @@
           </li>
         </ul>
       </nav>
+    </div>
+  </div>
+
+  <!-- Adoption Process Section -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card bg-light border-0 rounded-3">
+        <div class="card-body p-5">
+          <div class="row align-items-center">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+              <h2 class="mb-3">The Adoption Process</h2>
+              <p class="lead">Bringing a new pet into your family is an exciting journey. Here's how our simple adoption process works:</p>
+              <ol class="mt-4">
+                <li class="mb-2"><strong>Browse</strong> - Find a pet that matches your lifestyle and preferences</li>
+                <li class="mb-2"><strong>Connect</strong> - Contact our team to learn more about the pet's history</li>
+                <li class="mb-2"><strong>Meet</strong> - Schedule a meet and greet with your potential new family member</li>
+                <li class="mb-2"><strong>Complete</strong> - Finish the adoption paperwork and bring your new companion home!</li>
+              </ol>
+            </div>
+            <div class="col-lg-4 text-center">
+              <div class="bg-white p-4 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                <i class="fas fa-heart text-success fa-3x"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

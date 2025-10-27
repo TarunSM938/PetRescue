@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Profile | PetRescue{% endblock %}
+{% block title %}My Profile | PetRescue{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
   <div class="row">
     <div class="col-12">
-      <h2 class="mb-4">Your Profile</h2>
+      <h2 class="mb-4">Your PetRescue Profile</h2>
     </div>
   </div>
   
@@ -25,7 +25,7 @@
     <div class="col-lg-6">
       <div class="card shadow-sm h-100 border-0 rounded-3">
         <div class="card-header bg-white border-0">
-          <h5 class="mb-0">Update Profile Information</h5>
+          <h5 class="mb-0">Update Your Information</h5>
         </div>
         <div class="card-body">
           <form method="POST">
@@ -52,14 +52,14 @@
             </div>
             
             <div class="mb-3">
-              <label for="{{ p_form.bio.id_for_label }}" class="form-label">Bio</label>
+              <label for="{{ p_form.bio.id_for_label }}" class="form-label">About You</label>
               {{ p_form.bio }}
               {% if p_form.bio.errors %}
                 {% for error in p_form.bio.errors %}
                   <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
               {% endif %}
-              <div class="form-text">Tell us about yourself and your experience with pets.</div>
+              <div class="form-text">Share your story and your experience with pets.</div>
             </div>
             
             <div class="mb-3">
@@ -70,7 +70,7 @@
                   <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
               {% endif %}
-              <div class="form-text">City or area where you live.</div>
+              <div class="form-text">City or area where you live (helps with local pet matching).</div>
             </div>
             
             <div class="mb-3">
@@ -84,7 +84,7 @@
               <div class="form-text">Your birth date (optional).</div>
             </div>
             
-            <button type="submit" class="btn btn-primary w-100">Update Profile</button>
+            <button type="submit" class="btn btn-success w-100">Save Changes</button>
           </form>
         </div>
       </div>
@@ -94,7 +94,7 @@
     <div class="col-lg-6">
       <div class="card shadow-sm h-100 border-0 rounded-3">
         <div class="card-header bg-white border-0">
-          <h5 class="mb-0">Profile Details</h5>
+          <h5 class="mb-0">Your Profile Information</h5>
         </div>
         <div class="card-body">
           <div class="row mb-3">
@@ -108,12 +108,12 @@
           </div>
           
           <div class="row mb-3">
-            <div class="col-sm-4"><strong>Bio:</strong></div>
+            <div class="col-sm-4"><strong>About You:</strong></div>
             <div class="col-sm-8">
               {% if user.profile.bio %}
                 {{ user.profile.bio }}
               {% else %}
-                <span class="text-muted">No bio provided</span>
+                <span class="text-muted">Tell us about yourself and your love for pets.</span>
               {% endif %}
             </div>
           </div>
@@ -124,7 +124,7 @@
               {% if user.profile.location %}
                 {{ user.profile.location }}
               {% else %}
-                <span class="text-muted">No location provided</span>
+                <span class="text-muted">Add your location to help with local pet matching.</span>
               {% endif %}
             </div>
           </div>
@@ -135,14 +135,14 @@
               {% if user.profile.birth_date %}
                 {{ user.profile.birth_date }}
               {% else %}
-                <span class="text-muted">No birth date provided</span>
+                <span class="text-muted">Not provided</span>
               {% endif %}
             </div>
           </div>
           
           <!-- User Stats -->
           <div class="mt-4 pt-3 border-top">
-            <h6 class="mb-3">Your Activity</h6>
+            <h6 class="mb-3">Your PetRescue Impact</h6>
             <div class="row text-center">
               <div class="col-4">
                 <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
@@ -162,6 +162,26 @@
                 </div>
                 <div class="mt-2 small">Days Active</div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Account Actions -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card border-0 rounded-3 bg-light">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-1">Account Settings</h5>
+              <p class="mb-0 text-muted">Manage your account preferences and security settings.</p>
+            </div>
+            <div>
+              <a href="#" class="btn btn-outline-secondary me-2">Change Password</a>
+              <a href="#" class="btn btn-outline-danger">Delete Account</a>
             </div>
           </div>
         </div>

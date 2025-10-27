@@ -11,42 +11,55 @@ from django.db import models
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
 from .models import User, Profile
 
+# Home page view
+# Displays the main landing page with featured content and calls to action
 
-# -----------------------------
-# Home page
-# -----------------------------
 def home(request):
+    """
+    Render the homepage with current datetime for footer copyright.
+    """
     context = {
         'now': timezone.now()
     }
     return render(request, 'home.html', context) 
 
 
-# -----------------------------
-# Adopt page
-# -----------------------------
+# Adopt page view
+# Shows available pets for adoption (requires user authentication)
+
 @login_required
 def adopt(request):
+    """
+    Display pets available for adoption.
+    Requires user to be logged in.
+    """
     context = {
         'now': timezone.now()
     }
     return render(request, 'adopt.html', context)
 
 
-# -----------------------------
-# Donate page
-# -----------------------------
+# Donate page view
+# Information about supporting the pet rescue mission through donations
+
 def donate(request):
+    """
+    Display donation information to support the pet rescue mission.
+    """
     context = {
         'now': timezone.now()
     }
     return render(request, 'donate.html', context)
 
 
-# -----------------------------
-# Register new user
-# -----------------------------
+# User registration view
+# Handles new user signups with form validation and profile creation
+
 def register(request):
+    """
+    Handle user registration with custom form validation.
+    Creates user accounts and processes additional profile information.
+    """
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -61,58 +74,73 @@ def register(request):
                 user.phone_number = phone
                 user.save()
             
-            # Update profile with full name if provided
+            # Process full name if provided
             if full_name:
-                # Split full name into first and last name (simplified approach)
                 names = full_name.split(' ', 1)
                 if len(names) == 2:
-                    # We could store this in a profile field if we had one for names
-                    # For now, we'll just use what we have
+                    # If we have both first and last name, we could save them
+                    # This is left as an enhancement for future implementation
                     pass
             
             username = cast(User, user).username  # Fix Pyright warning
-            messages.success(request, f'Account created for {username}! You can now log in.')
+            messages.success(request, f'Welcome to PetRescue, {username}! Your account has been created successfully.')
             return redirect('login')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, 'Please correct the errors below to create your account.')
     else:
         form = UserRegisterForm()
 
     return render(request, 'registration/register.html', {'form': form})
 
 
-# -----------------------------
-# Login user
-# -----------------------------
+# User login view
+# Authenticates users and manages session login
+
 def user_login(request):
+    """
+    Handle user authentication and login.
+    Validates credentials and creates user session.
+    """
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            login(request, user)
-            return redirect('home')
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.username}! You have been successfully logged in.')
+                return redirect('home')
+            else:
+                messages.error(request, "Invalid username or password. Please try again.")
         else:
-            messages.error(request, "Invalid username or password.")
+            messages.error(request, "Invalid username or password. Please try again.")
     else:
         form = AuthenticationForm()
 
     return render(request, 'registration/login.html', {'form': form})
 
 
-# -----------------------------
-# Logout user
-# -----------------------------
+# User logout view
+# Ends user session and redirects to homepage
+
 def user_logout(request):
+    """
+    Log out the current user and end their session.
+    """
+    username = request.user.username if request.user.is_authenticated else "User"
     logout(request)
-    messages.info(request, 'You have been logged out successfully.')
+    messages.info(request, f'Goodbye, {username}! You have been successfully logged out.')
     return redirect('home')
 
 
-# -----------------------------
-# Profile view
-# -----------------------------
+# User profile view
+# Allows users to view and update their profile information
+
 @login_required
 def profile(request):
+    """
+    Display and update user profile information.
+    Requires user to be logged in.
+    """
     # Ensure the user has a profile
     from django.apps import apps
     ProfileModel = apps.get_model('main', 'Profile')
@@ -124,7 +152,10 @@ def profile(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=profile_obj)
@@ -136,10 +167,14 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
-# -----------------------------
-# Email validation (for AJAX)
-# -----------------------------
+# Email validation view
+# Provides AJAX endpoint for real-time email availability checking
+
 def validate_email(request):
+    """
+    AJAX endpoint to check if an email address is already taken.
+    Used for real-time form validation during registration.
+    """
     email = request.GET.get('email', None)
     data = {
         'is_taken': User.objects.filter(email__iexact=email).exists()
