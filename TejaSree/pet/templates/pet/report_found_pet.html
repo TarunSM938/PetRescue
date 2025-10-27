@@ -1,0 +1,48 @@
+{% extends "pet/base.html" %}
+
+{% block title %}Report Found Pet - PetRescue{% endblock %}
+
+{% block content %}
+<div class="home-container">
+
+    <div class="form-container">
+        <h2>Report a Found Pet 🐾</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="name">Pet Name (if known)</label>
+                <input type="text" name="name" id="name" placeholder="Optional">
+            </div>
+
+            <div class="form-group">
+                <label for="species">Species</label>
+                <input type="text" name="species" id="species" placeholder="Dog, Cat, etc." required>
+            </div>
+
+            <div class="form-group">
+                <label for="breed">Breed</label>
+                <input type="text" name="breed" id="breed" placeholder="Optional">
+            </div>
+
+            <div class="form-group">
+                <label for="found_location">Found Location</label>
+                <input type="text" name="found_location" id="found_location" placeholder="Where you found the pet" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contact_info">Your Contact (Phone/Email)</label>
+                <input type="text" name="contact_info" id="contact_info" placeholder="Phone number or Email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="image">Upload Pet Image</label>
+                <input type="file" name="image" id="image" accept="image/*">
+            </div>
+
+            <button type="submit" class="btn">Report Found Pet</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
