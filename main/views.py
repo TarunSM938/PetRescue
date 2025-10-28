@@ -8,8 +8,8 @@ from django.http import JsonResponse
 from typing import cast
 from django.db import models
 
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
-from .models import User, Profile
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm
+from .models import User, Profile, Pet, Request
 
 # Home page view
 # Displays the main landing page with featured content and calls to action
@@ -180,3 +180,46 @@ def validate_email(request):
         'is_taken': User.objects.filter(email__iexact=email).exists()
     }
     return JsonResponse(data)
+
+
+# Report found pet view
+# Allows authenticated users to report found pets
+
+@login_required
+def report_found_pet(request):
+    """
+    Handle reporting of found pets.
+    Displays form for reporting found pets and processes submissions.
+    """
+    if request.method == 'POST':
+        form = FoundPetForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Save the pet object
+            pet = form.save(commit=False)
+            pet.owner = request.user
+            pet.status = 'found'  # Set status to found
+            pet.save()
+            
+            # Create a request record linking the pet to the user
+            # Using apps.get_model to avoid potential naming conflicts
+            from django.apps import apps
+            RequestModel = apps.get_model('main', 'Request')
+            RequestModel.objects.create(
+                user=request.user,
+                pet=pet,
+                request_type='found',  # Found pet report
+                phone_number=request.user.phone_number or '',  # Use user's phone number if available
+                message=f"Found pet report for {pet.pet_type} near {pet.location}"
+            )
+            
+            messages.success(request, 'Thank you for reporting this found pet! Our team will review your submission.')
+            return redirect('report_found_pet')
+        # Remove the generic error message - form will display specific field errors
+    else:
+        form = FoundPetForm()
+    
+    context = {
+        'form': form,
+        'now': timezone.now()
+    }
+    return render(request, 'report_found_pet.html', context)

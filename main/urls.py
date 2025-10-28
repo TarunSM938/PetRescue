@@ -36,4 +36,8 @@ urlpatterns = [
     
     # AJAX endpoint for email validation during registration
     path('validate-email/', views.validate_email, name='validate_email'),
+    
+    # Report found pet page - allows users to report found pets
+    # Requires user authentication
+    path('report-found-pet/', views.report_found_pet, name='report_found_pet'),
 ]
