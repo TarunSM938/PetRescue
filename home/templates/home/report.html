@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report the lost pet</title>
+</head>
+<style>
+    .report-container {
+    width: 70%;
+    max-width: 750px;
+    margin: 40px auto;
+    background: hwb(37 71% 8%);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.report-container h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 28px;
+    color: #444;
+}
+
+.report-container p {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.report-form .form-group {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.report-form label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.report-form input,
+.report-form select,
+.report-form textarea {
+    padding: 10px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+    outline: none;
+    transition: 0.3s;
+}
+
+.report-form input:focus,
+.report-form select:focus,
+.report-form textarea:focus {
+    border-color: #8b6fff;
+    box-shadow: 0 0 5px rgba(139, 111, 255, 0.5);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #6a5acd;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.submit-btn:hover {
+    background: #5a4abb;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .report-container {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+</style>
+<body>
+    <div class="report-container">
+    <h2>Report a Lost Pet 🐾</h2>
+    <p>Please fill the details below to help others identify your pet.</p>
+
+    <form action="" method="POST" enctype="multipart/form-data" class="report-form">
+       
+
+        <div class="form-group">
+            <label>Pet Name</label>
+            <input type="text" name="pet_name" required placeholder="Enter pet's name">
+        </div>
+
+        <div class="form-group">
+            <label>Type of Pet</label>
+            <select name="pet_type" required>
+                <option value="" disabled selected>Select Pet Type</option>
+                <option>Dog</option>
+                <option>Cat</option>
+                <option>Bird</option>
+                <option>Rabbit</option>
+                <option>Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Breed (if known)</label>
+            <input type="text" name="breed" placeholder="e.g., German Shepherd">
+        </div>
+
+        <div class="form-group">
+            <label>Color & Identifying Marks</label>
+            <textarea name="color_marks" rows="3" required placeholder="Describe color, marks, collar, etc."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Last Seen Location</label>
+            <input type="text" name="last_seen_location" required placeholder="Street/Area/City">
+        </div>
+
+        <div class="form-group">
+            <label>Date Lost</label>
+            <input type="date" name="date_lost" required>
+        </div>
+
+        <div class="form-group">
+            <label>Upload Pet Image</label>
+            <input type="file" name="pet_image" accept="image/*" required>
+        </div>
+
+        <div class="form-group">
+            <label>Contact Number</label>
+            <input type="text" name="contact_number" required placeholder="Your mobile number">
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Report</button>
+    </form>
+</div>
+</body>
+</html>
