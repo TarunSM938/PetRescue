@@ -213,8 +213,10 @@ def report_found_pet(request):
             )
             
             messages.success(request, 'Thank you for reporting this found pet! Our team will review your submission.')
-            return redirect('report_found_pet')
-        # Remove the generic error message - form will display specific field errors
+            return redirect('report_success')  # Redirect to success page
+        else:
+            # Add form errors to messages for better user feedback
+            messages.error(request, 'Please correct the errors below and try again.')
     else:
         form = FoundPetForm()
     
@@ -223,3 +225,13 @@ def report_found_pet(request):
         'now': timezone.now()
     }
     return render(request, 'report_found_pet.html', context)
+
+
+# Success page view
+# Shows confirmation after successful pet report submission
+
+def report_success(request):
+    """
+    Display success page after pet report submission.
+    """
+    return render(request, 'success.html')

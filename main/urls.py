@@ -40,4 +40,7 @@ urlpatterns = [
     # Report found pet page - allows users to report found pets
     # Requires user authentication
     path('report-found-pet/', views.report_found_pet, name='report_found_pet'),
+    
+    # Success page after reporting a found pet
+    path('report-success/', views.report_success, name='report_success'),
 ]

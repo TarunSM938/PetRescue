@@ -11,6 +11,16 @@
     </div>
   </div>
   
+  <!-- Heart-touching message -->
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="alert alert-success text-center" role="alert">
+        <h4 class="alert-heading">Help reunite a lost pet with its loving family</h4>
+        <p class="mb-0">Your compassion in reporting found pets makes a huge difference in reuniting them with their worried families.</p>
+      </div>
+    </div>
+  </div>
+  
   {% if messages %}
     {% for message in messages %}
       <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -28,28 +38,22 @@
           <p class="mb-0 text-muted">Please provide as much information as possible to help us reunite this pet with their owner.</p>
         </div>
         <div class="card-body">
-          <form method="POST" enctype="multipart/form-data">
+          <form method="POST" enctype="multipart/form-data" id="found-pet-form">
             {% csrf_token %}
             
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="{{ form.pet_type.id_for_label }}" class="form-label">Pet Type *</label>
                 {{ form.pet_type }}
-                {% if form.pet_type.errors %}
-                  {% for error in form.pet_type.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                  {% endfor %}
-                {% endif %}
+                <!-- Display only one error message per field -->
+                <div id="pet_type-error" class="text-danger small mt-1 error-message" data-field="pet_type" style="display: none;"></div>
               </div>
               
               <div class="col-md-6 mb-3">
                 <label for="{{ form.breed.id_for_label }}" class="form-label">Breed *</label>
                 {{ form.breed }}
-                {% if form.breed.errors %}
-                  {% for error in form.breed.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                  {% endfor %}
-                {% endif %}
+                <!-- Display only one error message per field -->
+                <div id="breed-error" class="text-danger small mt-1 error-message" data-field="breed" style="display: none;"></div>
               </div>
             </div>
             
@@ -57,21 +61,15 @@
               <div class="col-md-6 mb-3">
                 <label for="{{ form.color.id_for_label }}" class="form-label">Primary Color *</label>
                 {{ form.color }}
-                {% if form.color.errors %}
-                  {% for error in form.color.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                  {% endfor %}
-                {% endif %}
+                <!-- Display only one error message per field -->
+                <div id="color-error" class="text-danger small mt-1 error-message" data-field="color" style="display: none;"></div>
               </div>
               
               <div class="col-md-6 mb-3">
                 <label for="{{ form.location.id_for_label }}" class="form-label">Location Found *</label>
                 {{ form.location }}
-                {% if form.location.errors %}
-                  {% for error in form.location.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                  {% endfor %}
-                {% endif %}
+                <!-- Display only one error message per field -->
+                <div id="location-error" class="text-danger small mt-1 error-message" data-field="location" style="display: none;"></div>
                 <div class="form-text">Please provide a specific location where the pet was found.</div>
               </div>
             </div>
@@ -80,11 +78,8 @@
               <div class="col-md-6 mb-3">
                 <label for="{{ form.date_found.id_for_label }}" class="form-label">Date Found *</label>
                 {{ form.date_found }}
-                {% if form.date_found.errors %}
-                  {% for error in form.date_found.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                  {% endfor %}
-                {% endif %}
+                <!-- Display only one error message per field -->
+                <div id="date_found-error" class="text-danger small mt-1 error-message" data-field="date_found" style="display: none;"></div>
                 <div class="form-text">When was the pet found? Cannot be in the future.</div>
               </div>
               
@@ -97,11 +92,8 @@
               <div class="col-12 mb-3">
                 <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
                 {{ form.description }}
-                {% if form.description.errors %}
-                  {% for error in form.description.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                  {% endfor %}
-                {% endif %}
+                <!-- Display only one error message per field -->
+                <div id="description-error" class="text-danger small mt-1 error-message" data-field="description" style="display: none;"></div>
                 <div class="form-text">Include any distinguishing features, behavior, or other helpful details.</div>
               </div>
             </div>
@@ -110,18 +102,21 @@
               <div class="col-12 mb-3">
                 <label for="{{ form.image.id_for_label }}" class="form-label">Photo of Pet</label>
                 {{ form.image }}
-                {% if form.image.errors %}
-                  {% for error in form.image.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                  {% endfor %}
-                {% endif %}
+                <!-- Display only one error message per field -->
+                <div id="image-error" class="text-danger small mt-1 error-message" data-field="image" style="display: none;"></div>
                 <div class="form-text">Upload a clear photo of the pet if available (optional but helpful). Only JPG and PNG files under 5MB are allowed.</div>
+                
+                <!-- Image preview container -->
+                <div id="image-preview" class="mt-3" style="display: none;">
+                  <p class="mb-1"><strong>Image Preview:</strong></p>
+                  <img id="preview-image" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                </div>
               </div>
             </div>
             
             <div class="row">
               <div class="col-12">
-                <button type="submit" class="btn btn-success w-100">Report Found Pet</button>
+                <button type="submit" class="btn btn-success w-100" id="submit-btn">Report Found Pet</button>
               </div>
             </div>
           </form>
@@ -138,4 +133,160 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Image preview functionality
+    const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImage = document.getElementById('preview-image');
+    
+    if (imageInput) {
+      imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            imagePreview.style.display = 'block';
+          }
+          reader.readAsDataURL(file);
+        } else {
+          imagePreview.style.display = 'none';
+        }
+      });
+    }
+    
+    // Real-time validation with automatic error clearing
+    const form = document.getElementById('found-pet-form');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (form) {
+      const inputs = form.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        // Clear error when user starts typing/correcting
+        input.addEventListener('input', function() {
+          hideFieldError(input.name);
+        });
+        
+        // Validate on blur (when user leaves the field)
+        input.addEventListener('blur', function() {
+          validateField(input);
+        });
+      });
+      
+      // Form submission handler
+      form.addEventListener('submit', function(e) {
+        // Prevent default submission
+        e.preventDefault();
+        
+        // Hide all errors first
+        hideAllErrors();
+        
+        // Validate all fields
+        let isValid = true;
+        inputs.forEach(input => {
+          if (!validateField(input)) {
+            isValid = false;
+          }
+        });
+        
+        // If form is valid, submit it
+        if (isValid) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+          form.submit();
+        } else {
+          // Scroll to first error
+          const firstError = form.querySelector('.error-message[style*="display: block"]');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      });
+    }
+    
+    function validateField(field) {
+      let isValid = true;
+      
+      // Validate pet type
+      if (field.name === 'pet_type' && field.value === '') {
+        showFieldError(field.name, 'Please select a pet type.');
+        isValid = false;
+      }
+      
+      // Validate location length
+      if (field.name === 'location' && field.value.length > 0 && field.value.length < 5) {
+        showFieldError(field.name, 'Location must contain at least 5 characters.');
+        isValid = false;
+      } else if (field.name === 'location' && field.value.length === 0) {
+        showFieldError(field.name, 'Location is required.');
+        isValid = false;
+      }
+      
+      // Validate date found (not in future)
+      if (field.name === 'date_found' && field.value) {
+        const selectedDate = new Date(field.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+        
+        if (selectedDate > today) {
+          showFieldError(field.name, 'Date found cannot be in the future.');
+          isValid = false;
+        }
+      } else if (field.name === 'date_found' && !field.value) {
+        showFieldError(field.name, 'Date found is required.');
+        isValid = false;
+      }
+      
+      // Validate required fields
+      if (field.required && field.value === '' && 
+          field.name !== 'pet_type' && field.name !== 'date_found' && field.name !== 'location') {
+        showFieldError(field.name, 'This field is required.');
+        isValid = false;
+      }
+      
+      // Validate image format and size
+      if (field.name === 'image' && field.files.length > 0) {
+        const file = field.files[0];
+        const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+        const ext = '.' + file.name.split('.').pop().toLowerCase();
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if (!allowedExtensions.includes(ext)) {
+          showFieldError(field.name, 'Only JPG and PNG files are allowed.');
+          isValid = false;
+        } else if (file.size > maxSize) {
+          showFieldError(field.name, 'Image file size must be less than 5 MB.');
+          isValid = false;
+        }
+      }
+      
+      return isValid;
+    }
+    
+    function showFieldError(fieldName, message) {
+      const errorDiv = document.getElementById(fieldName + '-error');
+      if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+      }
+    }
+    
+    function hideFieldError(fieldName) {
+      const errorDiv = document.getElementById(fieldName + '-error');
+      if (errorDiv) {
+        errorDiv.style.display = 'none';
+      }
+    }
+    
+    function hideAllErrors() {
+      const errors = document.querySelectorAll('.error-message');
+      errors.forEach(error => error.style.display = 'none');
+    }
+  });
+</script>
 {% endblock %}
