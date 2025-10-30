@@ -1,27 +1,26 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Report Found Pet | PetRescue{% endblock %}
+{% block title %}Report Lost Pet | PetRescue{% endblock %}
 
 {% block head_extra %}
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* Fresh color palette for found pet form */
+  /* Warm color palette */
   :root {
-    --success-green: #16a34a;
-    --light-green: #dcfce7;
-    --teal: #0d9488;
-    --light-teal: #ccfbf1;
-    --sky-blue: #e0f2fe;
-    --light-yellow: #fef9c3;
+    --warm-red: #FF6B6B;
+    --peach: #FFD1A0;
+    --cream: #FFF8F0;
+    --pastel-orange: #FFA07A;
+    --soft-gray: #F8F9FA;
     --dark-text: #333333;
   }
 
   /* Background with subtle gradient */
-  .found-pet-bg {
-    background: linear-gradient(135deg, var(--sky-blue) 0%, var(--light-green) 100%);
+  .lost-pet-bg {
+    background: linear-gradient(135deg, var(--cream) 0%, var(--peach) 100%);
     min-height: 100vh;
     padding: 2rem 0;
     font-family: 'Poppins', sans-serif;
@@ -35,7 +34,7 @@
   }
 
   .header-section h1 {
-    color: var(--success-green);
+    color: var(--warm-red);
     font-weight: 700;
     margin-bottom: 1rem;
   }
@@ -62,20 +61,20 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   }
 
-  .card-header-found {
-    background: linear-gradient(to right, var(--success-green), var(--teal));
+  .card-header-lost {
+    background: linear-gradient(to right, var(--warm-red), var(--pastel-orange));
     color: white;
     padding: 1.5rem;
     text-align: center;
     border-bottom: none;
   }
 
-  .card-header-found h2 {
+  .card-header-lost h2 {
     font-weight: 600;
     margin: 0;
   }
 
-  .card-header-found p {
+  .card-header-lost p {
     opacity: 0.9;
     margin: 0.5rem 0 0;
   }
@@ -96,12 +95,12 @@
     border: 2px solid #e9ecef;
     padding: 0.75rem 1rem;
     transition: all 0.3s ease;
-    background-color: var(--sky-blue);
+    background-color: var(--soft-gray);
   }
 
   .form-control:focus, .form-select:focus {
-    border-color: var(--success-green);
-    box-shadow: 0 0 0 0.25rem rgba(22, 163, 74, 0.25);
+    border-color: var(--warm-red);
+    box-shadow: 0 0 0 0.25rem rgba(255, 107, 107, 0.25);
     background-color: white;
   }
 
@@ -112,24 +111,24 @@
 
   /* Image upload area */
   .image-upload-area {
-    border: 2px dashed var(--success-green);
+    border: 2px dashed var(--warm-red);
     border-radius: 12px;
     padding: 2rem;
     text-align: center;
-    background-color: var(--light-green);
+    background-color: var(--soft-gray);
     transition: all 0.3s ease;
     cursor: pointer;
     margin-bottom: 1rem;
   }
 
   .image-upload-area:hover {
-    background-color: #d1fae5;
-    border-color: var(--teal);
+    background-color: #fff0e6;
+    border-color: var(--pastel-orange);
   }
 
   .image-upload-area i {
     font-size: 2.5rem;
-    color: var(--success-green);
+    color: var(--warm-red);
     margin-bottom: 1rem;
   }
 
@@ -197,7 +196,7 @@
     bottom: 10px;
     right: 10px;
     background: rgba(255, 255, 255, 0.9);
-    border: 2px solid var(--success-green);
+    border: 2px solid var(--warm-red);
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -211,12 +210,12 @@
   }
   
   .add-more-btn:hover {
-    background: var(--success-green);
+    background: var(--warm-red);
     transform: scale(1.1);
   }
   
   .add-more-btn i {
-    color: var(--success-green);
+    color: var(--warm-red);
     font-size: 18px;
   }
   
@@ -225,8 +224,8 @@
   }
   
   /* Buttons */
-  .btn-found-pet {
-    background: linear-gradient(to right, var(--success-green), #22c55e);
+  .btn-lost-pet {
+    background: linear-gradient(to right, var(--warm-red), var(--pastel-orange));
     border: none;
     border-radius: 12px;
     padding: 0.75rem 1.5rem;
@@ -234,16 +233,16 @@
     font-size: 1.1rem;
     transition: all 0.3s ease;
     color: white;
-    box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
   }
 
-  .btn-found-pet:hover {
+  .btn-lost-pet:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
-    background: linear-gradient(to right, #15803d, var(--success-green));
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    background: linear-gradient(to right, #ff5252, var(--warm-red));
   }
 
-  .btn-found-pet:active {
+  .btn-lost-pet:active {
     transform: translateY(0);
   }
 
@@ -263,16 +262,16 @@
   }
 
   /* Alert styling */
-  .alert-found {
+  .alert-lost {
     border-radius: 12px;
     border: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-    border-left: 5px solid var(--success-green);
+    background: linear-gradient(to right, #fff0f0, #ffe8d6);
+    border-left: 5px solid var(--warm-red);
   }
 
-  .alert-found .alert-heading {
-    color: var(--success-green);
+  .alert-lost .alert-heading {
+    color: var(--warm-red);
     font-weight: 600;
   }
 
@@ -313,7 +312,7 @@
 
   /* Responsive adjustments */
   @media (max-width: 768px) {
-    .found-pet-bg {
+    .lost-pet-bg {
       padding: 1rem 0;
     }
     
@@ -321,11 +320,11 @@
       padding: 1.5rem;
     }
     
-    .card-header-found {
+    .card-header-lost {
       padding: 1rem;
     }
     
-    .btn-found-pet, .btn-cancel {
+    .btn-lost-pet, .btn-cancel {
       width: 100%;
       margin-bottom: 0.5rem;
     }
@@ -335,40 +334,40 @@
   .paw-icon {
     display: inline-block;
     margin: 0 0.5rem;
-    color: var(--success-green);
+    color: var(--warm-red);
   }
 
   /* Help section */
   .help-section {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    background: linear-gradient(135deg, #fff8f0 0%, #fff0e6 100%);
     border-radius: 15px;
     padding: 1.5rem;
     margin-top: 1.5rem;
-    border: 1px solid #bbf7d0;
+    border: 1px solid #ffe0cc;
   }
 
   .help-section h5 {
-    color: var(--success-green);
+    color: var(--warm-red);
     font-weight: 600;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="found-pet-bg">
+<div class="lost-pet-bg">
   <div class="container">
     <!-- Header Section -->
     <div class="header-section">
-      <h1>Thank you for helping a pet find its home</h1>
-      <p>Please share the details you know so we can help the pet reunite with its family.</p>
+      <h1>We're here to help you find your beloved pet ❤️</h1>
+      <p>Please provide as many details as you can. Every detail brings your pet closer home.</p>
     </div>
     
     <!-- Heart-touching message -->
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="alert alert-found text-center fade-in-up" role="alert">
-          <h4 class="alert-heading">Your kindness makes a world of difference!</h4>
-          <p class="mb-0">By reporting found pets, you're helping us reunite lost animals with their worried families. Every report brings a pet closer to home.</p>
+        <div class="alert alert-lost text-center fade-in-up" role="alert">
+          <h4 class="alert-heading">Don't lose hope! Our community is ready to help</h4>
+          <p class="mb-0">We understand how important your pet is to you. Our dedicated team and community members will do everything we can to help reunite you with your missing companion.</p>
         </div>
       </div>
     </div>
@@ -385,77 +384,88 @@
     <div class="row justify-content-center">
       <div class="col-lg-8">
         <div class="report-card fade-in-up">
-          <div class="card-header-found">
+          <div class="card-header-lost">
             <h2><i class="fas fa-paw"></i> Pet Information <i class="fas fa-paw"></i></h2>
-            <p>Please provide as much information as possible to help us reunite this pet with their owner</p>
+            <p>Please provide as much information as possible to help us find your pet</p>
           </div>
           <div class="form-container">
-            <form method="POST" enctype="multipart/form-data" id="found-pet-form">
+            <form method="POST" enctype="multipart/form-data" id="lost-pet-form">
               {% csrf_token %}
               
               <div class="row">
                 <div class="col-md-6 mb-4">
-                  <label for="{{ form.pet_type.id_for_label }}" class="form-label">Pet Type <span class="text-danger">*</span></label>
-                  {{ form.pet_type }}
-                  <div id="pet_type-error" class="error-message" data-field="pet_type"></div>
+                  <label for="{{ form.pet_name.id_for_label }}" class="form-label">Pet Name <span class="text-danger">*</span></label>
+                  {{ form.pet_name }}
+                  <div id="pet_name-error" class="error-message"></div>
+                  <div class="form-text">Enter your pet's name</div>
                 </div>
                 
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.pet_type.id_for_label }}" class="form-label">Pet Type</label>
+                  {{ form.pet_type }}
+                  <div id="pet_type-error" class="error-message"></div>
+                  <div class="form-text">Select your pet's type (optional)</div>
+                </div>
+              </div>
+              
+              <div class="row">
                 <div class="col-md-6 mb-4">
                   <label for="{{ form.breed.id_for_label }}" class="form-label">Breed <span class="text-danger">*</span></label>
                   {{ form.breed }}
-                  <div id="breed-error" class="error-message" data-field="breed"></div>
+                  <div id="breed-error" class="error-message"></div>
                   <div class="form-text">Enter the breed (if known)</div>
                 </div>
-              </div>
-              
-              <div class="row">
+                
                 <div class="col-md-6 mb-4">
                   <label for="{{ form.color.id_for_label }}" class="form-label">Primary Color <span class="text-danger">*</span></label>
                   {{ form.color }}
-                  <div id="color-error" class="error-message" data-field="color"></div>
+                  <div id="color-error" class="error-message"></div>
                   <div class="form-text">Enter the primary color</div>
                 </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.last_seen_location.id_for_label }}" class="form-label">Last Seen Location <span class="text-danger">*</span></label>
+                  {{ form.last_seen_location }}
+                  <div id="last_seen_location-error" class="error-message"></div>
+                  <div class="form-text">Where was your pet last seen?</div>
+                </div>
                 
                 <div class="col-md-6 mb-4">
-                  <label for="{{ form.location.id_for_label }}" class="form-label">Location Found <span class="text-danger">*</span></label>
-                  {{ form.location }}
-                  <div id="location-error" class="error-message" data-field="location"></div>
-                  <div class="form-text">Where was the pet found?</div>
+                  <label for="{{ form.date_lost.id_for_label }}" class="form-label">Date Lost <span class="text-danger">*</span></label>
+                  {{ form.date_lost }}
+                  <div id="date_lost-error" class="error-message"></div>
+                  <div class="form-text">When was your pet lost?</div>
                 </div>
               </div>
               
               <div class="row">
                 <div class="col-md-6 mb-4">
-                  <label for="{{ form.date_found.id_for_label }}" class="form-label">Date Found <span class="text-danger">*</span></label>
-                  {{ form.date_found }}
-                  <div id="date_found-error" class="error-message" data-field="date_found"></div>
-                  <div class="form-text">When was the pet found?</div>
+                  <label for="{{ form.owner_contact.id_for_label }}" class="form-label">Owner Contact <span class="text-danger">*</span></label>
+                  {{ form.owner_contact }}
+                  <div id="owner_contact-error" class="error-message"></div>
+                  <div class="form-text">Your phone number for contact</div>
                 </div>
                 
                 <div class="col-md-6 mb-4">
-                  <!-- Empty column for spacing -->
-                </div>
-              </div>
-              
-              <div class="row">
-                <div class="col-12 mb-4">
-                  <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-                  {{ form.description }}
-                  <div id="description-error" class="error-message" data-field="description"></div>
-                  <div class="form-text">Describe the pet's appearance, behavior, or other helpful details</div>
+                  <label for="{{ form.alternate_email.id_for_label }}" class="form-label">Alternate Email</label>
+                  {{ form.alternate_email }}
+                  <div id="alternate_email-error" class="error-message"></div>
+                  <div class="form-text">An alternate email (optional)</div>
                 </div>
               </div>
               
               <div class="mb-4">
-                <label for="{{ form.image.id_for_label }}" class="form-label">Photos of Pet</label>
+                <label for="{{ form.pet_photo.id_for_label }}" class="form-label">Photos of Pet</label>
                 <div class="image-upload-area" id="image-upload-trigger">
                   <i class="fas fa-cloud-upload-alt"></i>
-                  <p>Upload clear photos of the pet</p>
-                  <p class="text-muted small mb-0">JPG or PNG format, max 5MB each (multiple photos allowed)</p>
+                  <p>Upload clear photos of your pet</p>
+                  <p class="text-muted small mb-0">JPG or PNG format, max 5MB each</p>
                 </div>
-                {{ form.image }}
-                <div id="image-error" class="error-message" data-field="image"></div>
-                <div class="form-text">Upload photos if available (helps identify the pet faster) - you can select multiple images</div>
+                {{ form.pet_photo }}
+                <div id="pet_photo-error" class="error-message"></div>
+                <div class="form-text">Recent photos help with identification</div>
                 
                 <!-- Image preview container -->
                 <div class="image-preview-container mt-3" id="image-preview">
@@ -466,8 +476,8 @@
               </div>
               
               <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
-                <button type="submit" class="btn-found-pet flex-fill" id="submit-btn">
-                  Report Found Pet
+                <button type="submit" class="btn-lost-pet flex-fill" id="submit-btn">
+                  Report Lost Pet
                 </button>
                 <a href="{% url 'home' %}" class="btn-cancel flex-fill ms-md-2 mt-2 mt-md-0">
                   <i class="fas fa-arrow-left"></i> Back to Home
@@ -478,8 +488,8 @@
         </div>
         
         <div class="help-section fade-in-up">
-          <h5><i class="fas fa-lightbulb"></i> Help Us Reunite Pets with Families</h5>
-          <p>By reporting found pets, you're helping us reunite lost animals with their families. Our team will review your submission and take appropriate action to find the pet's owner.</p>
+          <h5><i class="fas fa-lightbulb"></i> Help Us Find Your Pet</h5>
+          <p>By reporting your lost pet, you're helping us create a comprehensive search effort. Our team will review your submission and take appropriate action to help find your pet.</p>
           <p class="mb-0">If you have additional information or updates, please contact us at <a href="mailto:info@petrescue.com">info@petrescue.com</a>.</p>
         </div>
       </div>
@@ -492,7 +502,7 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Image preview functionality
-    const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+    const imageInput = document.getElementById('{{ form.pet_photo.id_for_label }}');
     const imagePreview = document.getElementById('image-preview');
     const previewContainer = document.getElementById('preview-container');
     const imageUploadArea = document.getElementById('image-upload-trigger');
@@ -500,8 +510,6 @@
     // Hide the default file input
     if (imageInput) {
       imageInput.style.display = 'none';
-      // Allow multiple file selection
-      imageInput.setAttribute('multiple', true);
       
       // Trigger file input when clicking on the custom upload area
       imageUploadArea.addEventListener('click', function() {
@@ -566,8 +574,7 @@
       const addMoreBtn = document.createElement('div');
       addMoreBtn.className = 'add-more-btn';
       addMoreBtn.innerHTML = '<i class="fas fa-plus"></i>';
-      addMoreBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
+      addMoreBtn.addEventListener('click', function() {
         imageInput.click();
       });
       
@@ -577,8 +584,16 @@
       previewContainer.appendChild(previewCol);
     }
     
+    function removeImagePreview(index) {
+      const previewCol = document.getElementById('preview-col-' + index);
+      if (previewCol) {
+        previewCol.remove();
+        imageInput.value = ''; // Clear the file input
+      }
+    }
+    
     // Real-time validation with automatic error clearing
-    const form = document.getElementById('found-pet-form');
+    const form = document.getElementById('lost-pet-form');
     const submitBtn = document.getElementById('submit-btn');
     
     if (form) {
@@ -629,46 +644,79 @@
     function validateField(field) {
       let isValid = true;
       
+      // Validate pet name
+      if (field.name === 'pet_name' && !field.value.trim()) {
+        showFieldError(field.name, 'Pet name is required.');
+        isValid = false;
+      }
+      
       // Validate pet type
       if (field.name === 'pet_type' && field.value === '') {
         showFieldError(field.name, 'Please select a pet type.');
         isValid = false;
       }
       
-      // Validate location length
-      if (field.name === 'location' && field.value.length > 0 && field.value.length < 5) {
-        showFieldError(field.name, 'Location must contain at least 5 characters.');
-        isValid = false;
-      } else if (field.name === 'location' && field.value.length === 0) {
-        showFieldError(field.name, 'Location is required.');
+      // Validate breed
+      if (field.name === 'breed' && !field.value.trim()) {
+        showFieldError(field.name, 'Breed is required.');
         isValid = false;
       }
       
-      // Validate date found (not in future)
-      if (field.name === 'date_found' && field.value) {
+      // Validate color
+      if (field.name === 'color' && !field.value.trim()) {
+        showFieldError(field.name, 'Color is required.');
+        isValid = false;
+      }
+      
+      // Validate last seen location
+      if (field.name === 'last_seen_location' && field.value.length > 0 && field.value.length < 5) {
+        showFieldError(field.name, 'Location must contain at least 5 characters.');
+        isValid = false;
+      } else if (field.name === 'last_seen_location' && field.value.length === 0) {
+        showFieldError(field.name, 'Last seen location is required.');
+        isValid = false;
+      }
+      
+      // Validate date lost (not in future)
+      if (field.name === 'date_lost' && field.value) {
         const selectedDate = new Date(field.value);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         selectedDate.setHours(0, 0, 0, 0);
         
         if (selectedDate > today) {
-          showFieldError(field.name, 'Date found cannot be in the future.');
+          showFieldError(field.name, 'Date lost cannot be in the future.');
           isValid = false;
         }
-      } else if (field.name === 'date_found' && !field.value) {
-        showFieldError(field.name, 'Date found is required.');
+      } else if (field.name === 'date_lost' && !field.value) {
+        showFieldError(field.name, 'Date lost is required.');
         isValid = false;
       }
       
-      // Validate required fields
-      if (field.required && field.value === '' && 
-          field.name !== 'pet_type' && field.name !== 'date_found' && field.name !== 'location') {
-        showFieldError(field.name, 'This field is required.');
+      // Validate owner contact
+      if (field.name === 'owner_contact' && !field.value.trim()) {
+        showFieldError(field.name, 'Owner contact is required.');
         isValid = false;
+      } else if (field.name === 'owner_contact' && field.value.trim()) {
+        // Validate phone number format
+        const phoneRegex = /^[0-9+\-\s()]{10,15}$/;
+        if (!phoneRegex.test(field.value)) {
+          showFieldError(field.name, 'Please enter a valid phone number.');
+          isValid = false;
+        }
       }
       
-      // Validate image format and size
-      if (field.name === 'image' && field.files.length > 0) {
+      // Validate alternate email (if provided)
+      if (field.name === 'alternate_email' && field.value.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(field.value)) {
+          showFieldError(field.name, 'Please enter a valid email address.');
+          isValid = false;
+        }
+      }
+      
+      // Validate pet photo format and size
+      if (field.name === 'pet_photo' && field.files.length > 0) {
         const files = field.files;
         const allowedExtensions = ['.jpg', '.jpeg', '.png'];
         const maxSize = 5 * 1024 * 1024; // 5MB

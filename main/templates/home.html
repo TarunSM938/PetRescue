@@ -13,11 +13,11 @@
         <p class="lead mb-4">PetRescue is your community-driven platform for finding lost pets and helping animals find forever homes. Every pet deserves to be home for the holidays.</p>
         <div class="d-flex flex-wrap gap-3">
           {% if user.is_authenticated %}
-            <a href="{% url 'adopt' %}" class="btn btn-success btn-lg">Report a Lost Pet</a>
-            <a href="{% url 'report_found_pet' %}" class="btn btn-warning btn-lg">Report a Found Pet</a>
+            <a href="{% url 'report_lost_pet' %}" class="btn btn-danger btn-lg">Report a Lost Pet</a>
+            <a href="{% url 'report_found_pet' %}" class="btn btn-success btn-lg">Report a Found Pet</a>
           {% else %}
-            <a href="{% url 'login' %}" class="btn btn-success btn-lg">Report a Lost Pet</a>
-            <a href="{% url 'login' %}" class="btn btn-warning btn-lg">Report a Found Pet</a>
+            <a href="{% url 'login' %}" class="btn btn-danger btn-lg">Report a Lost Pet</a>
+            <a href="{% url 'login' %}" class="btn btn-success btn-lg">Report a Found Pet</a>
           {% endif %}
           <a href="{% url 'adopt' %}" class="btn btn-outline-primary btn-lg">Search for Pets</a>
         </div>

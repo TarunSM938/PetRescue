@@ -5,6 +5,7 @@ from django.core.files.images import get_image_dimensions
 from django.utils import timezone
 from .models import User, Profile, Pet
 import os
+import re
 
 class UserRegisterForm(UserCreationForm):
     """
@@ -155,8 +156,7 @@ class FoundPetForm(forms.ModelForm):
     def clean_pet_type(self):
         """Validate that pet type is selected"""
         pet_type = self.cleaned_data.get('pet_type')
-        if not pet_type:
-            raise ValidationError("Please select a valid pet type.")
+        # Allow blank selection
         return pet_type
     
     def clean_location(self):
@@ -176,6 +176,149 @@ class FoundPetForm(forms.ModelForm):
     def clean_image(self):
         """Validate image file format and size"""
         image = self.cleaned_data.get('image')
+        
+        if image:
+            # Check file extension
+            allowed_extensions = ['.jpg', '.jpeg', '.png']
+            ext = os.path.splitext(image.name)[1].lower()
+            
+            if ext not in allowed_extensions:
+                raise ValidationError("Only JPG and PNG files are allowed.")
+            
+            # Check file size (5 MB limit)
+            if image.size > 5 * 1024 * 1024:  # 5 MB in bytes
+                raise ValidationError("Image file size must be less than 5 MB.")
+        
+        return image
+
+
+# Form for reporting lost pets
+class LostPetForm(forms.Form):
+    """
+    Form for reporting lost pets.
+    Includes fields for pet name, pet type, breed, color, last seen location, 
+    date lost, owner contact, alternate email, and pet photo.
+    """
+    pet_name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your pet\'s name'
+        }),
+        help_text="Your pet's name"
+    )
+    
+    pet_type = forms.ChoiceField(
+        choices=[('', 'Select Pet Type')] + Pet.PET_TYPES,
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        }),
+        help_text="Type of pet",
+        required=True
+    )
+    
+    breed = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter the breed (if known)'
+        }),
+        help_text="Breed of the pet (if known)"
+    )
+    
+    color = forms.CharField(
+        max_length=50,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter the primary color'
+        }),
+        help_text="Primary color of the pet"
+    )
+    
+    last_seen_location = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Where was the pet last seen?'
+        }),
+        help_text="Location where pet was last seen"
+    )
+    
+    date_lost = forms.DateField(
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        }),
+        help_text="When was the pet lost?"
+    )
+    
+    owner_contact = forms.CharField(
+        max_length=15,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your phone number'
+        }),
+        help_text="Your phone number for contact"
+    )
+    
+    alternate_email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter an alternate email (optional)'
+        }),
+        help_text="Alternate email for contact (optional)"
+    )
+    
+    pet_photo = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control'
+        }),
+        help_text="Photo of the pet (optional but helpful)"
+    )
+    
+    def clean_pet_name(self):
+        """Validate that pet name is provided"""
+        pet_name = self.cleaned_data.get('pet_name')
+        if not pet_name:
+            raise ValidationError("Pet name is required.")
+        return pet_name
+    
+    def clean_pet_type(self):
+        """Validate that pet type is selected"""
+        pet_type = self.cleaned_data.get('pet_type')
+        if not pet_type:
+            raise ValidationError("Please select a valid pet type.")
+        return pet_type
+    
+    def clean_last_seen_location(self):
+        """Validate that location has at least 5 characters"""
+        location = self.cleaned_data.get('last_seen_location')
+        if location and len(location) < 5:
+            raise ValidationError("Location must contain at least 5 characters.")
+        return location
+    
+    def clean_date_lost(self):
+        """Validate that date lost is not in the future"""
+        date_lost = self.cleaned_data.get('date_lost')
+        if date_lost and date_lost > timezone.now().date():
+            raise ValidationError("Date lost cannot be in the future.")
+        return date_lost
+    
+    def clean_owner_contact(self):
+        """Validate phone number format"""
+        phone = self.cleaned_data.get('owner_contact')
+        if phone:
+            # Allow common phone formats
+            phone_regex = r'^[0-9+\-\s()]{10,15}$'
+            if not re.match(phone_regex, phone):
+                raise ValidationError("Please enter a valid phone number.")
+        return phone
+    
+    def clean_pet_photo(self):
+        """Validate image file format and size"""
+        image = self.cleaned_data.get('pet_photo')
         
         if image:
             # Check file extension

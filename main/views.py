@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from typing import cast
 from django.db import models
 
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm, LostPetForm
 from .models import User, Profile, Pet, Request
 
 # Home page view
@@ -213,7 +213,7 @@ def report_found_pet(request):
             )
             
             messages.success(request, 'Thank you for reporting this found pet! Our team will review your submission.')
-            return redirect('report_success')  # Redirect to success page
+            return redirect('report_found_success')  # Redirect to found pet success page
         else:
             # Add form errors to messages for better user feedback
             messages.error(request, 'Please correct the errors below and try again.')
@@ -227,6 +227,58 @@ def report_found_pet(request):
     return render(request, 'report_found_pet.html', context)
 
 
+# Report lost pet view
+# Allows authenticated users to report lost pets
+
+@login_required
+def report_lost_pet(request):
+    """
+    Handle reporting of lost pets.
+    Displays form for reporting lost pets and processes submissions.
+    """
+    if request.method == 'POST':
+        form = LostPetForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Create a pet object with the form data
+            from django.apps import apps
+            PetModel = apps.get_model('main', 'Pet')
+            pet = PetModel(
+                owner=request.user,
+                pet_type=form.cleaned_data['pet_type'],
+                breed=form.cleaned_data['breed'],
+                color=form.cleaned_data['color'],
+                location=form.cleaned_data['last_seen_location'],
+                description=f"Lost pet named {form.cleaned_data['pet_name']}",
+                image=form.cleaned_data['pet_photo'],
+                status='lost'  # Set status to lost
+            )
+            pet.save()
+            
+            # Create a request record linking the pet to the user
+            RequestModel = apps.get_model('main', 'Request')
+            RequestModel.objects.create(
+                user=request.user,
+                pet=pet,
+                request_type='lost',  # Lost pet report
+                phone_number=form.cleaned_data['owner_contact'],
+                message=f"Lost pet report for {form.cleaned_data['pet_name']} ({form.cleaned_data['pet_type']}) near {form.cleaned_data['last_seen_location']}"
+            )
+            
+            messages.success(request, 'Thank you for reporting your lost pet! Our team will review your submission and help in the search.')
+            return redirect('report_lost_success')  # Redirect to lost pet success page
+        else:
+            # Add form errors to messages for better user feedback
+            messages.error(request, 'Please correct the errors below and try again.')
+    else:
+        form = LostPetForm()
+    
+    context = {
+        'form': form,
+        'now': timezone.now()
+    }
+    return render(request, 'report_lost_pet.html', context)
+
+
 # Success page view
 # Shows confirmation after successful pet report submission
 
@@ -234,4 +286,25 @@ def report_success(request):
     """
     Display success page after pet report submission.
     """
-    return render(request, 'success.html')
+    # Get the report type from session
+    report_type = request.session.get('report_type', 'found')
+    context = {
+        'report_type': report_type
+    }
+    return render(request, 'success.html', context)
+
+
+# Success page view for lost pet reports
+def report_lost_success(request):
+    """
+    Display success page after lost pet report submission.
+    """
+    return render(request, 'success_lost.html')
+
+
+# Success page view for found pet reports
+def report_found_success(request):
+    """
+    Display success page after found pet report submission.
+    """
+    return render(request, 'success_found.html')
