@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accepted Requests | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2>Accepted Requests</h2>
+      <p>Manage requests that have been accepted.</p>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin_dashboard' %}">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin_pending_requests' %}">
+            <i class="fas fa-clock"></i> Pending Requests
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'admin_accepted_requests' %}">
+            <i class="fas fa-check-circle"></i> Accepted Requests
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin_rejected_requests' %}">
+            <i class="fas fa-times-circle"></i> Rejected Requests
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5>Filters</h5>
+        </div>
+        <div class="card-body">
+          <form method="GET">
+            <div class="row">
+              <div class="col-md-3">
+                <label for="pet_type" class="form-label">Pet Type</label>
+                <select name="pet_type" id="pet_type" class="form-select">
+                  <option value="">All Types</option>
+                  {% for type, name in pet_types %}
+                    <option value="{{ type }}" {% if current_filters.pet_type == type %}selected{% endif %}>{{ name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="request_type" class="form-label">Request Type</label>
+                <select name="request_type" id="request_type" class="form-select">
+                  <option value="">All Types</option>
+                  {% for type, name in request_types %}
+                    <option value="{{ type }}" {% if current_filters.request_type == type %}selected{% endif %}>{{ name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="sort_by" class="form-label">Sort By</label>
+                <select name="sort_by" id="sort_by" class="form-select">
+                  <option value="date" {% if current_filters.sort_by == 'date' %}selected{% endif %}>Date</option>
+                  <option value="name" {% if current_filters.sort_by == 'name' %}selected{% endif %}>User Name</option>
+                  <option value="pet_type" {% if current_filters.sort_by == 'pet_type' %}selected{% endif %}>Pet Type</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="order" class="form-label">Order</label>
+                <select name="order" id="order" class="form-select">
+                  <option value="desc" {% if current_filters.order == 'desc' %}selected{% endif %}>Descending</option>
+                  <option value="asc" {% if current_filters.order == 'asc' %}selected{% endif %}>Ascending</option>
+                </select>
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{% url 'admin_accepted_requests' %}" class="btn btn-secondary">Clear Filters</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requests Heading -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <h4 class="mb-4">{{ requests|length }} Accepted Requests</h4>
+    </div>
+  </div>
+
+  <!-- Requests Cards -->
+  <div class="row">
+    {% if requests %}
+      {% for req in requests %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+          <div class="card accepted-card h-100 shadow-sm">
+            {% if req.pet.image %}
+              <img src="{{ req.pet.image.url }}" class="card-img-top" alt="Pet Photo" style="height: 200px; object-fit: cover;">
+            {% else %}
+              <div class="d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
+                <i class="fas fa-paw fa-3x text-muted"></i>
+              </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">
+                {{ req.pet.breed }}
+                <span class="badge badge-success">Accepted</span>
+              </h5>
+              <p class="card-text">
+                <strong>Type:</strong> {{ req.pet.pet_type|title }}<br>
+                <strong>Breed:</strong> {{ req.pet.breed }}<br>
+                <strong>Color:</strong> {{ req.pet.color }}<br>
+                <strong>Location:</strong> {{ req.pet.location }}<br>
+                <strong>Date:</strong> {{ req.created_at|date:"M d, Y" }}<br>
+                <strong>Contact:</strong> {{ req.user.email }}<br>
+                {{ req.phone_number }}
+              </p>
+              <div class="mt-auto">
+                <small class="text-muted">Accepted on {{ req.created_at|date:"M d, Y" }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12">
+        <div class="alert alert-info">
+          <p class="mb-0">No accepted requests found.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Pagination -->
+  {% if requests.has_other_pages %}
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        {% if requests.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ requests.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        {% endif %}
+        
+        {% for num in requests.paginator.page_range %}
+          {% if requests.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+        
+        {% if requests.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ requests.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+
+<style>
+.accepted-card {
+  border-left: 5px solid #28a745;
+  transition: transform 0.2s;
+  background-color: #f8fff9;
+}
+
+.accepted-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+</style>
+
+<script>
+// Initialize toasts
+document.addEventListener('DOMContentLoaded', function() {
+  // This will be replaced with actual message content by Django
+  var messageContent = "{{ messages.0 }}" || "";
+  if (messageContent) {
+    document.querySelector('#successToast .toast-body').textContent = messageContent;
+    var toast = new bootstrap.Toast(document.getElementById('successToast'));
+    toast.show();
+  }
+});
+</script>
+{% endblock %}

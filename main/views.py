@@ -1,12 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from typing import cast
 from django.db import models
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponseForbidden
 
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm, LostPetForm
 from .models import User, Profile, Pet, Request
@@ -86,11 +89,21 @@ def register(request):
             messages.success(request, f'Welcome to PetRescue, {username}! Your account has been created successfully.')
             return redirect('login')
         else:
+            # Form is not valid, but we want to preserve the additional field values
+            # Pass the values back to the template
             messages.error(request, 'Please correct the errors below to create your account.')
     else:
         form = UserRegisterForm()
 
-    return render(request, 'registration/register.html', {'form': form})
+    # Get additional field values to preserve them on validation errors
+    full_name = request.POST.get('full_name', '') if request.method == 'POST' else ''
+    phone = request.POST.get('phone', '') if request.method == 'POST' else ''
+
+    return render(request, 'registration/register.html', {
+        'form': form,
+        'full_name': full_name,
+        'phone': phone
+    })
 
 
 # User login view
@@ -304,7 +317,238 @@ def report_lost_success(request):
 
 # Success page view for found pet reports
 def report_found_success(request):
-    """
-    Display success page after found pet report submission.
-    """
+    """Display success page after found pet report submission."""
     return render(request, 'success_found.html')
+
+
+# Admin Dashboard Views
+# Restricted to admin users only
+
+def admin_check(user):
+    """Check if user is a superuser (admin)."""
+    return user.is_superuser
+
+
+@user_passes_test(admin_check, login_url='login')
+def admin_dashboard(request):
+    """
+    Main admin dashboard view.
+    Redirects non-admin users or shows access denied message.
+    """
+    # Get counts for each status
+    from django.apps import apps
+    RequestModel = apps.get_model('main', 'Request')
+    
+    pending_count = RequestModel.objects.filter(status='pending').count()
+    accepted_count = RequestModel.objects.filter(status='accepted').count()
+    rejected_count = RequestModel.objects.filter(status='rejected').count()
+    
+    # Get recent pending requests (limit to 5 for dashboard preview)
+    recent_pending = RequestModel.objects.select_related('user', 'pet').filter(status='pending')[:5]
+    
+    context = {
+        'pending_count': pending_count,
+        'accepted_count': accepted_count,
+        'rejected_count': rejected_count,
+        'recent_pending': recent_pending,
+    }
+    
+    return render(request, 'admin/dashboard.html', context)
+
+
+@user_passes_test(admin_check, login_url='login')
+def admin_pending_requests(request):
+    """Display pending requests with filtering, sorting, and pagination."""
+    # Get all pending requests
+    from django.apps import apps
+    RequestModel = apps.get_model('main', 'Request')
+    requests = RequestModel.objects.select_related('user', 'pet').filter(status='pending')
+    
+    # Apply filters
+    pet_type = request.GET.get('pet_type')
+    if pet_type:
+        requests = requests.filter(pet__pet_type=pet_type)
+    
+    request_type = request.GET.get('request_type')
+    if request_type:
+        requests = requests.filter(request_type=request_type)
+    
+    # Apply sorting
+    sort_by = request.GET.get('sort_by', 'created_at')
+    order = request.GET.get('order', 'desc')
+    
+    if order == 'asc':
+        if sort_by == 'name':
+            requests = requests.order_by('user__username')
+        elif sort_by == 'date':
+            requests = requests.order_by('created_at')
+        elif sort_by == 'pet_type':
+            requests = requests.order_by('pet__pet_type')
+    else:  # desc
+        if sort_by == 'name':
+            requests = requests.order_by('-user__username')
+        elif sort_by == 'date':
+            requests = requests.order_by('-created_at')
+        elif sort_by == 'pet_type':
+            requests = requests.order_by('-pet__pet_type')
+    
+    # Apply pagination
+    paginator = Paginator(requests, 10)  # Show 10 requests per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get Pet and Request models for choices
+    PetModel = apps.get_model('main', 'Pet')
+    
+    context = {
+        'requests': page_obj,
+        'pet_types': PetModel.PET_TYPES,
+        'request_types': RequestModel.REQUEST_TYPES,
+        'current_filters': {
+            'pet_type': pet_type,
+            'request_type': request_type,
+            'sort_by': sort_by,
+            'order': order,
+        }
+    }
+    
+    return render(request, 'admin/pending_requests.html', context)
+
+
+@user_passes_test(admin_check, login_url='login')
+def admin_accepted_requests(request):
+    """Display accepted requests with filtering, sorting, and pagination."""
+    # Get all accepted requests
+    from django.apps import apps
+    RequestModel = apps.get_model('main', 'Request')
+    requests = RequestModel.objects.select_related('user', 'pet').filter(status='accepted')
+    
+    # Apply filters
+    pet_type = request.GET.get('pet_type')
+    if pet_type:
+        requests = requests.filter(pet__pet_type=pet_type)
+    
+    request_type = request.GET.get('request_type')
+    if request_type:
+        requests = requests.filter(request_type=request_type)
+    
+    # Apply sorting
+    sort_by = request.GET.get('sort_by', 'created_at')
+    order = request.GET.get('order', 'desc')
+    
+    if order == 'asc':
+        if sort_by == 'name':
+            requests = requests.order_by('user__username')
+        elif sort_by == 'date':
+            requests = requests.order_by('created_at')
+        elif sort_by == 'pet_type':
+            requests = requests.order_by('pet__pet_type')
+    else:  # desc
+        if sort_by == 'name':
+            requests = requests.order_by('-user__username')
+        elif sort_by == 'date':
+            requests = requests.order_by('-created_at')
+        elif sort_by == 'pet_type':
+            requests = requests.order_by('-pet__pet_type')
+    
+    # Apply pagination
+    paginator = Paginator(requests, 10)  # Show 10 requests per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get Pet and Request models for choices
+    PetModel = apps.get_model('main', 'Pet')
+    
+    context = {
+        'requests': page_obj,
+        'pet_types': PetModel.PET_TYPES,
+        'request_types': RequestModel.REQUEST_TYPES,
+        'current_filters': {
+            'pet_type': pet_type,
+            'request_type': request_type,
+            'sort_by': sort_by,
+            'order': order,
+        }
+    }
+    
+    return render(request, 'admin/accepted_requests.html', context)
+
+
+@user_passes_test(admin_check, login_url='login')
+def admin_rejected_requests(request):
+    """Display rejected requests with filtering, sorting, and pagination."""
+    # Get all rejected requests
+    from django.apps import apps
+    RequestModel = apps.get_model('main', 'Request')
+    requests = RequestModel.objects.select_related('user', 'pet').filter(status='rejected')
+    
+    # Apply filters
+    pet_type = request.GET.get('pet_type')
+    if pet_type:
+        requests = requests.filter(pet__pet_type=pet_type)
+    
+    request_type = request.GET.get('request_type')
+    if request_type:
+        requests = requests.filter(request_type=request_type)
+    
+    # Apply sorting
+    sort_by = request.GET.get('sort_by', 'created_at')
+    order = request.GET.get('order', 'desc')
+    
+    if order == 'asc':
+        if sort_by == 'name':
+            requests = requests.order_by('user__username')
+        elif sort_by == 'date':
+            requests = requests.order_by('created_at')
+        elif sort_by == 'pet_type':
+            requests = requests.order_by('pet__pet_type')
+    else:  # desc
+        if sort_by == 'name':
+            requests = requests.order_by('-user__username')
+        elif sort_by == 'date':
+            requests = requests.order_by('-created_at')
+        elif sort_by == 'pet_type':
+            requests = requests.order_by('-pet__pet_type')
+    
+    # Apply pagination
+    paginator = Paginator(requests, 10)  # Show 10 requests per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get Pet and Request models for choices
+    PetModel = apps.get_model('main', 'Pet')
+    
+    context = {
+        'requests': page_obj,
+        'pet_types': PetModel.PET_TYPES,
+        'request_types': RequestModel.REQUEST_TYPES,
+        'current_filters': {
+            'pet_type': pet_type,
+            'request_type': request_type,
+            'sort_by': sort_by,
+            'order': order,
+        }
+    }
+    
+    return render(request, 'admin/rejected_requests.html', context)
+
+
+@user_passes_test(admin_check, login_url='login')
+def update_request_status(request, request_id):
+    """Update request status (Pending → Accepted/Rejected)."""
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        # Update the request status
+        from django.apps import apps
+        RequestModel = apps.get_model('main', 'Request')
+        try:
+            req = RequestModel.objects.get(id=request_id)
+            # Convert status to lowercase to match model choices
+            req.status = new_status.lower()
+            req.save()
+            messages.success(request, f'Request status updated successfully to {new_status}.')
+        except RequestModel.DoesNotExist:
+            messages.error(request, 'Request not found.')
+        return redirect('admin_pending_requests')
+    
+    return HttpResponseForbidden(b"Method not allowed")

@@ -93,6 +93,12 @@ class Request(models.Model):
         ('found', 'Found Pet Report'),
         ('adoption', 'Adoption Inquiry'),
     ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                             help_text="User making the request")
@@ -104,6 +110,8 @@ class Request(models.Model):
                                    help_text="Phone number for contact about this request")
     message = models.TextField(blank=True, 
                               help_text="Additional message or information (optional)")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending',
+                             help_text="Current status of the request")
     created_at = models.DateTimeField(auto_now_add=True,
                                      help_text="When this request was created")
 

@@ -51,4 +51,11 @@ urlpatterns = [
     path('report-lost-success/', views.report_lost_success, name='report_lost_success'),
     # Success page after reporting a found pet
     path('report-found-success/', views.report_found_success, name='report_found_success'),
+    
+    # Admin Dashboard URLs
+    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('dashboard/admin/pending-requests/', views.admin_pending_requests, name='admin_pending_requests'),
+    path('dashboard/admin/accepted-requests/', views.admin_accepted_requests, name='admin_accepted_requests'),
+    path('dashboard/admin/rejected-requests/', views.admin_rejected_requests, name='admin_rejected_requests'),
+    path('dashboard/admin/update-request-status/<int:request_id>/', views.update_request_status, name='update_request_status'),
 ]

@@ -43,6 +43,13 @@
           </li>
           {% endif %}
           
+          <!-- Admin Dashboard link - only visible to admin users -->
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/admin/">Admin Dashboard</a>
+          </li>
+          {% endif %}
+          
           <!-- About and Contact links - always visible -->
           <li class="nav-item">
             <a class="nav-link" href="#">About Us</a>
