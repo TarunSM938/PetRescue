@@ -19,7 +19,7 @@
             <a href="{% url 'login' %}" class="btn btn-danger btn-lg">Report a Lost Pet</a>
             <a href="{% url 'login' %}" class="btn btn-success btn-lg">Report a Found Pet</a>
           {% endif %}
-          <a href="{% url 'adopt' %}" class="btn btn-outline-primary btn-lg">Search for Pets</a>
+          <a href="{% url 'find_pets' %}" class="btn btn-outline-primary btn-lg">Search for Pets</a>
         </div>
       </div>
       <div class="col-lg-6">
@@ -123,87 +123,75 @@
     </div>
     
     <div class="row g-4">
-      <!-- Lost Pet Card -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
-          <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-               class="card-img-top" alt="Lost dog" style="height: 200px; object-fit: cover;">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-danger align-self-start mb-2">LOST</span>
-            <h5 class="card-title">Buddy</h5>
-            <p class="card-text flex-grow-1">Golden Retriever, 3 years old. Last seen near Central Park on October 20th. Responds to "Bud".</p>
-            <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+      {% if recent_pets %}
+        {% for pet in recent_pets %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
+              {% if pet.image %}
+                <img src="{{ pet.image.url }}" class="card-img-top" alt="{{ pet.breed }}" style="height: 200px; object-fit: cover;">
+              {% else %}
+                <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
+                     class="card-img-top" alt="{{ pet.breed }}" style="height: 200px; object-fit: cover;">
+              {% endif %}
+              <div class="card-body d-flex flex-column">
+                {% if pet.status == 'lost' %}
+                  <span class="badge bg-danger align-self-start mb-2">LOST</span>
+                {% elif pet.status == 'found' %}
+                  <span class="badge bg-success align-self-start mb-2">FOUND</span>
+                {% elif pet.status == 'adoptable' %}
+                  <span class="badge bg-info align-self-start mb-2">NEEDS HOME</span>
+                {% endif %}
+                <h5 class="card-title">{{ pet.breed }}</h5>
+                <p class="card-text flex-grow-1">
+                  {{ pet.pet_type|title }}, {{ pet.color }}. 
+                  {% if pet.status == 'lost' %}
+                    Last seen near {{ pet.location }}.
+                  {% elif pet.status == 'found' %}
+                    Found near {{ pet.location }}.
+                  {% else %}
+                    Looking for a loving home.
+                  {% endif %}
+                </p>
+                <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+              </div>
+            </div>
           </div>
+        {% endfor %}
+      {% else %}
+        <!-- Fallback content if no pets are available -->
+        <div class="col-12 text-center">
+          <p class="lead">No pets have been reported yet. Be the first to help!</p>
         </div>
-      </div>
-      
-      <!-- Found Pet Card -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
-          <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-               class="card-img-top" alt="Found cat" style="height: 200px; object-fit: cover;">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-success align-self-start mb-2">FOUND</span>
-            <h5 class="card-title">Whiskers</h5>
-            <p class="card-text flex-grow-1">Orange tabby cat, adult. Found near Main Street on October 18th. Very friendly and vocal.</p>
-            <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Need Help Pet Card -->
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
-          <img src="https://images.unsplash.com/photo-1596623220-421a543fb5d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-               class="card-img-top" alt="Dog needing help" style="height: 200px; object-fit: cover;">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-info align-self-start mb-2">NEEDS HELP</span>
-            <h5 class="card-title">Max</h5>
-            <p class="card-text flex-grow-1">Mixed breed, senior dog. Needs medical care and a loving home. Great with children.</p>
-            <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
-          </div>
-        </div>
-      </div>
+      {% endif %}
     </div>
     
     <div class="row mt-4">
       <div class="col-12 text-center">
-        <a href="{% url 'adopt' %}" class="btn btn-success btn-lg">View All Pets</a>
+        <a href="{% url 'find_pets' %}" class="btn btn-success btn-lg">View All Pets</a>
       </div>
     </div>
   </div>
 </section>
 
 <!-- CTA Section -->
+{% if not user.is_authenticated %}
 <section class="cta-section mb-5">
   <div class="container">
     <div class="row">
       <div class="col-lg-8 mx-auto">
-        {% if user.is_authenticated %}
-          <div class="card border-0 rounded-3 bg-success bg-opacity-10 text-center">
-            <div class="card-body p-5">
-              <h3 class="mb-3">Welcome back, {{ user.username }}!</h3>
-              <p class="mb-4">You're making a difference in the lives of pets and their families. Thank you for being part of our community.</p>
-              <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="{% url 'profile' %}" class="btn btn-success btn-lg">View Profile</a>
-                <a href="{% url 'adopt' %}" class="btn btn-outline-success btn-lg">Report a Pet</a>
-              </div>
-            </div>
+        <div class="card border-0 rounded-3 bg-light p-5 text-center">
+          <h3 class="mb-3">Join Our Community Today</h3>
+          <p class="mb-4">Sign up to help rescue pets and report lost or found animals in your area. Together, we can make a difference.</p>
+          <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'register' %}" class="btn btn-success btn-lg">Create Account</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Sign In</a>
           </div>
-        {% else %}
-          <div class="card border-0 rounded-3 bg-light p-5 text-center">
-            <h3 class="mb-3">Join Our Community Today</h3>
-            <p class="mb-4">Sign up to help rescue pets and report lost or found animals in your area. Together, we can make a difference.</p>
-            <div class="d-flex flex-wrap justify-content-center gap-3">
-              <a href="{% url 'register' %}" class="btn btn-success btn-lg">Create Account</a>
-              <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Sign In</a>
-            </div>
-          </div>
-        {% endif %}
+        </div>
       </div>
     </div>
   </div>
 </section>
+{% endif %}
 {% endblock %}
 
 {% block head_extra %}

@@ -393,9 +393,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const linkHref = link.getAttribute('href');
             
             // Special handling for Report Lost Pet and Report Found Pet links
-            if (link.textContent === 'Report Lost Pet' && currentPage === '/adopt/' && petType === 'lost') {
+            if (link.textContent === 'Report Lost Pet' && currentPage === '/find-pets/' && petType === 'lost') {
                 link.classList.add('active');
-            } else if (link.textContent === 'Report Found Pet' && currentPage === '/adopt/' && petType === 'found') {
+            } else if (link.textContent === 'Report Found Pet' && currentPage === '/find-pets/' && petType === 'found') {
                 link.classList.add('active');
             } else if (linkHref === currentPage) {
                 link.classList.add('active');
