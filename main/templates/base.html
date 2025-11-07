@@ -39,7 +39,7 @@
           <!-- Search link - only visible when logged in -->
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'adopt' %}">Find Pets</a>
+            <a class="nav-link" href="{% url 'find_pets' %}">Find Pets</a>
           </li>
           {% endif %}
           
@@ -142,7 +142,7 @@
           <h6 class="fw-bold mb-3">Quick Links</h6>
           <ul class="list-unstyled">
             <li class="mb-2"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
-            <li class="mb-2"><a href="{% url 'adopt' %}" class="text-decoration-none">Find Pets</a></li>
+            <li class="mb-2"><a href="{% url 'find_pets' %}" class="text-decoration-none">Find Pets</a></li>
             <li class="mb-2"><a href="#" class="text-decoration-none">Report Lost Pet</a></li>
             <li class="mb-2"><a href="#" class="text-decoration-none">About Us</a></li>
           </ul>

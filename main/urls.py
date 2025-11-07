@@ -13,9 +13,9 @@ urlpatterns = [
     # Home page - the main landing page for the site
     path('', views.home, name='home'),
     
-    # Pet adoption page - browse pets available for adoption
+    # Pet search page - browse pets available for adoption
     # Requires user authentication
-    path('adopt/', views.adopt, name='adopt'),
+    path('find-pets/', views.adopt, name='find_pets'),
     
     # Donation page - information about supporting the rescue mission
     path('donate/', views.donate, name='donate'),

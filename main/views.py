@@ -10,8 +10,9 @@ from django.db import models
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseForbidden
+from django.apps import apps
 
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm, LostPetForm
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm, LostPetForm, PetSearchForm
 from .models import User, Profile, Pet, Request
 
 # Home page view
@@ -21,8 +22,19 @@ def home(request):
     """
     Render the homepage with current datetime for footer copyright.
     """
+    # Get model classes using apps.get_model to avoid linter issues
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    
+    # Get recently reported pets that have accepted requests
+    # We'll get pets that have associated accepted requests, ordered by most recent
+    recent_pets = PetModel.objects.filter(
+        request__status='accepted'
+    ).select_related('owner').order_by('-created_at')[:6]  # Limit to 6 most recent
+    
     context = {
-        'now': timezone.now()
+        'now': timezone.now(),
+        'recent_pets': recent_pets
     }
     return render(request, 'home.html', context) 
 
@@ -36,10 +48,99 @@ def adopt(request):
     Display pets available for adoption.
     Requires user to be logged in.
     """
+    # Get model classes using apps.get_model to avoid linter issues
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    
+    # Initialize the search form
+    search_form = PetSearchForm(request.GET or None)
+    
+    # Initialize pets as empty queryset
+    pets = PetModel.objects.none()
+    
+    # Apply filters only if form is submitted and at least one filter is provided
+    if request.GET and search_form and search_form.is_valid():
+        # Check if any search criteria were provided
+        pet_type = search_form.cleaned_data.get('pet_type')
+        breed = search_form.cleaned_data.get('breed')
+        color = search_form.cleaned_data.get('color')
+        location = search_form.cleaned_data.get('location')
+        start_date = search_form.cleaned_data.get('start_date')
+        end_date = search_form.cleaned_data.get('end_date')
+        
+        # Only perform search if at least one filter is provided
+        if pet_type or breed or color or location or start_date or end_date:
+            # Start with all found pets that have been accepted (for search results)
+            pets = PetModel.objects.filter(status='found').select_related('owner')
+            
+            # Filter by accepted requests
+            accepted_requests = RequestModel.objects.filter(status='accepted', request_type='found')
+            pets = pets.filter(request__in=accepted_requests)
+            
+            # Apply pet type filter
+            if pet_type:
+                pets = pets.filter(pet_type=pet_type)
+            
+            # Apply breed filter with case-insensitive partial matching
+            if breed:
+                pets = pets.filter(breed__icontains=breed)
+            
+            # Apply color filter with case-insensitive partial matching and synonyms
+            if color:
+                # Define color synonyms
+                color_synonyms = {
+                    'brown': ['brown', 'tan', 'chocolate'],
+                    'black': ['black', 'dark'],
+                    'white': ['white', 'light'],
+                    'gray': ['gray', 'grey', 'silver'],
+                    'golden': ['golden', 'yellow', 'blonde'],
+                    'red': ['red', 'orange', 'rust'],
+                }
+                
+                # Check if the color has synonyms
+                if color.lower() in color_synonyms:
+                    color_filters = Q()
+                    for synonym in color_synonyms[color.lower()]:
+                        color_filters = color_filters | Q(color__icontains=synonym)
+                    pets = pets.filter(color_filters)
+                else:
+                    pets = pets.filter(color__icontains=color)
+            
+            # Apply location filter with case-insensitive partial matching
+            if location:
+                pets = pets.filter(location__icontains=location)
+            
+            # Apply date range filters
+            if start_date:
+                pets = pets.filter(created_at__date__gte=start_date)
+            if end_date:
+                pets = pets.filter(created_at__date__lte=end_date)
+    
+    # Sort by most recent entries first (only if there are pets)
+    if pets.exists():
+        pets = pets.order_by('-created_at')
+    
+    # Get all available pets (explicitly adoptable pets and found pets with accepted requests)
+    # First get explicitly adoptable pets
+    adoptable_pets = PetModel.objects.filter(status='adoptable').select_related('owner')
+    
+    # Then get found pets with accepted requests
+    accepted_found_pets = PetModel.objects.filter(
+        status='found',
+        request__status='accepted',
+        request__request_type='found'
+    ).select_related('owner')
+    
+    # Combine both querysets
+    all_pets = adoptable_pets.union(accepted_found_pets).order_by('-created_at')
+    
     context = {
-        'now': timezone.now()
+        'now': timezone.now(),
+        'search_form': search_form,
+        'pets': pets,  # Found pets matching search criteria (empty if no search)
+        'all_pets': all_pets  # All available pets
     }
-    return render(request, 'adopt.html', context)
+    return render(request, 'find_pets.html', context)
 
 
 # Donate page view

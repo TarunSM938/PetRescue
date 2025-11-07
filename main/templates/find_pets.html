@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Lost Pets | PetRescue{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Hero Section -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card border-0 rounded-3 overflow-hidden shadow-lg">
+            <img src="https://images.unsplash.com/photo-1517423568366-8b83523034fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
+                 class="card-img-top" alt="Lost pet search" style="max-height: 300px; object-fit: cover;">
+            <div class="card-img-overlay d-flex align-items-center justify-content-center">
+              <div class="bg-dark bg-opacity-75 p-4 rounded text-center text-white" style="max-width: 600px;">
+                <h1 class="card-title mb-3">Find Your Lost Pet</h1>
+                <p class="card-text mb-4">Search our database of found pets to help reunite you with your missing companion.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-column layout for filter and results -->
+  <div class="row">
+    <!-- Filter Panel (Left Column) -->
+    <div class="col-lg-3 mb-4">
+      <div class="card shadow-sm border-0 rounded-3 sticky-top" style="top: 80px;">
+        <div class="card-header bg-white border-0">
+          <h2 class="mb-0">Filters</h2>
+          <p class="text-muted small mb-0">Refine your search results</p>
+        </div>
+        <div class="card-body">
+          <form method="GET" id="pet-search-form">
+            <div class="mb-3">
+              <label for="{{ search_form.pet_type.id_for_label }}" class="form-label">Pet Type</label>
+              {{ search_form.pet_type }}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ search_form.breed.id_for_label }}" class="form-label">Breed</label>
+              {{ search_form.breed }}
+              <div class="form-text">Search accepts partial names and common misspellings</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ search_form.color.id_for_label }}" class="form-label">Color</label>
+              {{ search_form.color }}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ search_form.location.id_for_label }}" class="form-label">Location</label>
+              {{ search_form.location }}
+              <div class="form-text">Enter city, neighborhood, or address</div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Date Range</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label for="{{ search_form.start_date.id_for_label }}" class="form-label small">From</label>
+                  {{ search_form.start_date }}
+                </div>
+                <div class="col-6">
+                  <label for="{{ search_form.end_date.id_for_label }}" class="form-label small">To</label>
+                  {{ search_form.end_date }}
+                </div>
+              </div>
+              <div id="date-error" class="text-danger small mt-1 d-none">Start date must be before end date</div>
+            </div>
+            
+            <div class="d-grid gap-2 mt-4">
+              <button type="submit" class="btn btn-primary" id="search-button">
+                <span class="spinner-border spinner-border-sm d-none" id="search-spinner" role="status" aria-hidden="true"></span>
+                <span id="search-text">Search Found Pets</span>
+              </button>
+              <a href="{% url 'find_pets' %}" class="btn btn-outline-secondary">Reset Filters</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section (Right Column) -->
+    <div class="col-lg-9">
+      <!-- Loading indicator -->
+      <div id="loading-indicator" class="text-center py-5 d-none">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Searching for pets...</p>
+      </div>
+
+      <!-- Search Results Section -->
+      <div id="search-results-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">Found Pets</h2>
+          <div class="text-muted">
+            {% if pets %}
+              {{ pets|length }} pet{{ pets|length|pluralize }} found
+            {% else %}
+              No pets found
+            {% endif %}
+          </div>
+        </div>
+        
+        {% if pets %}
+          <!-- Pet Grid -->
+          <div class="row g-4" id="pet-grid">
+            {% for pet in pets %}
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
+                  {% if pet.image %}
+                    <img src="{{ pet.image.url }}" class="card-img-top pet-image" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}, {{ pet.color }}" style="height: 200px; object-fit: cover;" loading="lazy">
+                  {% else %}
+                    <div class="d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
+                      <i class="fas fa-paw fa-3x text-muted"></i>
+                    </div>
+                  {% endif %}
+                  <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <h5 class="card-title mb-0">{{ pet.breed }}</h5>
+                      <span class="badge bg-success">Found</span>
+                    </div>
+                    <p class="card-text">
+                      <small class="text-muted">
+                        <i class="fas fa-paw me-1"></i> {{ pet.get_pet_type_display }}<br>
+                        <i class="fas fa-palette me-1"></i> {{ pet.color }}<br>
+                        <i class="fas fa-map-marker-alt me-1"></i> {{ pet.location }}<br>
+                        <i class="fas fa-calendar-alt me-1"></i> {{ pet.created_at|date:"M d, Y" }}
+                      </small>
+                    </p>
+                    <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
+                    <button class="btn btn-outline-primary mt-auto contact-reporter-btn" 
+                            data-pet-id="{{ pet.id }}" 
+                            data-pet-name="{{ pet.breed }}"
+                            data-pet-type="{{ pet.get_pet_type_display }}"
+                            data-pet-color="{{ pet.color }}"
+                            data-pet-owner="{{ pet.owner.username }}">
+                      Contact Reporter
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <!-- No Results Message -->
+          <div class="text-center py-5" id="no-results-message">
+            <div class="mb-4">
+              <i class="fas fa-search fa-3x text-muted"></i>
+            </div>
+            <h3>No Found Pets Match Your Search</h3>
+            <p class="lead">Try removing filters, widening date range, or check spelling.</p>
+            <div class="d-grid gap-2 col-lg-6 mx-auto">
+              <a href="{% url 'find_pets' %}" class="btn btn-primary">Reset All Filters</a>
+              {% if user.is_authenticated %}
+                <a href="{% url 'report_lost_pet' %}" class="btn btn-outline-success">Report a Lost Pet</a>
+                <a href="{% url 'report_found_pet' %}" class="btn btn-outline-info">Post a Found Pet</a>
+              {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-success">Report a Lost Pet</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-info">Post a Found Pet</a>
+              {% endif %}
+            </div>
+            
+            <!-- Recent pets carousel as fallback -->
+            {% if all_pets %}
+            <div class="mt-5">
+              <h4>Recently Reported Pets</h4>
+              <div class="row g-3 mt-3">
+                {% for pet in all_pets|slice:":3" %}
+                  <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0 rounded-3">
+                      {% if pet.image %}
+                        <img src="{{ pet.image.url }}" class="card-img-top" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}" style="height: 120px; object-fit: cover;" loading="lazy">
+                      {% else %}
+                        <div class="d-flex align-items-center justify-content-center" style="height: 120px; background-color: #f8f9fa;">
+                          <i class="fas fa-paw fa-2x text-muted"></i>
+                        </div>
+                      {% endif %}
+                      <div class="card-body p-2">
+                        <h6 class="card-title mb-1">{{ pet.breed }}</h6>
+                        <p class="card-text small text-muted mb-0">
+                          {{ pet.get_pet_type_display }}, {{ pet.color }}<br>
+                          {{ pet.location }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- All Available Pets Section -->
+      <div class="row mt-5">
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">All Founded Pets</h2>
+            <div class="text-muted">
+              {% if all_pets %}
+                {{ all_pets|length }} pet{{ all_pets|length|pluralize }} founded
+              {% else %}
+                No pets founded
+              {% endif %}
+            </div>
+          </div>
+          
+          {% if all_pets %}
+            <!-- Available Pets Grid -->
+            <div class="row g-4">
+              {% for pet in all_pets %}
+                <div class="col-md-6 col-lg-4">
+                  <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
+                    {% if pet.image %}
+                      <img src="{{ pet.image.url }}" class="card-img-top pet-image" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}, {{ pet.color }}" style="height: 200px; object-fit: cover;" loading="lazy">
+                    {% else %}
+                      <div class="d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
+                        <i class="fas fa-paw fa-3x text-muted"></i>
+                      </div>
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                      <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">{{ pet.breed }}</h5>
+                        <span class="badge bg-success">Founded</span>
+                      </div>
+                      <p class="card-text">
+                        <small class="text-muted">
+                          <i class="fas fa-paw me-1"></i> {{ pet.get_pet_type_display }}<br>
+                          <i class="fas fa-palette me-1"></i> {{ pet.color }}<br>
+                          <i class="fas fa-map-marker-alt me-1"></i> {{ pet.location }}<br>
+                          <i class="fas fa-calendar-alt me-1"></i> {{ pet.created_at|date:"M d, Y" }}
+                        </small>
+                      </p>
+                      <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
+                      <button class="btn btn-outline-primary mt-auto contact-reporter-btn" 
+                              data-pet-id="{{ pet.id }}" 
+                              data-pet-name="{{ pet.breed }}"
+                              data-pet-type="{{ pet.get_pet_type_display }}"
+                              data-pet-color="{{ pet.color }}"
+                              data-pet-owner="{{ pet.owner.username }}">
+                        Contact Reporter
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <!-- No Available Pets Message -->
+            <div class="text-center py-5">
+              <div class="mb-4">
+                <i class="fas fa-paw fa-3x text-muted"></i>
+              </div>
+              <h3>No Pets Founded</h3>
+              <p class="lead">Check back later as new pets are added regularly.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact Reporter Modal -->
+<div class="modal fade" id="contactReporterModal" tabindex="-1" aria-labelledby="contactReporterModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contactReporterModalLabel">Contact Reporter</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-4">
+          <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+            <i class="fas fa-user fa-2x text-muted"></i>
+          </div>
+          <h5 class="mt-3" id="modal-pet-name">Pet Name</h5>
+          <p class="text-muted mb-0" id="modal-pet-details">Pet Type, Color</p>
+          <p class="text-muted mb-0" id="modal-reporter-name">Reported by: <span id="reporter-name">Reporter Name</span></p>
+        </div>
+        
+        <div class="alert alert-info">
+          <h6 class="alert-heading">Privacy Notice</h6>
+          <p class="mb-0">Please respect reporter privacy. Use contact info only to reunite pets.</p>
+        </div>
+        
+        <div class="mt-4" id="contact-info-section">
+          <h6>Contact Information</h6>
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-phone me-2"></i>
+            <span id="reporter-phone">Phone number not available</span>
+            <button class="btn btn-outline-primary btn-sm ms-auto copy-contact-btn" data-contact-type="phone">
+              <i class="fas fa-copy me-1"></i> Copy
+            </button>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-envelope me-2"></i>
+            <span id="reporter-email">Email not available</span>
+            <button class="btn btn-outline-primary btn-sm ms-auto copy-contact-btn" data-contact-type="email">
+              <i class="fas fa-copy me-1"></i> Copy
+            </button>
+          </div>
+        </div>
+        
+        <div class="mt-4" id="contact-alternative-section">
+          <p>To contact the reporter for this pet:</p>
+          <div class="d-grid gap-2">
+            {% if user.is_authenticated %}
+              <a href="#" class="btn btn-primary" id="view-full-report-btn">View Full Report</a>
+              <a href="#" class="btn btn-outline-secondary" id="send-message-btn">Send Message</a>
+            {% else %}
+              <a href="{% url 'login' %}" class="btn btn-primary">Sign In to Contact</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block head_extra %}
+<style>
+  .card-img-overlay .bg-dark {
+    background-color: rgba(0,0,0,0.75) !important;
+  }
+  
+  .pet-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .pet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+  }
+  
+  /* Add padding offset for fixed navbar */
+  #search-results {
+    scroll-margin-top: 70px;
+  }
+  
+  #available-pets-section {
+    scroll-margin-top: 70px;
+  }
+  
+  /* Sticky filter panel */
+  @media (min-width: 992px) {
+    .sticky-top {
+      position: sticky;
+    }
+  }
+  
+  /* Lazy loading placeholder */
+  .pet-image {
+    background-color: #f8f9fa;
+  }
+  
+  /* Accessibility improvements */
+  .btn:focus, .form-control:focus, .form-select:focus {
+    outline: 2px solid #4CAF50;
+    outline-offset: 2px;
+  }
+  
+  /* Contact info section */
+  #contact-info-section .d-flex {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+  }
+  
+  #contact-info-section .d-flex:hover {
+    background-color: #e9ecef;
+  }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get form elements
+    const form = document.getElementById('pet-search-form');
+    const startDateInput = document.querySelector('[name="start_date"]');
+    const endDateInput = document.querySelector('[name="end_date"]');
+    const dateError = document.getElementById('date-error');
+    const searchButton = document.getElementById('search-button');
+    const searchSpinner = document.getElementById('search-spinner');
+    const searchText = document.getElementById('search-text');
+    const contactReporterButtons = document.querySelectorAll('.contact-reporter-btn');
+    const contactReporterModal = new bootstrap.Modal(document.getElementById('contactReporterModal'));
+    const modalPetName = document.getElementById('modal-pet-name');
+    const modalPetDetails = document.getElementById('modal-pet-details');
+    const modalReporterName = document.getElementById('reporter-name');
+    const reporterPhone = document.getElementById('reporter-phone');
+    const reporterEmail = document.getElementById('reporter-email');
+    const viewFullReportBtn = document.getElementById('view-full-report-btn');
+    const sendMessageBtn = document.getElementById('send-message-btn');
+    const copyContactButtons = document.querySelectorAll('.copy-contact-btn');
+    
+    // Add event listeners for date validation
+    if (startDateInput && endDateInput) {
+      startDateInput.addEventListener('change', validateDates);
+      endDateInput.addEventListener('change', validateDates);
+    }
+    
+    // Add event listener for form submission
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        // Validate dates before submission
+        if (!validateDates()) {
+          e.preventDefault();
+          return false;
+        }
+        
+        // Show loading indicator
+        showLoadingIndicator();
+      });
+    }
+    
+    // Add event listeners for contact reporter buttons
+    contactReporterButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const petId = this.getAttribute('data-pet-id');
+        const petName = this.getAttribute('data-pet-name');
+        const petType = this.getAttribute('data-pet-type');
+        const petColor = this.getAttribute('data-pet-color');
+        const petOwner = this.getAttribute('data-pet-owner');
+        
+        // Update modal content
+        modalPetName.textContent = petName;
+        modalPetDetails.textContent = `${petType}, ${petColor}`;
+        modalReporterName.textContent = petOwner;
+        
+        // Set default contact info (in a real app, this would come from the backend)
+        reporterPhone.innerHTML = 'Phone number not available <span class="text-muted">(Sign in to view)</span>';
+        reporterEmail.innerHTML = 'Email not available <span class="text-muted">(Sign in to view)</span>';
+        
+        // Update view full report button (placeholder URL)
+        if (viewFullReportBtn) {
+          viewFullReportBtn.href = `/pet/${petId}/`;
+        }
+        
+        // Update send message button (placeholder URL)
+        if (sendMessageBtn) {
+          sendMessageBtn.href = `/messages/new/?pet=${petId}`;
+        }
+        
+        // Show modal
+        contactReporterModal.show();
+      });
+    });
+    
+    // Add event listeners for copy contact buttons
+    copyContactButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const contactType = this.getAttribute('data-contact-type');
+        let contactInfo = '';
+        
+        if (contactType === 'phone') {
+          contactInfo = reporterPhone.textContent;
+        } else if (contactType === 'email') {
+          contactInfo = reporterEmail.textContent;
+        }
+        
+        // In a real implementation, we would copy to clipboard
+        // For now, we'll show an alert
+        alert(`In a real application, this would copy the ${contactType} to your clipboard: ${contactInfo}`);
+      });
+    });
+    
+    // Validate date range
+    function validateDates() {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+      
+      if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        dateError.classList.remove('d-none');
+        return false;
+      } else {
+        dateError.classList.add('d-none');
+        return true;
+      }
+    }
+    
+    // Show loading indicator
+    function showLoadingIndicator() {
+      if (searchButton) {
+        searchSpinner.classList.remove('d-none');
+        searchText.textContent = 'Searching...';
+        searchButton.disabled = true;
+      }
+      
+      // Show loading section and hide results
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const resultsSection = document.getElementById('search-results-section');
+      if (loadingIndicator && resultsSection) {
+        loadingIndicator.classList.remove('d-none');
+        resultsSection.classList.add('d-none');
+      }
+    }
+    
+    // Hide loading indicator
+    function hideLoadingIndicator() {
+      if (searchButton) {
+        searchSpinner.classList.add('d-none');
+        searchText.textContent = 'Search Found Pets';
+        searchButton.disabled = false;
+      }
+      
+      // Hide loading section and show results
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const resultsSection = document.getElementById('search-results-section');
+      if (loadingIndicator && resultsSection) {
+        loadingIndicator.classList.add('d-none');
+        resultsSection.classList.remove('d-none');
+      }
+    }
+    
+    // Check if there are search parameters in the URL and show loading
+    if (window.location.search) {
+      showLoadingIndicator();
+      // Hide after a short delay to simulate loading
+      setTimeout(hideLoadingIndicator, 800);
+    }
+    
+    // Add keyboard accessibility for pet cards
+    const petCards = document.querySelectorAll('.pet-card');
+    petCards.forEach(card => {
+      card.setAttribute('tabindex', '0');
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const contactButton = this.querySelector('.contact-reporter-btn');
+          if (contactButton) {
+            contactButton.click();
+          }
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

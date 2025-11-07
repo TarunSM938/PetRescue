@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get form elements
     const registerForm = document.getElementById('register-form');
     const loginForm = document.getElementById('login-form');
+    const searchForm = document.getElementById('pet-search-form');
     
     // Add event listeners if forms exist
     if (registerForm) {
@@ -34,6 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set active nav link
     setActiveNavLink();
+    
+    // Setup search form enhancements if it exists
+    if (searchForm) {
+        setupSearchFormEnhancements();
+    }
+    
+    // Setup contact reporter functionality
+    setupContactReporter();
     
     // Real-time validation setup
     function setupRealTimeValidation() {
@@ -68,6 +77,216 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (usernameField) {
             usernameField.addEventListener('blur', validateUsername);
+        }
+    }
+    
+    // Setup search form enhancements
+    function setupSearchFormEnhancements() {
+        // Get search form elements
+        const breedInput = document.querySelector('[name="breed"]');
+        const locationInput = document.querySelector('[name="location"]');
+        const startDateInput = document.querySelector('[name="start_date"]');
+        const endDateInput = document.querySelector('[name="end_date"]');
+        const searchButton = document.getElementById('search-button');
+        
+        // Add debounced input listeners for text fields
+        if (breedInput) {
+            let breedTimeout;
+            breedInput.addEventListener('input', function() {
+                clearTimeout(breedTimeout);
+                breedTimeout = setTimeout(() => {
+                    // Could implement auto-search here if needed
+                    // For now, we'll just show suggestions
+                    suggestBreedCorrections(breedInput.value);
+                }, 500); // 500ms debounce
+            });
+        }
+        
+        if (locationInput) {
+            let locationTimeout;
+            locationInput.addEventListener('input', function() {
+                clearTimeout(locationTimeout);
+                locationTimeout = setTimeout(() => {
+                    // Could implement auto-search here if needed
+                }, 500); // 500ms debounce
+            });
+        }
+        
+        // Add date validation
+        if (startDateInput && endDateInput) {
+            startDateInput.addEventListener('change', validateDateRange);
+            endDateInput.addEventListener('change', validateDateRange);
+        }
+        
+        // Add form submission handler
+        searchForm.addEventListener('submit', function(e) {
+            // Validate date range
+            if (!validateDateRange()) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show loading state
+            if (searchButton) {
+                const spinner = searchButton.querySelector('.spinner-border');
+                const text = searchButton.querySelector('#search-text');
+                if (spinner && text) {
+                    spinner.classList.remove('d-none');
+                    text.textContent = 'Searching...';
+                    searchButton.disabled = true;
+                }
+            }
+        });
+    }
+    
+    // Setup contact reporter functionality
+    function setupContactReporter() {
+        // Handle copy contact buttons
+        const copyContactButtons = document.querySelectorAll('.copy-contact-btn');
+        copyContactButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const contactType = this.getAttribute('data-contact-type');
+                let contactInfo = '';
+                
+                if (contactType === 'phone') {
+                    const phoneElement = document.getElementById('reporter-phone');
+                    if (phoneElement) {
+                        contactInfo = phoneElement.textContent;
+                    }
+                } else if (contactType === 'email') {
+                    const emailElement = document.getElementById('reporter-email');
+                    if (emailElement) {
+                        contactInfo = emailElement.textContent;
+                    }
+                }
+                
+                // Copy to clipboard
+                if (contactInfo && contactInfo !== 'Phone number not available' && contactInfo !== 'Email not available') {
+                    copyToClipboard(contactInfo)
+                        .then(() => {
+                            // Show success feedback
+                            const originalText = this.innerHTML;
+                            this.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                            setTimeout(() => {
+                                this.innerHTML = originalText;
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            console.error('Failed to copy: ', err);
+                            alert(`Copy ${contactType} to clipboard: ${contactInfo}`);
+                        });
+                } else {
+                    alert('Contact information is not available. Please sign in to view contact details.');
+                }
+            });
+        });
+        
+        // Handle phone number click for mobile
+        const phoneElements = document.querySelectorAll('#reporter-phone');
+        phoneElements.forEach(element => {
+            element.addEventListener('click', function() {
+                const phoneText = this.textContent.trim();
+                if (phoneText && phoneText !== 'Phone number not available') {
+                    // On mobile, this will initiate a call
+                    window.location.href = `tel:${phoneText}`;
+                }
+            });
+        });
+    }
+    
+    // Copy text to clipboard
+    function copyToClipboard(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            // Use Clipboard API if available
+            return navigator.clipboard.writeText(text);
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            return new Promise((resolve, reject) => {
+                document.execCommand('copy') ? resolve() : reject();
+                textArea.remove();
+            });
+        }
+    }
+    
+    // Simple fuzzy matching for breed suggestions
+    function suggestBreedCorrections(input) {
+        if (!input || input.length < 2) return;
+        
+        const commonBreeds = [
+            'Labrador', 'German Shepherd', 'Golden Retriever', 'French Bulldog',
+            'Siberian Husky', 'Poodle', 'Chihuahua', 'Boxer', 'Dachshund',
+            'Beagle', 'Rottweiler', 'Pointer', 'Shiba Inu', 'Corgi'
+        ];
+        
+        const inputLower = input.toLowerCase();
+        const suggestions = commonBreeds.filter(breed => 
+            breed.toLowerCase().includes(inputLower) || 
+            levenshteinDistance(breed.toLowerCase(), inputLower) <= 2
+        );
+        
+        // In a real implementation, we would show these suggestions to the user
+        // For now, we'll just log them to the console
+        if (suggestions.length > 0) {
+            console.log('Did you mean:', suggestions[0]);
+        }
+    }
+    
+    // Simple Levenshtein distance implementation for fuzzy matching
+    function levenshteinDistance(str1, str2) {
+        const track = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+        
+        for (let i = 0; i <= str1.length; i += 1) {
+            track[0][i] = i;
+        }
+        
+        for (let j = 0; j <= str2.length; j += 1) {
+            track[j][0] = j;
+        }
+        
+        for (let j = 1; j <= str2.length; j += 1) {
+            for (let i = 1; i <= str1.length; i += 1) {
+                const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                track[j][i] = Math.min(
+                    track[j][i - 1] + 1, // deletion
+                    track[j - 1][i] + 1, // insertion
+                    track[j - 1][i - 1] + indicator, // substitution
+                );
+            }
+        }
+        
+        return track[str2.length][str1.length];
+    }
+    
+    // Validate date range
+    function validateDateRange() {
+        const startDateInput = document.querySelector('[name="start_date"]');
+        const endDateInput = document.querySelector('[name="end_date"]');
+        const dateError = document.getElementById('date-error');
+        
+        if (!startDateInput || !endDateInput) return true;
+        
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+        
+        // If both dates are provided, check that start is before end
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            if (dateError) {
+                dateError.classList.remove('d-none');
+            }
+            return false;
+        } else {
+            if (dateError) {
+                dateError.classList.add('d-none');
+            }
+            return true;
         }
     }
     
@@ -393,9 +612,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const linkHref = link.getAttribute('href');
             
             // Special handling for Report Lost Pet and Report Found Pet links
-            if (link.textContent === 'Report Lost Pet' && currentPage === '/adopt/' && petType === 'lost') {
+            if (link.textContent === 'Report Lost Pet' && currentPage === '/find-pets/' && petType === 'lost') {
                 link.classList.add('active');
-            } else if (link.textContent === 'Report Found Pet' && currentPage === '/adopt/' && petType === 'found') {
+            } else if (link.textContent === 'Report Found Pet' && currentPage === '/find-pets/' && petType === 'found') {
                 link.classList.add('active');
             } else if (linkHref === currentPage) {
                 link.classList.add('active');

@@ -333,3 +333,77 @@ class LostPetForm(forms.Form):
                 raise ValidationError("Image file size must be less than 5 MB.")
         
         return image
+
+
+# Form for searching lost pets
+class PetSearchForm(forms.Form):
+    """
+    Form for searching lost pets with multiple filter options.
+    """
+    pet_type = forms.ChoiceField(
+        choices=[('', 'All Pet Types')] + Pet.PET_TYPES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        })
+    )
+    
+    breed = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter breed'
+        })
+    )
+    
+    color = forms.CharField(
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter color'
+        })
+    )
+    
+    location = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter location'
+        })
+    )
+    
+    start_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'placeholder': 'From date'
+        }),
+        help_text="Start date for search"
+    )
+    
+    end_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+            'placeholder': 'To date'
+        }),
+        help_text="End date for search"
+    )
+    
+    def clean(self):
+        """
+        Validate that start_date is not after end_date
+        """
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        
+        if start_date and end_date and start_date > end_date:
+            raise ValidationError("Start date cannot be after end date.")
+        
+        return cleaned_data
