@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | MyApp</title>
+
+</head>
+<style>
+    /* Basic Page Setup */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, hwb(32 40% 7%), hsl(26, 90%, 51%));
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Login Container */
+.login-container {
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+.input-group {
+  margin-bottom: 18px;
+}
+
+label {
+  display: block;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: 0.3s;
+  font-size: 15px;
+}
+
+input:focus {
+  border-color: hwb(210 6% 92%);
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background: hsl(41, 94%, 46%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-login:hover {
+  background: hsl(40, 98%, 52%);
+}
+
+.signup-text {
+  text-align: center;
+  margin-top: 15px;
+  color: #555;
+  font-size: 14px;
+}
+
+.signup-text a {
+  color: hsl(38, 100%, 50%);
+  text-decoration: none;
+}
+
+.signup-text a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .login-container {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+}
+
+</style>
+<body>
+
+  <div class="login-container">
+    <div class="form-box">
+      <h2>Welcome Back 👋</h2>
+      <p class="subtitle">Login to continue</p>
+
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required />
+          <small class="error-message" id="emailError"></small>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required />
+          <small class="error-message" id="passwordError"></small>
+        </div>
+
+        <button type="submit" class="btn-login">Login</button>
+
+        <p class="signup-text">
+          Don’t have an account? <a href="login.html">Sign up</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const emailError = document.getElementById("emailError");
+  const passwordError = document.getElementById("passwordError");
+
+  emailError.textContent = "";
+  passwordError.textContent = "";
+
+  // Simple frontend validation
+  let hasError = false;
+  if (!email) {
+    emailError.textContent = "Email is required";
+    hasError = true;
+  }
+  if (!password) {
+    passwordError.textContent = "Password is required";
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  try {
+    // Connect to backend
+    const response = await fetch("http://localhost:8000/api/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) throw new Error("Invalid credentials");
+
+    const data = await response.json();
+    localStorage.setItem("token", data.token);
+    alert("Login successful!");
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    passwordError.textContent = err.message;
+  }
+});
+
+  </script>
+</body>
+</html>
