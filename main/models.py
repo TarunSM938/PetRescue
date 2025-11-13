@@ -121,6 +121,39 @@ class Request(models.Model):
         return f"{user.username} - {self.request_type} - {pet.pet_type}"
 
 
+# Activity Log Model
+# Tracks all activities related to pet reports for history/timeline functionality
+
+class ActivityLog(models.Model):
+    """
+    Activity log model to track all activities related to pet reports.
+    Records events such as creation, edits, status changes, and deletions.
+    """
+    ACTIVITY_TYPES = [
+        ('created', 'Created'),
+        ('edited', 'Edited'),
+        ('status_changed', 'Status Changed'),
+        ('deleted', 'Deleted'),
+    ]
+    
+    pet = models.ForeignKey('Pet', on_delete=models.CASCADE, 
+                           help_text="The pet this activity is related to")
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES,
+                                   help_text="Type of activity")
+    timestamp = models.DateTimeField(auto_now_add=True,
+                                   help_text="When this activity occurred")
+    actor = models.CharField(max_length=50, 
+                            help_text="Who performed the action (user, admin, system)")
+    details = models.TextField(blank=True,
+                              help_text="Additional details about the activity")
+    
+    class Meta:
+        ordering = ['-timestamp']  # Latest first
+    
+    def __str__(self):
+        pet = cast('Pet', self.pet)
+        return f"{pet.breed} - {self.activity_type} - {self.timestamp}"
+
 
 # Signal Handlers
 # Automatically create and save user profiles when users are created/updated

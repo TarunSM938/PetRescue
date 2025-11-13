@@ -11,6 +11,10 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.apps import apps
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm, LostPetForm, PetSearchForm
 from .models import User, Profile, Pet, Request
@@ -101,7 +105,8 @@ def adopt(request):
                 if color.lower() in color_synonyms:
                     color_filters = Q()
                     for synonym in color_synonyms[color.lower()]:
-                        color_filters = color_filters | Q(color__icontains=synonym)
+                        q_object = Q(color__icontains=synonym)
+                        color_filters.add(q_object, Q.OR)
                     pets = pets.filter(color_filters)
                 else:
                     pets = pets.filter(color__icontains=color)
@@ -318,12 +323,21 @@ def report_found_pet(request):
             # Using apps.get_model to avoid potential naming conflicts
             from django.apps import apps
             RequestModel = apps.get_model('main', 'Request')
-            RequestModel.objects.create(
+            ActivityLogModel = apps.get_model('main', 'ActivityLog')
+            request_obj = RequestModel.objects.create(
                 user=request.user,
                 pet=pet,
                 request_type='found',  # Found pet report
                 phone_number=request.user.phone_number or '',  # Use user's phone number if available
                 message=f"Found pet report for {pet.pet_type} near {pet.location}"
+            )
+            
+            # Log the creation activity
+            ActivityLogModel.objects.create(
+                pet=pet,
+                activity_type='created',
+                actor=f"user-{request.user.username}",
+                details=f"Found pet report created by user {request.user.username}"
             )
             
             messages.success(request, 'Thank you for reporting this found pet! Our team will review your submission.')
@@ -341,9 +355,6 @@ def report_found_pet(request):
     return render(request, 'report_found_pet.html', context)
 
 
-# Report lost pet view
-# Allows authenticated users to report lost pets
-
 @login_required
 def report_lost_pet(request):
     """
@@ -356,6 +367,7 @@ def report_lost_pet(request):
             # Create a pet object with the form data
             from django.apps import apps
             PetModel = apps.get_model('main', 'Pet')
+            ActivityLogModel = apps.get_model('main', 'ActivityLog')
             pet = PetModel(
                 owner=request.user,
                 pet_type=form.cleaned_data['pet_type'],
@@ -370,12 +382,20 @@ def report_lost_pet(request):
             
             # Create a request record linking the pet to the user
             RequestModel = apps.get_model('main', 'Request')
-            RequestModel.objects.create(
+            request_obj = RequestModel.objects.create(
                 user=request.user,
                 pet=pet,
                 request_type='lost',  # Lost pet report
                 phone_number=form.cleaned_data['owner_contact'],
                 message=f"Lost pet report for {form.cleaned_data['pet_name']} ({form.cleaned_data['pet_type']}) near {form.cleaned_data['last_seen_location']}"
+            )
+            
+            # Log the creation activity
+            ActivityLogModel.objects.create(
+                pet=pet,
+                activity_type='created',
+                actor=f"user-{request.user.username}",
+                details=f"Lost pet report created by user {request.user.username}"
             )
             
             messages.success(request, 'Thank you for reporting your lost pet! Our team will review your submission and help in the search.')
@@ -642,14 +662,392 @@ def update_request_status(request, request_id):
         # Update the request status
         from django.apps import apps
         RequestModel = apps.get_model('main', 'Request')
+        ActivityLogModel = apps.get_model('main', 'ActivityLog')
         try:
             req = RequestModel.objects.get(id=request_id)
+            # Store the old status for logging
+            old_status = req.status
             # Convert status to lowercase to match model choices
             req.status = new_status.lower()
             req.save()
+            
+            # Log the status change activity
+            ActivityLogModel.objects.create(
+                pet=req.pet,
+                activity_type='status_changed',
+                actor=f"admin-{request.user.username}",
+                details=f"Status changed from {old_status} to {new_status.lower()}"
+            )
+            
             messages.success(request, f'Request status updated successfully to {new_status}.')
         except RequestModel.DoesNotExist:
             messages.error(request, 'Request not found.')
         return redirect('admin_pending_requests')
     
     return HttpResponseForbidden(b"Method not allowed")
+
+
+@login_required
+def user_requests(request):
+    """
+    Display all pet reports (lost and found) submitted by the logged-in user.
+    Shows pet details, request status, and allows editing/deleting pending reports.
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    
+    # Get all pets reported by the current user
+    user_pets = PetModel.objects.filter(owner=request.user).order_by('-created_at')
+    
+    # Get requests associated with these pets
+    pet_requests = RequestModel.objects.filter(pet__in=user_pets)
+    
+    # Create a dictionary to map pet IDs to their requests
+    pet_request_map = {req.pet.id: req for req in pet_requests}
+    
+    # Add status messages based on request status
+    for pet in user_pets:
+        if pet.id in pet_request_map:
+            request_obj = pet_request_map[pet.id]
+            pet.request_status = request_obj.status
+            if request_obj.status == 'pending':
+                pet.status_message = "Your report is under review by admin."
+            elif request_obj.status == 'accepted':
+                pet.status_message = "Your report is now visible in search results."
+            elif request_obj.status == 'rejected':
+                pet.status_message = "Admin has reviewed and rejected this report."
+            else:
+                pet.status_message = "Status unknown."
+        else:
+            pet.request_status = 'unknown'
+            pet.status_message = "No request associated with this pet."
+    
+    context = {
+        'user_pets': user_pets,
+        'now': timezone.now()
+    }
+    return render(request, 'user_requests.html', context)
+
+
+@login_required
+def edit_user_request(request, pet_id):
+    """
+    Allow users to edit their pet reports if the status is pending.
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    ActivityLogModel = apps.get_model('main', 'ActivityLog')
+    
+    # Get the pet object
+    pet = get_object_or_404(PetModel, id=pet_id, owner=request.user)
+    
+    # Check if there's a request associated with this pet
+    try:
+        pet_request = RequestModel.objects.get(pet=pet)
+        # Only allow editing if status is pending
+        if pet_request.status != 'pending':
+            messages.error(request, "You can only edit reports with pending status.")
+            return redirect('user_requests')
+    except RequestModel.DoesNotExist:
+        messages.error(request, "No request found for this pet.")
+        return redirect('user_requests')
+    
+    # For editing, we'll use a simple form approach since the existing forms
+    # are designed for creation, not editing
+    if request.method == 'POST':
+        # Track changes for activity log
+        changes = []
+        
+        # Update pet details
+        fields_to_update = ['pet_type', 'breed', 'color', 'location', 'description']
+        for field in fields_to_update:
+            if field in request.POST:
+                old_value = getattr(pet, field)
+                new_value = request.POST[field]
+                if old_value != new_value:
+                    setattr(pet, field, new_value)
+                    changes.append(f"{field}: {old_value} → {new_value}")
+        
+        # Handle image upload if provided
+        if 'image' in request.FILES:
+            pet.image = request.FILES['image']
+            changes.append("image: updated")
+        
+        pet.save()
+        
+        # Log the edit activity
+        if changes:
+            ActivityLogModel.objects.create(
+                pet=pet,
+                activity_type='edited',
+                actor=f"user-{request.user.username}",
+                details=f"Edited fields: {', '.join(changes)}"
+            )
+        
+        messages.success(request, "Your report has been updated successfully.")
+        return redirect('user_requests')
+    
+    context = {
+        'pet': pet,
+        'now': timezone.now()
+    }
+    return render(request, 'edit_request.html', context)
+
+
+@login_required
+def delete_user_request(request, pet_id):
+    """
+    Allow users to delete their pet reports if the status is pending.
+    """
+    if request.method == 'POST':
+        # Get model classes using apps.get_model to avoid linter issues
+        from django.apps import apps
+        PetModel = apps.get_model('main', 'Pet')
+        RequestModel = apps.get_model('main', 'Request')
+        ActivityLogModel = apps.get_model('main', 'ActivityLog')
+        
+        # Get the pet object
+        pet = get_object_or_404(PetModel, id=pet_id, owner=request.user)
+        
+        # Check if there's a request associated with this pet
+        try:
+            pet_request = RequestModel.objects.get(pet=pet)
+            # Only allow deleting if status is pending
+            if pet_request.status != 'pending':
+                messages.error(request, "You can only delete reports with pending status.")
+                return redirect('user_requests')
+        except RequestModel.DoesNotExist:
+            # If no request exists, we can still delete the pet
+            pass
+        
+        # Log the deletion activity
+        ActivityLogModel.objects.create(
+            pet=pet,
+            activity_type='deleted',
+            actor=f"user-{request.user.username}",
+            details=f"Report deleted by user {request.user.username}"
+        )
+        
+        # Delete the pet and associated request
+        pet_name = pet.breed
+        pet.delete()
+        messages.success(request, f"Report for {pet_name} has been deleted successfully.")
+        return redirect('user_requests')
+    
+    return HttpResponseForbidden(b"Method not allowed")
+
+
+# API Views for Dashboard
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_user_requests(request):
+    """
+    API endpoint to return all reports of the logged-in user (found + lost).
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    ActivityLogModel = apps.get_model('main', 'ActivityLog')
+    
+    # Get all pets reported by the current user
+    user_pets = PetModel.objects.filter(owner=request.user).order_by('-created_at')
+    
+    # Prepare response data
+    reports_data = []
+    for pet in user_pets:
+        # Get associated request
+        try:
+            pet_request = RequestModel.objects.get(pet=pet)
+            request_status = pet_request.status
+            request_type = pet_request.request_type
+        except RequestModel.DoesNotExist:
+            request_status = 'unknown'
+            request_type = 'unknown'
+        
+        # Get activity log entries for this pet (latest 5)
+        activity_logs = ActivityLogModel.objects.filter(pet=pet)[:5]
+        timeline = []
+        for log in activity_logs:
+            timeline.append({
+                'activity_type': log.activity_type,
+                'timestamp': log.timestamp.isoformat(),
+                'actor': log.actor,
+                'details': log.details
+            })
+        
+        # Determine status message
+        if request_status == 'pending':
+            status_message = "Your report is under review by admin."
+        elif request_status == 'accepted':
+            status_message = "Your report is now visible in search results."
+        elif request_status == 'rejected':
+            status_message = "Admin has reviewed and rejected this report."
+        else:
+            status_message = "Status unknown."
+        
+        reports_data.append({
+            'id': pet.id,
+            'pet_type': pet.pet_type,
+            'breed': pet.breed,
+            'color': pet.color,
+            'location': pet.location,
+            'description': pet.description,
+            'image': pet.image.url if pet.image else None,
+            'status': pet.status,
+            'request_status': request_status,
+            'request_type': request_type,
+            'status_message': status_message,
+            'created_at': pet.created_at.isoformat(),
+            'updated_at': pet.created_at.isoformat(),  # For now, using created_at
+            'timeline': timeline
+        })
+    
+    return Response({'reports': reports_data})
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def api_edit_request(request, pet_id):
+    """
+    API endpoint to edit a report (only if Pending and owned by user).
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    ActivityLogModel = apps.get_model('main', 'ActivityLog')
+    
+    # Get the pet object
+    try:
+        pet = PetModel.objects.get(id=pet_id, owner=request.user)
+    except PetModel.DoesNotExist:
+        return Response({'error': 'Report not found or you do not have permission to edit it.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    # Check if there's a request associated with this pet
+    try:
+        pet_request = RequestModel.objects.get(pet=pet)
+        # Only allow editing if status is pending
+        if pet_request.status != 'pending':
+            return Response({'error': 'Only pending reports can be edited or deleted.'}, 
+                           status=status.HTTP_403_FORBIDDEN)
+    except RequestModel.DoesNotExist:
+        return Response({'error': 'No request found for this pet.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    # Track changes for activity log
+    changes = []
+    
+    # Update pet details
+    fields_to_update = ['pet_type', 'breed', 'color', 'location', 'description']
+    for field in fields_to_update:
+        if field in request.data:
+            old_value = getattr(pet, field)
+            new_value = request.data[field]
+            if old_value != new_value:
+                setattr(pet, field, new_value)
+                changes.append(f"{field}: {old_value} → {new_value}")
+    
+    # Handle image upload if provided
+    if 'image' in request.FILES:
+        pet.image = request.FILES['image']
+        changes.append("image: updated")
+    
+    pet.save()
+    
+    # Log the edit activity
+    if changes:
+        ActivityLogModel.objects.create(
+            pet=pet,
+            activity_type='edited',
+            actor=f"user-{request.user.username}",
+            details=f"Edited fields: {', '.join(changes)}"
+        )
+    
+    return Response({'message': 'Report updated successfully.'})
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def api_delete_request(request, pet_id):
+    """
+    API endpoint to delete a report (only if Pending and owned by user).
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    ActivityLogModel = apps.get_model('main', 'ActivityLog')
+    
+    # Get the pet object
+    try:
+        pet = PetModel.objects.get(id=pet_id, owner=request.user)
+    except PetModel.DoesNotExist:
+        return Response({'error': 'Report not found or you do not have permission to delete it.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    # Check if there's a request associated with this pet
+    try:
+        pet_request = RequestModel.objects.get(pet=pet)
+        # Only allow deleting if status is pending
+        if pet_request.status != 'pending':
+            return Response({'error': 'Only pending reports can be edited or deleted.'}, 
+                           status=status.HTTP_403_FORBIDDEN)
+    except RequestModel.DoesNotExist:
+        # If no request exists, we can still delete the pet
+        pass
+    
+    # Log the deletion activity
+    ActivityLogModel.objects.create(
+        pet=pet,
+        activity_type='deleted',
+        actor=f"user-{request.user.username}",
+        details=f"Report deleted by user {request.user.username}"
+    )
+    
+    # Delete the pet
+    pet_name = pet.breed
+    pet.delete()
+    
+    return Response({'message': f'Report for {pet_name} has been deleted successfully.'})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_request_history(request, pet_id):
+    """
+    API endpoint to return timeline/activity for a report.
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    ActivityLogModel = apps.get_model('main', 'ActivityLog')
+    
+    # Get the pet object
+    try:
+        pet = PetModel.objects.get(id=pet_id, owner=request.user)
+    except PetModel.DoesNotExist:
+        return Response({'error': 'Report not found or you do not have permission to view it.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    # Get activity log entries for this pet (all, ordered by timestamp)
+    activity_logs = ActivityLogModel.objects.filter(pet=pet).order_by('timestamp')
+    
+    timeline = []
+    for log in activity_logs:
+        timeline.append({
+            'id': log.id,
+            'activity_type': log.activity_type,
+            'timestamp': log.timestamp.isoformat(),
+            'actor': log.actor,
+            'details': log.details
+        })
+    
+    return Response({'timeline': timeline})
+

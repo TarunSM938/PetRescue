@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Report | PetRescue{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">Edit Pet Report</h2>
+      <p class="text-muted">Update your pet report details.</p>
+    </div>
+  </div>
+  
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+  
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="pet_type" class="form-label">Pet Type</label>
+              <select class="form-select" id="pet_type" name="pet_type" required>
+                <option value="">Select Pet Type</option>
+                <option value="dog" {% if pet.pet_type == 'dog' %}selected{% endif %}>Dog</option>
+                <option value="cat" {% if pet.pet_type == 'cat' %}selected{% endif %}>Cat</option>
+                <option value="bird" {% if pet.pet_type == 'bird' %}selected{% endif %}>Bird</option>
+                <option value="rabbit" {% if pet.pet_type == 'rabbit' %}selected{% endif %}>Rabbit</option>
+                <option value="other" {% if pet.pet_type == 'other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="breed" class="form-label">Breed</label>
+              <input type="text" class="form-control" id="breed" name="breed" value="{{ pet.breed }}" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="color" class="form-label">Color</label>
+              <input type="text" class="form-control" id="color" name="color" value="{{ pet.color }}" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="location" class="form-label">Location</label>
+              <input type="text" class="form-control" id="location" name="location" value="{{ pet.location }}" required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description" name="description" rows="4">{{ pet.description }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+              <label for="image" class="form-label">Pet Photo</label>
+              {% if pet.image %}
+                <div class="mb-2">
+                  <img src="{{ pet.image.url }}" alt="Current pet photo" class="img-thumbnail" style="max-height: 150px;">
+                </div>
+              {% endif %}
+              <input type="file" class="form-control" id="image" name="image">
+              <div class="form-text">Upload a new photo or keep the current one.</div>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-success">Update Report</button>
+              <a href="{% url 'user_requests' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-white border-0">
+          <h5 class="mb-0">Report Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Type:</strong></div>
+            <div class="col-sm-8">
+              {% if pet.status == 'lost' %}
+                <span class="badge bg-danger">LOST</span>
+              {% elif pet.status == 'found' %}
+                <span class="badge bg-success">FOUND</span>
+              {% elif pet.status == 'adoptable' %}
+                <span class="badge bg-info">ADOPTABLE</span>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Reported:</strong></div>
+            <div class="col-sm-8">{{ pet.created_at|date:"d M Y" }}</div>
+          </div>
+          
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Status:</strong></div>
+            <div class="col-sm-8">
+              <span class="badge 
+                {% if pet.request_status == 'pending' %}bg-warning text-dark
+                {% elif pet.request_status == 'accepted' %}bg-success
+                {% elif pet.request_status == 'rejected' %}bg-danger
+                {% else %}bg-secondary{% endif %}">
+                {{ pet.request_status|title }}
+              </span>
+            </div>
+          </div>
+          
+          {% if pet.image %}
+            <div class="text-center mt-4">
+              <img src="{{ pet.image.url }}" alt="{{ pet.breed }}" class="img-fluid rounded">
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

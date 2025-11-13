@@ -34,6 +34,18 @@ urlpatterns = [
     # Requires user authentication
     path('profile/', views.profile, name='profile'),
     
+    # User requests dashboard - view all user's pet reports
+    # Requires user authentication
+    path('my-requests/', views.user_requests, name='user_requests'),
+    path('my-requests/edit/<int:pet_id>/', views.edit_user_request, name='edit_user_request'),
+    path('my-requests/delete/<int:pet_id>/', views.delete_user_request, name='delete_user_request'),
+    
+    # API endpoints for dashboard
+    path('api/dashboard/requests/', views.api_user_requests, name='api_user_requests'),
+    path('api/requests/<int:pet_id>/', views.api_edit_request, name='api_edit_request'),
+    path('api/requests/<int:pet_id>/delete/', views.api_delete_request, name='api_delete_request'),
+    path('api/requests/<int:pet_id>/history/', views.api_request_history, name='api_request_history'),
+    
     # AJAX endpoint for email validation during registration
     path('validate-email/', views.validate_email, name='validate_email'),
     

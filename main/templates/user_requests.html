@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Requests | PetRescue{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">My Pet Reports</h2>
+      <p class="text-muted">View and manage all your pet reports submitted to PetRescue.</p>
+    </div>
+  </div>
+  
+  {% if user_pets %}
+    <div class="row g-4">
+      {% for pet in user_pets %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 shadow-sm border-0 rounded-3">
+            {% if pet.image %}
+              <img src="{{ pet.image.url }}" class="card-img-top" alt="{{ pet.breed }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+              <div class="d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
+                <i class="fas fa-paw fa-3x text-muted"></i>
+              </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              {% if pet.status == 'lost' %}
+                <span class="badge bg-danger align-self-start mb-2">LOST</span>
+              {% elif pet.status == 'found' %}
+                <span class="badge bg-success align-self-start mb-2">FOUND</span>
+              {% elif pet.status == 'adoptable' %}
+                <span class="badge bg-info align-self-start mb-2">ADOPTABLE</span>
+              {% endif %}
+              
+              <h5 class="card-title">{{ pet.breed }}</h5>
+              <p class="card-text">
+                <strong>Type:</strong> {{ pet.pet_type|title }}<br>
+                <strong>Color:</strong> {{ pet.color }}<br>
+                <strong>Location:</strong> {{ pet.location }}<br>
+                <strong>Description:</strong> {{ pet.description|truncatewords:10 }}
+              </p>
+              
+              <div class="mt-2">
+                <span class="badge 
+                  {% if pet.request_status == 'pending' %}bg-warning text-dark
+                  {% elif pet.request_status == 'accepted' %}bg-success
+                  {% elif pet.request_status == 'rejected' %}bg-danger
+                  {% else %}bg-secondary{% endif %}">
+                  {{ pet.request_status|title }}
+                </span>
+                <small class="d-block mt-1 text-muted">{{ pet.status_message }}</small>
+              </div>
+              
+              <div class="mt-3">
+                <small class="text-muted">Reported on: {{ pet.created_at|date:"d/m/Y" }}</small><br>
+                <small class="text-muted">Last updated: {{ pet.created_at|date:"d/m/Y" }}</small>
+              </div>
+              
+              <!-- Timeline/History section -->
+              <div class="mt-3">
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#timeline-{{ pet.id }}" aria-expanded="false" aria-controls="timeline-{{ pet.id }}">
+                  <i class="fas fa-history"></i> View History
+                </button>
+                <div class="collapse mt-2" id="timeline-{{ pet.id }}">
+                  <div class="border rounded p-2 bg-light">
+                    <small class="fw-bold">Report History:</small>
+                    <ul class="list-unstyled small mb-0">
+                      <li class="d-flex justify-content-between">
+                        <span>Created</span>
+                        <span>{{ pet.created_at|date:"d/m/Y H:i" }}</span>
+                      </li>
+                      <!-- More timeline entries would be loaded via AJAX -->
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              {% if pet.request_status == 'pending' %}
+                <div class="mt-auto pt-3">
+                  <a href="{% url 'edit_user_request' pet.id %}" class="btn btn-sm btn-outline-primary me-2">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                          data-pet-id="{{ pet.id }}" data-pet-name="{{ pet.breed }}">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="row">
+      <div class="col-12">
+        <div class="card border-0 rounded-3 bg-light p-5 text-center">
+          <i class="fas fa-paw fa-3x text-muted mb-3"></i>
+          <h5 class="mb-3">No Pet Reports Found</h5>
+          <p class="mb-4">You haven't submitted any pet reports yet.</p>
+          <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'report_lost_pet' %}" class="btn btn-danger">
+              <i class="fas fa-search"></i> Report Lost Pet
+            </a>
+            <a href="{% url 'report_found_pet' %}" class="btn btn-success">
+              <i class="fas fa-heart"></i> Report Found Pet
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-3">
+      <div class="modal-header bg-light border-0">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete the report for <strong id="pet-name">this pet</strong>?</p>
+        <p class="mb-0">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteForm" method="POST" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Handle delete modal
+document.addEventListener('DOMContentLoaded', function() {
+  var deleteModal = document.getElementById('deleteModal');
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    var petId = button.getAttribute('data-pet-id');
+    var petName = button.getAttribute('data-pet-name');
+    
+    // Update modal content
+    var modal = this;
+    modal.querySelector('#pet-name').textContent = petName;
+    
+    // Set form action
+    var formAction = "{% url 'delete_user_request' 999 %}".replace('999', petId);
+    modal.querySelector('#deleteForm').setAttribute('action', formAction);
+  });
+});
+</script>
+{% endblock %}
