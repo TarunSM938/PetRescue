@@ -401,10 +401,10 @@
                 </div>
                 
                 <div class="col-md-6 mb-4">
-                  <label for="{{ form.pet_type.id_for_label }}" class="form-label">Pet Type</label>
+                  <label for="{{ form.pet_type.id_for_label }}" class="form-label">Pet Type <span class="text-danger">*</span></label>
                   {{ form.pet_type }}
                   <div id="pet_type-error" class="error-message"></div>
-                  <div class="form-text">Select your pet's type (optional)</div>
+                  <div class="form-text">Select your pet's type</div>
                 </div>
               </div>
               
@@ -628,9 +628,10 @@
         
         // If form is valid, submit it
         if (isValid) {
-          submitBtn.disabled = true;
-          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-          form.submit();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            // Submit the form normally (not via AJAX) to ensure proper CSRF handling
+            form.submit();
         } else {
           // Scroll to first error
           const firstError = form.querySelector('.error-message[style*="block"]');

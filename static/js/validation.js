@@ -626,4 +626,148 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Admin Notification System
+    function setupAdminNotifications() {
+        // Only run for authenticated admin users
+        if (!document.querySelector('.notification-badge')) {
+            return;
+        }
+        
+        // Function to update notification count
+        function updateNotificationCount() {
+            fetch('/api/admin/notifications/unread-count/')
+                .then(response => response.json())
+                .then(data => {
+                    const countElement = document.getElementById('notification-count');
+                    if (countElement) {
+                        countElement.textContent = data.unread_count;
+                        countElement.style.display = data.unread_count > 0 ? 'inline' : 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching notification count:', error));
+        }
+        
+        // Function to load notifications dropdown
+        function loadNotifications() {
+            fetch('/api/admin/notifications/')
+                .then(response => response.json())
+                .then(data => {
+                    const notificationList = document.getElementById('notification-list');
+                    if (notificationList) {
+                        notificationList.innerHTML = '';
+                        
+                        if (data.notifications && data.notifications.length > 0) {
+                            data.notifications.slice(0, 5).forEach(notification => {
+                                const notificationElement = document.createElement('li');
+                                notificationElement.className = `notification-item ${notification.is_read ? '' : 'unread'}`;
+                                notificationElement.innerHTML = `
+                                    <div class="d-flex justify-content-between">
+                                        <div class="notification-message">${notification.message}</div>
+                                        <button class="btn btn-sm btn-outline-secondary mark-read-btn" 
+                                                data-notification-id="${notification.id}">
+                                            Mark Read
+                                        </button>
+                                    </div>
+                                    <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
+                                `;
+                                notificationList.appendChild(notificationElement);
+                                
+                                // Add click event to mark as read
+                                const markReadBtn = notificationElement.querySelector('.mark-read-btn');
+                                markReadBtn.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const notificationId = this.getAttribute('data-notification-id');
+                                    markNotificationAsRead(notificationId);
+                                });
+                                
+                                // Add click event to the notification item
+                                notificationElement.addEventListener('click', function() {
+                                    markNotificationAsRead(notification.id);
+                                    // Redirect to the request details page
+                                    window.location.href = `/dashboard/admin/pending-requests/`;
+                                });
+                            });
+                        } else {
+                            const emptyElement = document.createElement('li');
+                            emptyElement.className = 'dropdown-item text-center text-muted';
+                            emptyElement.textContent = 'No notifications';
+                            notificationList.appendChild(emptyElement);
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching notifications:', error));
+        }
+        
+        // Function to mark a notification as read
+        function markNotificationAsRead(notificationId) {
+            fetch(`/api/admin/notifications/mark-read/${notificationId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update UI
+                updateNotificationCount();
+                loadNotifications();
+            })
+            .catch(error => console.error('Error marking notification as read:', error));
+        }
+        
+        // Function to mark all notifications as read
+        function markAllNotificationsAsRead() {
+            fetch('/api/admin/notifications/mark-all-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update UI
+                updateNotificationCount();
+                loadNotifications();
+            })
+            .catch(error => console.error('Error marking all notifications as read:', error));
+        }
+        
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Set up event listeners
+        document.getElementById('mark-all-read').addEventListener('click', function(e) {
+            e.preventDefault();
+            markAllNotificationsAsRead();
+        });
+        
+        // Initial load
+        updateNotificationCount();
+        loadNotifications();
+        
+        // Set up periodic refresh (every 30 seconds)
+        setInterval(() => {
+            updateNotificationCount();
+            loadNotifications();
+        }, 30000);
+    }
+    
+    // Initialize admin notifications
+    setupAdminNotifications();
 });

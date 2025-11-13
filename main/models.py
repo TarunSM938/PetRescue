@@ -155,6 +155,36 @@ class ActivityLog(models.Model):
         return f"{pet.breed} - {self.activity_type} - {self.timestamp}"
 
 
+# Notification Model
+# Tracks admin notifications for new pet reports
+
+class Notification(models.Model):
+    """
+    Notification model to track admin notifications for new pet reports.
+    """
+    NOTIFICATION_TYPES = [
+        ('lost_report', 'Lost Pet Report'),
+        ('found_report', 'Found Pet Report'),
+    ]
+    
+    request = models.ForeignKey('Request', on_delete=models.CASCADE,
+                               help_text="The request this notification is related to")
+    message = models.TextField(help_text="Notification message")
+    created_at = models.DateTimeField(auto_now_add=True,
+                                    help_text="When this notification was created")
+    is_read = models.BooleanField(default=False,
+                                 help_text="Whether this notification has been read")
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES,
+                                       help_text="Type of notification")
+    
+    class Meta:
+        ordering = ['-created_at']  # Latest first
+    
+    def __str__(self):
+        request = cast('Request', self.request)
+        return f"Notification for {request.request_type} - {self.created_at}"
+
+
 # Signal Handlers
 # Automatically create and save user profiles when users are created/updated
 

@@ -61,11 +61,30 @@
           <!-- Profile and Logout - only visible when logged in -->
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'profile' %}">My Profile</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="{% url 'user_requests' %}">My Reports</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'profile' %}">My Profile</a>
+          </li>
+          <!-- Notification Bell Icon - only visible to admin users -->
+          {% if user.is_authenticated and user.is_superuser %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-bell"></i>
+              <span class="badge bg-danger notification-badge" id="notification-count">0</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown" id="notification-dropdown-menu">
+              <li class="dropdown-header">Notifications</li>
+              <li><hr class="dropdown-divider"></li>
+              <div id="notification-list">
+                <!-- Notifications will be loaded here via AJAX -->
+              </div>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-center" href="#" id="mark-all-read">Mark all as read</a></li>
+              <li><a class="dropdown-item text-center" href="/dashboard/admin/notifications/">View all notifications</a></li>
+            </ul>
+          </li>
+          {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="#" id="logout-link" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a>
           </li>

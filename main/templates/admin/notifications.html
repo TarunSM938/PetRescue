@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head_extra %}
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
+<style>
+  .notification-card {
+    transition: all 0.3s ease;
+  }
+  
+  .notification-card.unread {
+    background-color: #fff8e1;
+    border-left: 4px solid #ffc107;
+  }
+  
+  .notification-card.read {
+    background-color: #f8f9fa;
+  }
+  
+  .mark-read-btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block title %}Admin Notifications | PetRescue{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Admin Notifications</h2>
+        <button class="btn btn-primary" id="mark-all-read-btn">
+          <i class="fas fa-check-circle"></i> Mark All as Read
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="notificationTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="unread-tab" data-bs-toggle="tab" href="#unread" role="tab">
+                Unread (<span id="unread-count">0</span>)
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="all-tab" data-bs-toggle="tab" href="#all" role="tab">
+                All Notifications
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content" id="notificationTabContent">
+            <!-- Unread Notifications Tab -->
+            <div class="tab-pane fade show active" id="unread" role="tabpanel">
+              <div id="unread-notifications-list">
+                <!-- Unread notifications will be loaded here -->
+              </div>
+            </div>
+            
+            <!-- All Notifications Tab -->
+            <div class="tab-pane fade" id="all" role="tabpanel">
+              <div id="all-notifications-list">
+                <!-- All notifications will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Function to update notification counts
+  function updateNotificationCounts() {
+    fetch('/api/admin/notifications/unread-count/')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('unread-count').textContent = data.unread_count;
+      })
+      .catch(error => console.error('Error fetching notification count:', error));
+  }
+  
+  // Function to load unread notifications
+  function loadUnreadNotifications() {
+    fetch('/api/admin/notifications/')
+      .then(response => response.json())
+      .then(data => {
+        const unreadList = document.getElementById('unread-notifications-list');
+        if (unreadList) {
+          unreadList.innerHTML = '';
+          
+          const unreadNotifications = data.notifications.filter(n => !n.is_read);
+          
+          if (unreadNotifications.length > 0) {
+            unreadNotifications.forEach(notification => {
+              const notificationElement = createNotificationElement(notification);
+              unreadList.appendChild(notificationElement);
+            });
+          } else {
+            unreadList.innerHTML = '<div class="text-center py-4 text-muted">No unread notifications</div>';
+          }
+        }
+      })
+      .catch(error => console.error('Error fetching notifications:', error));
+  }
+  
+  // Function to load all notifications
+  function loadAllNotifications() {
+    fetch('/api/admin/notifications/')
+      .then(response => response.json())
+      .then(data => {
+        const allList = document.getElementById('all-notifications-list');
+        if (allList) {
+          allList.innerHTML = '';
+          
+          if (data.notifications && data.notifications.length > 0) {
+            data.notifications.forEach(notification => {
+              const notificationElement = createNotificationElement(notification);
+              allList.appendChild(notificationElement);
+            });
+          } else {
+            allList.innerHTML = '<div class="text-center py-4 text-muted">No notifications</div>';
+          }
+        }
+      })
+      .catch(error => console.error('Error fetching notifications:', error));
+  }
+  
+  // Function to create notification element
+  function createNotificationElement(notification) {
+    const notificationElement = document.createElement('div');
+    notificationElement.className = `notification-card card mb-3 ${notification.is_read ? 'read' : 'unread'}`;
+    
+    const timestamp = new Date(notification.timestamp).toLocaleString();
+    
+    notificationElement.innerHTML = `
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <h5 class="card-title">${notification.message}</h5>
+          <button class="btn btn-sm ${notification.is_read ? 'btn-secondary' : 'btn-success'} mark-read-btn" 
+                  data-notification-id="${notification.id}">
+            ${notification.is_read ? 'Read' : 'Mark as Read'}
+          </button>
+        </div>
+        <p class="card-text">
+          <strong>Type:</strong> ${notification.notification_type}<br>
+          <strong>Request Type:</strong> ${notification.request.request_type}<br>
+          <strong>Pet:</strong> ${notification.request.pet.breed} (${notification.request.pet.pet_type})<br>
+          <strong>User:</strong> ${notification.request.user.username}<br>
+          <strong>Location:</strong> ${notification.request.pet.location}<br>
+          <strong>Time:</strong> ${timestamp}
+        </p>
+        <a href="/dashboard/admin/pending-requests/" class="btn btn-outline-primary btn-sm">
+          View Request
+        </a>
+      </div>
+    `;
+    
+    // Add event listener to mark as read button
+    const markReadBtn = notificationElement.querySelector('.mark-read-btn');
+    markReadBtn.addEventListener('click', function() {
+      const notificationId = this.getAttribute('data-notification-id');
+      markNotificationAsRead(notificationId);
+    });
+    
+    return notificationElement;
+  }
+  
+  // Function to mark a notification as read
+  function markNotificationAsRead(notificationId) {
+    fetch(`/api/admin/notifications/mark-read/${notificationId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Refresh the notifications
+      updateNotificationCounts();
+      loadUnreadNotifications();
+      loadAllNotifications();
+    })
+    .catch(error => console.error('Error marking notification as read:', error));
+  }
+  
+  // Function to mark all notifications as read
+  function markAllNotificationsAsRead() {
+    fetch('/api/admin/notifications/mark-all-read/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Refresh the notifications
+      updateNotificationCounts();
+      loadUnreadNotifications();
+      loadAllNotifications();
+    })
+    .catch(error => console.error('Error marking all notifications as read:', error));
+  }
+  
+  // Helper function to get CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  
+  // Set up event listeners
+  document.getElementById('mark-all-read-btn').addEventListener('click', function() {
+    markAllNotificationsAsRead();
+  });
+  
+  // Initial load
+  updateNotificationCounts();
+  loadUnreadNotifications();
+  loadAllNotifications();
+  
+  // Set up tab change events
+  document.getElementById('unread-tab').addEventListener('shown.bs.tab', loadUnreadNotifications);
+  document.getElementById('all-tab').addEventListener('shown.bs.tab', loadAllNotifications);
+});
+</script>
+{% endblock %}

@@ -70,4 +70,11 @@ urlpatterns = [
     path('dashboard/admin/accepted-requests/', views.admin_accepted_requests, name='admin_accepted_requests'),
     path('dashboard/admin/rejected-requests/', views.admin_rejected_requests, name='admin_rejected_requests'),
     path('dashboard/admin/update-request-status/<int:request_id>/', views.update_request_status, name='update_request_status'),
+    path('dashboard/admin/notifications/', views.admin_notifications, name='admin_notifications'),
+    
+    # Admin Notification API URLs
+    path('api/admin/notifications/', views.api_admin_notifications, name='api_admin_notifications'),
+    path('api/admin/notifications/unread-count/', views.api_admin_unread_count, name='api_admin_unread_count'),
+    path('api/admin/notifications/mark-read/<int:notification_id>/', views.api_admin_mark_read, name='api_admin_mark_read'),
+    path('api/admin/notifications/mark-all-read/', views.api_admin_mark_all_read, name='api_admin_mark_all_read'),
 ]

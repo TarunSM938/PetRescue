@@ -613,9 +613,10 @@
         
         // If form is valid, submit it
         if (isValid) {
-          submitBtn.disabled = true;
-          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-          form.submit();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            // Submit the form normally (not via AJAX) to ensure proper CSRF handling
+            form.submit();
         } else {
           // Scroll to first error
           const firstError = form.querySelector('.error-message[style*="block"]');
@@ -664,6 +665,12 @@
       if (field.required && field.value === '' && 
           field.name !== 'pet_type' && field.name !== 'date_found' && field.name !== 'location') {
         showFieldError(field.name, 'This field is required.');
+        isValid = false;
+      }
+      
+      // Special handling for date_found since it's required
+      if (field.name === 'date_found' && (!field.value || field.value === '')) {
+        showFieldError(field.name, 'Date found is required.');
         isValid = false;
       }
       

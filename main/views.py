@@ -317,6 +317,15 @@ def report_found_pet(request):
             pet = form.save(commit=False)
             pet.owner = request.user
             pet.status = 'found'  # Set status to found
+            # Handle the date_found field
+            date_found = form.cleaned_data.get('date_found')
+            if date_found:
+                # We can store this in the description or create a new field
+                # For now, let's add it to the description
+                if pet.description:
+                    pet.description += f"\n\nFound on: {date_found}"
+                else:
+                    pet.description = f"Found on: {date_found}"
             pet.save()
             
             # Create a request record linking the pet to the user
@@ -338,6 +347,14 @@ def report_found_pet(request):
                 activity_type='created',
                 actor=f"user-{request.user.username}",
                 details=f"Found pet report created by user {request.user.username}"
+            )
+            
+            # Create admin notification
+            NotificationModel = apps.get_model('main', 'Notification')
+            NotificationModel.objects.create(
+                request=request_obj,
+                message=f"New found pet report submitted by {request.user.username} for a {pet.pet_type} near {pet.location}",
+                notification_type='found_report'
             )
             
             messages.success(request, 'Thank you for reporting this found pet! Our team will review your submission.')
@@ -375,9 +392,12 @@ def report_lost_pet(request):
                 color=form.cleaned_data['color'],
                 location=form.cleaned_data['last_seen_location'],
                 description=f"Lost pet named {form.cleaned_data['pet_name']}",
-                image=form.cleaned_data['pet_photo'],
                 status='lost'  # Set status to lost
             )
+            # Handle image separately
+            pet_photo = form.cleaned_data.get('pet_photo')
+            if pet_photo:
+                pet.image = pet_photo
             pet.save()
             
             # Create a request record linking the pet to the user
@@ -396,6 +416,14 @@ def report_lost_pet(request):
                 activity_type='created',
                 actor=f"user-{request.user.username}",
                 details=f"Lost pet report created by user {request.user.username}"
+            )
+            
+            # Create admin notification
+            NotificationModel = apps.get_model('main', 'Notification')
+            NotificationModel.objects.create(
+                request=request_obj,
+                message=f"New lost pet report submitted by {request.user.username} for a {pet.pet_type} near {pet.location}",
+                notification_type='lost_report'
             )
             
             messages.success(request, 'Thank you for reporting your lost pet! Our team will review your submission and help in the search.')
@@ -652,6 +680,14 @@ def admin_rejected_requests(request):
     }
     
     return render(request, 'admin/rejected_requests.html', context)
+
+
+@user_passes_test(admin_check, login_url='login')
+def admin_notifications(request):
+    """
+    Display admin notifications page.
+    """
+    return render(request, 'admin/notifications.html')
 
 
 @user_passes_test(admin_check, login_url='login')
@@ -1051,3 +1087,126 @@ def api_request_history(request, pet_id):
     
     return Response({'timeline': timeline})
 
+
+# Admin Notification API Views
+# API endpoints for managing admin notifications
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_admin_notifications(request):
+    """
+    API endpoint to return all admin notifications (unread + read).
+    Only accessible by admin users.
+    """
+    # Check if user is admin
+    if not request.user.is_superuser:
+        return Response({'error': 'Access denied. Admin privileges required.'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    NotificationModel = apps.get_model('main', 'Notification')
+    
+    # Get all notifications ordered by creation time
+    notifications = NotificationModel.objects.select_related('request__pet', 'request__user').all()
+    
+    # Prepare response data
+    notifications_data = []
+    for notification in notifications:
+        notifications_data.append({
+            'id': notification.id,
+            'message': notification.message,
+            'timestamp': notification.created_at.isoformat(),
+            'is_read': notification.is_read,
+            'notification_type': notification.notification_type,
+            'request': {
+                'id': notification.request.id,
+                'request_type': notification.request.request_type,
+                'status': notification.request.status,
+                'pet': {
+                    'id': notification.request.pet.id,
+                    'breed': notification.request.pet.breed,
+                    'pet_type': notification.request.pet.pet_type,
+                    'location': notification.request.pet.location,
+                },
+                'user': {
+                    'username': notification.request.user.username,
+                }
+            }
+        })
+    
+    return Response({'notifications': notifications_data})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_admin_unread_count(request):
+    """
+    API endpoint to return the count of unread admin notifications.
+    Only accessible by admin users.
+    """
+    # Check if user is admin
+    if not request.user.is_superuser:
+        return Response({'error': 'Access denied. Admin privileges required.'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    NotificationModel = apps.get_model('main', 'Notification')
+    
+    # Count unread notifications
+    unread_count = NotificationModel.objects.filter(is_read=False).count()
+    
+    return Response({'unread_count': unread_count})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_admin_mark_read(request, notification_id):
+    """
+    API endpoint to mark a notification as read.
+    Only accessible by admin users.
+    """
+    # Check if user is admin
+    if not request.user.is_superuser:
+        return Response({'error': 'Access denied. Admin privileges required.'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    NotificationModel = apps.get_model('main', 'Notification')
+    
+    # Get the notification
+    try:
+        notification = NotificationModel.objects.get(id=notification_id)
+    except NotificationModel.DoesNotExist:
+        return Response({'error': 'Notification not found.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    # Mark as read
+    notification.is_read = True
+    notification.save()
+    
+    return Response({'message': 'Notification marked as read.'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_admin_mark_all_read(request):
+    """
+    API endpoint to mark all notifications as read.
+    Only accessible by admin users.
+    """
+    # Check if user is admin
+    if not request.user.is_superuser:
+        return Response({'error': 'Access denied. Admin privileges required.'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    NotificationModel = apps.get_model('main', 'Notification')
+    
+    # Mark all notifications as read
+    NotificationModel.objects.filter(is_read=False).update(is_read=True)
+    
+    return Response({'message': 'All notifications marked as read.'})
