@@ -7,7 +7,7 @@
 <div class="container mt-4">
   <div class="row">
     <div class="col-12">
-      <h2 class="mb-4">Your PetRescue Profile</h2>
+      <h2 class="mb-4">My PetRescue Profile</h2>
     </div>
   </div>
   
@@ -59,7 +59,7 @@
                   <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
               {% endif %}
-              <div class="form-text">Share your story and your experience with pets.</div>
+              <div class="form-text">Tell us about yourself and your experience with pets.</div>
             </div>
             
             <div class="mb-3">
@@ -70,7 +70,7 @@
                   <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
               {% endif %}
-              <div class="form-text">City or area where you live (helps with local pet matching).</div>
+              <div class="form-text">City or area where you live (this helps with local pet matching).</div>
             </div>
             
             <div class="mb-3">
@@ -113,7 +113,7 @@
               {% if user.profile.bio %}
                 {{ user.profile.bio }}
               {% else %}
-                <span class="text-muted">Tell us about yourself and your love for pets.</span>
+                <span class="text-muted">Share your story and your love for pets.</span>
               {% endif %}
             </div>
           </div>
@@ -124,7 +124,7 @@
               {% if user.profile.location %}
                 {{ user.profile.location }}
               {% else %}
-                <span class="text-muted">Add your location to help with local pet matching.</span>
+                <span class="text-muted">Add your location to help with matching pets in your area.</span>
               {% endif %}
             </div>
           </div>

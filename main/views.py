@@ -190,12 +190,12 @@ def register(request):
                     pass
             
             username = cast(User, user).username  # Fix Pyright warning
-            messages.success(request, f'Welcome to PetRescue, {username}! Your account has been created successfully.')
+            messages.success(request, f'Welcome to PetRescue, {username}! Your account is ready to use.')
             return redirect('login')
         else:
             # Form is not valid, but we want to preserve the additional field values
             # Pass the values back to the template
-            messages.error(request, 'Please correct the errors below to create your account.')
+            messages.error(request, 'Please fix the errors shown below and try again.')
     else:
         form = UserRegisterForm()
 
@@ -224,12 +224,12 @@ def user_login(request):
             user = form.get_user()
             if user is not None:
                 login(request, user)
-                messages.success(request, f'Welcome back, {user.username}! You have been successfully logged in.')
+                messages.success(request, f'Welcome back, {user.username}! You\'re now signed in.')
                 return redirect('home')
             else:
-                messages.error(request, "Invalid username or password. Please try again.")
+                messages.error(request, "The username or password you entered is incorrect. Please check and try again.")
         else:
-            messages.error(request, "Invalid username or password. Please try again.")
+            messages.error(request, "The username or password you entered is incorrect. Please check and try again.")
     else:
         form = AuthenticationForm()
 
@@ -245,7 +245,7 @@ def user_logout(request):
     """
     username = request.user.username if request.user.is_authenticated else "User"
     logout(request)
-    messages.info(request, f'Goodbye, {username}! You have been successfully logged out.')
+    messages.info(request, f'Goodbye, {username}! You\'ve been signed out successfully.')
     return redirect('home')
 
 
@@ -269,10 +269,10 @@ def profile(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            messages.success(request, 'Your profile has been updated successfully!')
+            messages.success(request, 'Your profile information has been saved.')
             return redirect('profile')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, 'Please fix the errors shown below and try again.')
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=profile_obj)
@@ -355,11 +355,11 @@ def report_found_pet(request):
                 notification_type='found_report'
             )
             
-            messages.success(request, 'Thank you for reporting this found pet! Our team will review your submission.')
+            messages.success(request, 'Thank you for reporting this found pet! Our team will review your report shortly.')
             return redirect('report_found_success')  # Redirect to found pet success page
         else:
             # Add form errors to messages for better user feedback
-            messages.error(request, 'Please correct the errors below and try again.')
+            messages.error(request, 'Please fix the errors shown below and try again.')
     else:
         form = FoundPetForm()
     
@@ -424,11 +424,11 @@ def report_lost_pet(request):
                 notification_type='lost_report'
             )
             
-            messages.success(request, 'Thank you for reporting your lost pet! Our team will review your submission and help in the search.')
+            messages.success(request, 'Thank you for reporting your lost pet! Our team will review your report and help with the search.')
             return redirect('report_lost_success')  # Redirect to lost pet success page
         else:
             # Add form errors to messages for better user feedback
-            messages.error(request, 'Please correct the errors below and try again.')
+            messages.error(request, 'Please fix the errors shown below and try again.')
     else:
         form = LostPetForm()
     
@@ -713,9 +713,9 @@ def update_request_status(request, request_id):
                 details=f"Status changed from {old_status} to {new_status.lower()}"
             )
             
-            messages.success(request, f'Request status updated successfully to {new_status}.')
+            messages.success(request, f'Request status has been updated to {new_status}.')
         except RequestModel.DoesNotExist:
-            messages.error(request, 'Request not found.')
+            messages.error(request, 'The requested item could not be found.')
         return redirect('admin_pending_requests')
     
     return HttpResponseForbidden(b"Method not allowed")
@@ -747,11 +747,11 @@ def user_requests(request):
             request_obj = pet_request_map[pet.id]
             pet.request_status = request_obj.status
             if request_obj.status == 'pending':
-                pet.status_message = "Your report is under review by admin."
+                pet.status_message = "Your report is currently being reviewed."
             elif request_obj.status == 'accepted':
-                pet.status_message = "Your report is now visible in search results."
+                pet.status_message = "Your report is now visible to other users in search results."
             elif request_obj.status == 'rejected':
-                pet.status_message = "Admin has reviewed and rejected this report."
+                pet.status_message = "This report has been reviewed and was not approved."
             else:
                 pet.status_message = "Status unknown."
         else:
@@ -784,10 +784,10 @@ def edit_user_request(request, pet_id):
         pet_request = RequestModel.objects.get(pet=pet)
         # Only allow editing if status is pending
         if pet_request.status != 'pending':
-            messages.error(request, "You can only edit reports with pending status.")
+            messages.error(request, "Only reports that are pending review can be edited.")
             return redirect('user_requests')
     except RequestModel.DoesNotExist:
-        messages.error(request, "No request found for this pet.")
+        messages.error(request, "No request record was found for this pet.")
         return redirect('user_requests')
     
     # For editing, we'll use a simple form approach since the existing forms
@@ -822,7 +822,7 @@ def edit_user_request(request, pet_id):
                 details=f"Edited fields: {', '.join(changes)}"
             )
         
-        messages.success(request, "Your report has been updated successfully.")
+        messages.success(request, "Your report has been saved with the updated information.")
         return redirect('user_requests')
     
     context = {
@@ -852,7 +852,7 @@ def delete_user_request(request, pet_id):
             pet_request = RequestModel.objects.get(pet=pet)
             # Only allow deleting if status is pending
             if pet_request.status != 'pending':
-                messages.error(request, "You can only delete reports with pending status.")
+                messages.error(request, "Only reports that are pending review can be deleted.")
                 return redirect('user_requests')
         except RequestModel.DoesNotExist:
             # If no request exists, we can still delete the pet
@@ -869,7 +869,7 @@ def delete_user_request(request, pet_id):
         # Delete the pet and associated request
         pet_name = pet.breed
         pet.delete()
-        messages.success(request, f"Report for {pet_name} has been deleted successfully.")
+        messages.success(request, f"The report for {pet_name} has been removed.")
         return redirect('user_requests')
     
     return HttpResponseForbidden(b"Method not allowed")
@@ -917,11 +917,11 @@ def api_user_requests(request):
         
         # Determine status message
         if request_status == 'pending':
-            status_message = "Your report is under review by admin."
+            status_message = "Your report is currently being reviewed."
         elif request_status == 'accepted':
-            status_message = "Your report is now visible in search results."
+            status_message = "Your report is now visible to other users in search results."
         elif request_status == 'rejected':
-            status_message = "Admin has reviewed and rejected this report."
+            status_message = "This report has been reviewed and was not approved."
         else:
             status_message = "Status unknown."
         

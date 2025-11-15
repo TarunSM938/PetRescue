@@ -54,7 +54,7 @@
   <div class="card shadow-sm">
     <div class="card-header">
       <h2>Welcome Back to PetRescue</h2>
-      <p class="mb-0">Sign in to continue helping pets</p>
+      <p class="mb-0">Sign in to your account to continue helping pets</p>
     </div>
     
     <div class="card-body">
@@ -87,7 +87,7 @@
           {% endfor %}
         {% endif %}
 
-        <button type="submit" class="btn btn-login w-100">Sign In to Your Account</button>
+        <button type="submit" class="btn btn-login w-100">Sign In</button>
       </form>
 
       <div class="forgot-password">
@@ -97,7 +97,7 @@
       <div class="register-link">
         <p class="mb-0">
           New to PetRescue?
-          <a href="{% url 'register' %}">Create an account</a>.
+          <a href="{% url 'register' %}">Create an account here</a>.
         </p>
       </div>
     </div>

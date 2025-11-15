@@ -172,10 +172,22 @@ document.addEventListener('DOMContentLoaded', function() {
                             }, 2000);
                         })
                         .catch(() => {
-                            alert(`Copy ${contactType} to clipboard: ${contactInfo}`);
+                            // Fallback: show inline message if clipboard API fails
+                            const fallbackMsg = document.createElement('div');
+                            fallbackMsg.className = 'alert alert-info alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+                            fallbackMsg.style.zIndex = '9999';
+                            fallbackMsg.innerHTML = `<span>Contact info: ${contactInfo}</span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                            document.body.appendChild(fallbackMsg);
+                            setTimeout(() => fallbackMsg.remove(), 5000);
                         });
                 } else {
-                    alert('Contact information is not available. Please sign in to view contact details.');
+                    // Show inline message for unavailable contact info
+                    const unavailableMsg = document.createElement('div');
+                    unavailableMsg.className = 'alert alert-warning alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+                    unavailableMsg.style.zIndex = '9999';
+                    unavailableMsg.innerHTML = '<span>Contact details are not available. Please sign in to view contact information.</span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                    document.body.appendChild(unavailableMsg);
+                    setTimeout(() => unavailableMsg.remove(), 5000);
                 }
             });
         });

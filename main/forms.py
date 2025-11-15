@@ -90,11 +90,11 @@ class ProfileUpdateForm(forms.ModelForm):
             'bio': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
-                'placeholder': 'Tell us about your experience with pets...'
+                'placeholder': 'Share your experience with pets...'
             }),
             'location': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'City or area where you live'
+                'placeholder': 'Your city or area'
             }),
         }
 
@@ -125,20 +125,20 @@ class FoundPetForm(forms.ModelForm):
             }),
             'breed': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter the breed (if known)'
+                'placeholder': 'Breed (if known)'
             }),
             'color': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter the primary color'
+                'placeholder': 'Primary color'
             }),
             'location': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Where was the pet found?'
+                'placeholder': 'Location where pet was found'
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
-                'placeholder': 'Additional details about the pet...'
+                'placeholder': 'Any additional details about the pet...'
             }),
             'image': forms.FileInput(attrs={
                 'class': 'form-control'
@@ -202,7 +202,7 @@ class LostPetForm(forms.Form):
         max_length=100,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter your pet\'s name'
+            'placeholder': 'Your pet\'s name'
         }),
         help_text="Your pet's name"
     )
@@ -238,7 +238,7 @@ class LostPetForm(forms.Form):
         max_length=100,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Where was the pet last seen?'
+            'placeholder': 'Location where pet was last seen'
         }),
         help_text="Location where pet was last seen"
     )
@@ -255,7 +255,7 @@ class LostPetForm(forms.Form):
         max_length=15,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter your phone number'
+            'placeholder': 'Your phone number'
         }),
         help_text="Your phone number for contact"
     )
@@ -264,7 +264,7 @@ class LostPetForm(forms.Form):
         required=False,
         widget=forms.EmailInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter an alternate email (optional)'
+            'placeholder': 'Alternate email (optional)'
         }),
         help_text="Alternate email for contact (optional)"
     )
@@ -352,7 +352,7 @@ class PetSearchForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter breed'
+            'placeholder': 'Breed'
         })
     )
     
@@ -361,7 +361,7 @@ class PetSearchForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter color'
+            'placeholder': 'Color'
         })
     )
     
@@ -370,7 +370,7 @@ class PetSearchForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter location'
+            'placeholder': 'Location'
         })
     )
     

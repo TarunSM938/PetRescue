@@ -9,8 +9,8 @@
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-6 mb-4 mb-lg-0">
-        <h1 class="display-4 fw-bold mb-3">Reuniting Pets with Their Loving Families</h1>
-        <p class="lead mb-4">PetRescue is your community-driven platform for finding lost pets and helping animals find forever homes. Every pet deserves to be home for the holidays.</p>
+        <h1 class="display-4 fw-bold mb-3">Helping Pets Find Their Way Home</h1>
+        <p class="lead mb-4">PetRescue connects communities to help reunite lost pets with their families and find loving homes for animals in need.</p>
         <div class="d-flex flex-wrap gap-3">
           {% if user.is_authenticated %}
             <a href="{% url 'report_lost_pet' %}" class="btn btn-danger btn-lg">Report a Lost Pet</a>
@@ -38,7 +38,7 @@
     <div class="row justify-content-center">
       <div class="col-lg-8 text-center">
         <h2 class="mb-4">Our Mission: Every Pet Deserves a Home</h2>
-        <p class="lead">We believe that every pet deserves to be safe, loved, and part of a family. Our platform connects communities to help lost pets find their way home and helps animals in need find loving forever homes.</p>
+        <p class="lead">We believe every pet deserves safety, love, and a place in a family. Our platform brings communities together to help lost pets return home and find caring families for animals in need.</p>
       </div>
     </div>
   </div>
@@ -49,8 +49,8 @@
   <div class="container">
     <div class="row">
       <div class="col-12 text-center mb-5">
-        <h2 class="mb-3">How PetRescue Helps</h2>
-        <p class="lead">Our simple process helps reunite pets with their families quickly and efficiently</p>
+        <h2 class="mb-3">How PetRescue Works</h2>
+        <p class="lead">Our straightforward process helps reunite pets with their families quickly</p>
       </div>
     </div>
     
@@ -62,7 +62,7 @@
               <i class="fas fa-paw fa-2x text-success"></i>
             </div>
             <h3 class="card-title">Report Lost Pets</h3>
-            <p class="card-text">Quickly create a detailed report for your missing pet with photos, location, and description to help others identify them.</p>
+            <p class="card-text">Create a detailed report for your missing pet with photos, location, and description to help others recognize them.</p>
           </div>
         </div>
       </div>
@@ -74,7 +74,7 @@
               <i class="fas fa-search fa-2x text-warning"></i>
             </div>
             <h3 class="card-title">Find Found Pets</h3>
-            <p class="card-text">Browse pets found in your neighborhood and help connect them with their worried families through our community network.</p>
+            <p class="card-text">Browse pets found in your area and help connect them with their families through our community network.</p>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@
               <i class="fas fa-heart fa-2x text-primary"></i>
             </div>
             <h3 class="card-title">Support Animal Welfare</h3>
-            <p class="card-text">Join our community of compassionate animal lovers working together to protect and care for pets in need.</p>
+            <p class="card-text">Join our community of animal lovers working together to protect and care for pets in need.</p>
           </div>
         </div>
       </div>
@@ -100,7 +100,7 @@
     <div class="row align-items-center">
       <div class="col-lg-6 mb-4 mb-lg-0">
         <h2 class="mb-4">Making a Difference Together</h2>
-        <p class="lead">PetRescue has helped reunite thousands of pets with their families and connected countless animals with loving homes.</p>
+        <p class="lead">PetRescue has helped reunite many pets with their families and connected numerous animals with loving homes.</p>
       </div>
       <div class="col-lg-6">
         <div class="rounded-3 overflow-hidden shadow-lg">
@@ -118,7 +118,7 @@
     <div class="row">
       <div class="col-12 text-center mb-5">
         <h2 class="mb-3">Recently Reported Pets</h2>
-        <p class="lead">These pets are looking for their families. Can you help?</p>
+        <p class="lead">These pets are looking for their families. Can you help them?</p>
       </div>
     </div>
     
@@ -160,7 +160,7 @@
       {% else %}
         <!-- Fallback content if no pets are available -->
         <div class="col-12 text-center">
-          <p class="lead">No pets have been reported yet. Be the first to help!</p>
+          <p class="lead">No pets have been reported yet. You can be the first to help!</p>
         </div>
       {% endif %}
     </div>
@@ -181,7 +181,7 @@
       <div class="col-lg-8 mx-auto">
         <div class="card border-0 rounded-3 bg-light p-5 text-center">
           <h3 class="mb-3">Join Our Community Today</h3>
-          <p class="mb-4">Sign up to help rescue pets and report lost or found animals in your area. Together, we can make a difference.</p>
+          <p class="mb-4">Create an account to help rescue pets and report lost or found animals in your area. Together, we can make a difference.</p>
           <div class="d-flex flex-wrap justify-content-center gap-3">
             <a href="{% url 'register' %}" class="btn btn-success btn-lg">Create Account</a>
             <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Sign In</a>
