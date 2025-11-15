@@ -85,13 +85,15 @@
           </li>
           {% endif %}
           
-          <!-- About and Contact links - always visible -->
+          <!-- About and Contact links - visible for non-admin users -->
           <li class="nav-item">
             <a class="nav-link" href="#">About Us</a>
           </li>
+          {% if not user.is_superuser %}
           <li class="nav-item">
-            <a class="nav-link" href="#">Contact</a>
+            <a class="nav-link" href="{% url 'contact' %}">Contact</a>
           </li>
+          {% endif %}
           
           <!-- Profile and Logout - only visible when logged in -->
           {% if user.is_authenticated %}
@@ -208,8 +210,8 @@
           <ul class="list-unstyled">
             <li class="mb-2"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
             <li class="mb-2"><a href="{% url 'find_pets' %}" class="text-decoration-none">Find Pets</a></li>
-            <li class="mb-2"><a href="#" class="text-decoration-none">Report Lost Pet</a></li>
-            <li class="mb-2"><a href="#" class="text-decoration-none">About Us</a></li>
+            <li class="mb-2"><a href="{% url 'report_lost_pet' %}" class="text-decoration-none">Report Lost Pet</a></li>
+            <li class="mb-2"><a href="{% url 'contact' %}" class="text-decoration-none">Contact Us</a></li>
           </ul>
         </div>
         <div class="col-lg-3 col-md-6 mb-4 mb-md-0">

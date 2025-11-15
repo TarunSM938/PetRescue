@@ -159,14 +159,22 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <p class="card-text">
           <strong>Type:</strong> ${notification.notification_type}<br>
-          <strong>Request Type:</strong> ${notification.request.request_type}<br>
-          <strong>Pet:</strong> ${notification.request.pet.breed} (${notification.request.pet.pet_type})<br>
-          <strong>User:</strong> ${notification.request.user.username}<br>
-          <strong>Location:</strong> ${notification.request.pet.location}<br>
+          ${notification.request ? `
+            <strong>Request Type:</strong> ${notification.request.request_type}<br>
+            <strong>Pet:</strong> ${notification.request.pet.breed} (${notification.request.pet.pet_type})<br>
+            <strong>User:</strong> ${notification.request.user.username}<br>
+            <strong>Location:</strong> ${notification.request.pet.location}<br>
+          ` : ''}
+          ${notification.contact_submission ? `
+            <strong>From:</strong> ${notification.contact_submission.name}<br>
+            <strong>Email:</strong> ${notification.contact_submission.email}<br>
+            <strong>Subject:</strong> ${notification.contact_submission.subject}<br>
+            ${notification.contact_submission.pet ? `<strong>Related Pet:</strong> ${notification.contact_submission.pet.breed} (${notification.contact_submission.pet.pet_type})<br>` : ''}
+          ` : ''}
           <strong>Time:</strong> ${timestamp}
         </p>
-        <a href="/dashboard/admin/pending-requests/" class="btn btn-outline-primary btn-sm">
-          View Request
+        <a href="${notification.link || (notification.request ? '/dashboard/admin/pending-requests/' : '/dashboard/admin/contact-submissions/')}" class="btn btn-outline-primary btn-sm">
+          ${notification.request ? 'View Request' : 'View Submission'}
         </a>
       </div>
     `;

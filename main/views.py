@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm, LostPetForm, PetSearchForm
+from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm, FoundPetForm, LostPetForm, PetSearchForm, ContactForm, ReportIssueForm
 from .models import User, Profile, Pet, Request
 
 # Home page view
@@ -1106,18 +1106,22 @@ def api_admin_notifications(request):
     NotificationModel = apps.get_model('main', 'Notification')
     
     # Get all notifications ordered by creation time
-    notifications = NotificationModel.objects.select_related('request__pet', 'request__user').all()
+    notifications = NotificationModel.objects.select_related('request__pet', 'request__user', 'contact_submission__related_pet', 'contact_submission__user').all()
     
     # Prepare response data
     notifications_data = []
     for notification in notifications:
-        notifications_data.append({
+        notification_data = {
             'id': notification.id,
             'message': notification.message,
             'timestamp': notification.created_at.isoformat(),
             'is_read': notification.is_read,
             'notification_type': notification.notification_type,
-            'request': {
+        }
+        
+        # Add request data if it's a request-based notification
+        if notification.request:
+            notification_data['request'] = {
                 'id': notification.request.id,
                 'request_type': notification.request.request_type,
                 'status': notification.request.status,
@@ -1131,7 +1135,28 @@ def api_admin_notifications(request):
                     'username': notification.request.user.username,
                 }
             }
-        })
+            notification_data['link'] = '/dashboard/admin/pending-requests/'
+        
+        # Add contact submission data if it's a contact-based notification
+        if notification.contact_submission:
+            contact_sub = notification.contact_submission
+            notification_data['contact_submission'] = {
+                'id': contact_sub.id,
+                'name': contact_sub.name,
+                'email': contact_sub.email,
+                'subject': contact_sub.subject,
+                'submission_type': contact_sub.submission_type,
+                'status': contact_sub.status,
+            }
+            if contact_sub.related_pet:
+                notification_data['contact_submission']['pet'] = {
+                    'id': contact_sub.related_pet.id,
+                    'breed': contact_sub.related_pet.breed,
+                    'pet_type': contact_sub.related_pet.pet_type,
+                }
+            notification_data['link'] = f'/dashboard/admin/contact-submissions/{contact_sub.id}/'
+        
+        notifications_data.append(notification_data)
     
     return Response({'notifications': notifications_data})
 
@@ -1208,3 +1233,275 @@ def api_admin_mark_all_read(request):
     NotificationModel.objects.filter(is_read=False).update(is_read=True)
     
     return Response({'message': 'All notifications marked as read.'})
+
+
+# Contact & Communication Module Views
+
+# Contact page view
+# Allows users to send messages to admin
+
+def contact(request):
+    """
+    Handle contact form submissions.
+    Auto-fills name and email for logged-in users.
+    """
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            # Get model classes using apps.get_model
+            from django.apps import apps
+            ContactSubmissionModel = apps.get_model('main', 'ContactSubmission')
+            
+            # Create contact submission
+            submission = ContactSubmissionModel.objects.create(
+                name=form.cleaned_data['name'],
+                email=form.cleaned_data['email'],
+                subject=form.cleaned_data['subject'],
+                message=form.cleaned_data['message'],
+                submission_type='general',
+                user=request.user if request.user.is_authenticated else None,
+                status='pending'
+            )
+            
+            # Create admin notification
+            NotificationModel = apps.get_model('main', 'Notification')
+            submitter_name = request.user.username if request.user.is_authenticated else submission.name
+            NotificationModel.objects.create(
+                contact_submission=submission,
+                message=f"New contact submission from {submitter_name}: {submission.subject}",
+                notification_type='contact_submission'
+            )
+            
+            # Send email notification if email is configured
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                # Only send if email backend is configured
+                if hasattr(settings, 'EMAIL_BACKEND') and settings.EMAIL_BACKEND != 'django.core.mail.backends.console.EmailBackend':
+                    admin_email = getattr(settings, 'ADMIN_EMAIL', None)
+                    if admin_email:
+                        send_mail(
+                            subject=f'New Contact Submission: {submission.subject}',
+                            message=f'Name: {submission.name}\nEmail: {submission.email}\n\nMessage:\n{submission.message}',
+                            from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else None,
+                            recipient_list=[admin_email],
+                            fail_silently=True,
+                        )
+            except Exception:
+                # Email sending is optional, fail silently
+                pass
+            
+            messages.success(request, 'Thank you for contacting us! We\'ll get back to you soon.')
+            return redirect('contact')
+        else:
+            messages.error(request, 'Please fix the errors shown below and try again.')
+    else:
+        # Pre-fill form for logged-in users
+        initial_data = {}
+        if request.user.is_authenticated:
+            initial_data = {
+                'name': f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
+                'email': request.user.email
+            }
+        form = ContactForm(initial=initial_data)
+    
+    context = {
+        'form': form,
+        'now': timezone.now()
+    }
+    return render(request, 'contact.html', context)
+
+
+# Report issue view
+# Allows users to report issues related to specific pets
+
+def report_issue(request, pet_id):
+    """
+    Handle issue reports related to specific pets.
+    """
+    # Get model classes using apps.get_model
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    
+    # Get the pet object
+    pet = get_object_or_404(PetModel, id=pet_id)
+    
+    if request.method == 'POST':
+        form = ReportIssueForm(request.POST)
+        if form.is_valid():
+            ContactSubmissionModel = apps.get_model('main', 'ContactSubmission')
+            
+            # Create contact submission linked to pet
+            submission = ContactSubmissionModel.objects.create(
+                name=form.cleaned_data['name'],
+                email=form.cleaned_data['email'],
+                subject=form.cleaned_data['subject'],
+                message=form.cleaned_data['message'],
+                submission_type='issue_report',
+                related_pet=pet,
+                user=request.user if request.user.is_authenticated else None,
+                status='pending'
+            )
+            
+            # Create admin notification
+            NotificationModel = apps.get_model('main', 'Notification')
+            submitter_name = request.user.username if request.user.is_authenticated else submission.name
+            NotificationModel.objects.create(
+                contact_submission=submission,
+                message=f"Issue report from {submitter_name} for pet {pet.breed} ({pet.pet_type})",
+                notification_type='issue_report'
+            )
+            
+            # Send email notification if email is configured
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                if hasattr(settings, 'EMAIL_BACKEND') and settings.EMAIL_BACKEND != 'django.core.mail.backends.console.EmailBackend':
+                    admin_email = getattr(settings, 'ADMIN_EMAIL', None)
+                    if admin_email:
+                        send_mail(
+                            subject=f'Issue Report for Pet: {pet.breed}',
+                            message=f'Name: {submission.name}\nEmail: {submission.email}\nPet: {pet.breed} ({pet.pet_type})\n\nIssue:\n{submission.message}',
+                            from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else None,
+                            recipient_list=[admin_email],
+                            fail_silently=True,
+                        )
+            except Exception:
+                pass
+            
+            messages.success(request, 'Thank you for reporting this issue. We\'ll review it and take appropriate action.')
+            return redirect('find_pets')
+        else:
+            messages.error(request, 'Please fix the errors shown below and try again.')
+    else:
+        # Pre-fill form for logged-in users
+        initial_data = {}
+        if request.user.is_authenticated:
+            initial_data = {
+                'name': f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
+                'email': request.user.email
+            }
+        form = ReportIssueForm(initial=initial_data)
+    
+    context = {
+        'form': form,
+        'pet': pet,
+        'now': timezone.now()
+    }
+    return render(request, 'report_issue.html', context)
+
+
+# Admin contact submissions view
+# Allows admin to view and manage all contact submissions
+
+@user_passes_test(admin_check, login_url='login')
+def admin_contact_submissions(request):
+    """
+    Display all contact submissions with filtering, searching, and status management.
+    Admin-only view.
+    """
+    from django.apps import apps
+    ContactSubmissionModel = apps.get_model('main', 'ContactSubmission')
+    
+    # Get all submissions
+    submissions = ContactSubmissionModel.objects.select_related('user', 'related_pet').all()
+    
+    # Apply filters
+    status_filter = request.GET.get('status')
+    if status_filter:
+        submissions = submissions.filter(status=status_filter)
+    
+    submission_type_filter = request.GET.get('submission_type')
+    if submission_type_filter:
+        submissions = submissions.filter(submission_type=submission_type_filter)
+    
+    # Apply search
+    search_query = request.GET.get('search')
+    if search_query:
+        submissions = submissions.filter(
+            Q(name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(subject__icontains=search_query) |
+            Q(message__icontains=search_query)
+        )
+    
+    # Apply sorting
+    sort_by = request.GET.get('sort_by', 'created_at')
+    order = request.GET.get('order', 'desc')
+    
+    if order == 'asc':
+        submissions = submissions.order_by(sort_by)
+    else:
+        submissions = submissions.order_by(f'-{sort_by}')
+    
+    # Apply pagination
+    paginator = Paginator(submissions, 15)  # Show 15 submissions per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'submissions': page_obj,
+        'status_choices': ContactSubmissionModel.STATUS_CHOICES,
+        'submission_type_choices': ContactSubmissionModel.SUBMISSION_TYPES,
+        'current_filters': {
+            'status': status_filter,
+            'submission_type': submission_type_filter,
+            'search': search_query,
+            'sort_by': sort_by,
+            'order': order,
+        }
+    }
+    
+    return render(request, 'admin/contact_submissions.html', context)
+
+
+# Admin view contact submission details
+# Allows admin to view full details of a submission
+
+@user_passes_test(admin_check, login_url='login')
+def admin_contact_submission_detail(request, submission_id):
+    """
+    Display detailed view of a contact submission.
+    Admin-only view.
+    """
+    from django.apps import apps
+    ContactSubmissionModel = apps.get_model('main', 'ContactSubmission')
+    
+    submission = get_object_or_404(ContactSubmissionModel, id=submission_id)
+    
+    context = {
+        'submission': submission,
+        'status_choices': ContactSubmissionModel.STATUS_CHOICES,
+        'submission_type_choices': ContactSubmissionModel.SUBMISSION_TYPES
+    }
+    
+    return render(request, 'admin/contact_submission_detail.html', context)
+
+
+# Admin update submission status
+# Allows admin to change the status of a submission
+
+@user_passes_test(admin_check, login_url='login')
+def admin_update_submission_status(request, submission_id):
+    """
+    Update the status of a contact submission.
+    Admin-only action.
+    """
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        from django.apps import apps
+        ContactSubmissionModel = apps.get_model('main', 'ContactSubmission')
+        
+        try:
+            submission = ContactSubmissionModel.objects.get(id=submission_id)
+            submission.status = new_status
+            submission.save()
+            messages.success(request, f'Submission status updated to {new_status}.')
+        except ContactSubmissionModel.DoesNotExist:
+            messages.error(request, 'Submission not found.')
+        
+        return redirect('admin_contact_submissions')
+    
+    return HttpResponseForbidden(b"Method not allowed")

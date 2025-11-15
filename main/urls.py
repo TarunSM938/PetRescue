@@ -77,4 +77,13 @@ urlpatterns = [
     path('api/admin/notifications/unread-count/', views.api_admin_unread_count, name='api_admin_unread_count'),
     path('api/admin/notifications/mark-read/<int:notification_id>/', views.api_admin_mark_read, name='api_admin_mark_read'),
     path('api/admin/notifications/mark-all-read/', views.api_admin_mark_all_read, name='api_admin_mark_all_read'),
+    
+    # Contact & Communication Module URLs
+    path('contact/', views.contact, name='contact'),
+    path('report-issue/<int:pet_id>/', views.report_issue, name='report_issue'),
+    
+    # Admin Contact Submissions URLs
+    path('dashboard/admin/contact-submissions/', views.admin_contact_submissions, name='admin_contact_submissions'),
+    path('dashboard/admin/contact-submissions/<int:submission_id>/', views.admin_contact_submission_detail, name='admin_contact_submission_detail'),
+    path('dashboard/admin/contact-submissions/<int:submission_id>/update-status/', views.admin_update_submission_status, name='admin_update_submission_status'),
 ]

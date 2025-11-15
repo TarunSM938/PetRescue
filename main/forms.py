@@ -406,3 +406,134 @@ class PetSearchForm(forms.Form):
             raise ValidationError("Start date cannot be after end date.")
         
         return cleaned_data
+
+
+# Contact Form
+# Form for users to submit contact messages
+
+class ContactForm(forms.Form):
+    """
+    Form for contact submissions.
+    Supports both logged-in users (auto-filled) and guest users.
+    """
+    name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your name'
+        }),
+        help_text="Your full name"
+    )
+    
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your email address'
+        }),
+        help_text="Your email address"
+    )
+    
+    subject = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'What is this about?'
+        }),
+        help_text="Brief subject line"
+    )
+    
+    message = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 6,
+            'placeholder': 'Tell us how we can help...'
+        }),
+        help_text="Your message"
+    )
+    
+    def clean_name(self):
+        """Validate that name is provided and has reasonable length"""
+        name = self.cleaned_data.get('name')
+        if name and len(name.strip()) < 2:
+            raise ValidationError("Please enter your full name.")
+        return name.strip()
+    
+    def clean_message(self):
+        """Validate that message is provided and has minimum length"""
+        message = self.cleaned_data.get('message')
+        if message and len(message.strip()) < 10:
+            raise ValidationError("Please provide more details in your message (at least 10 characters).")
+        return message.strip()
+    
+    def clean_subject(self):
+        """Validate that subject is provided"""
+        subject = self.cleaned_data.get('subject')
+        if subject and len(subject.strip()) < 3:
+            raise ValidationError("Please enter a subject for your message.")
+        return subject.strip()
+
+
+# Report Issue Form
+# Form for reporting issues related to specific pets
+
+class ReportIssueForm(forms.Form):
+    """
+    Form for reporting issues related to specific pets.
+    Similar to contact form but linked to a pet.
+    """
+    name = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your name'
+        }),
+        help_text="Your full name"
+    )
+    
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your email address'
+        }),
+        help_text="Your email address"
+    )
+    
+    subject = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Issue subject (optional)'
+        }),
+        help_text="Brief description of the issue"
+    )
+    
+    message = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 6,
+            'placeholder': 'Describe the issue you\'ve noticed...'
+        }),
+        help_text="Details about the issue"
+    )
+    
+    def clean_name(self):
+        """Validate that name is provided"""
+        name = self.cleaned_data.get('name')
+        if name and len(name.strip()) < 2:
+            raise ValidationError("Please enter your full name.")
+        return name.strip()
+    
+    def clean_message(self):
+        """Validate that message is provided"""
+        message = self.cleaned_data.get('message')
+        if message and len(message.strip()) < 10:
+            raise ValidationError("Please provide more details about the issue (at least 10 characters).")
+        return message.strip()
+    
+    def clean_subject(self):
+        """Set default subject if not provided"""
+        subject = self.cleaned_data.get('subject')
+        if not subject or len(subject.strip()) < 3:
+            return "Issue Report"
+        return subject.strip()

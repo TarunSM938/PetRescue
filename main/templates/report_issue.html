@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Issue | PetRescue{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Header Section -->
+      <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold mb-3">Report an Issue</h1>
+        <p class="lead text-muted">Found something wrong with this pet listing? Let us know and we'll look into it.</p>
+      </div>
+      
+      <!-- Pet Information Card -->
+      <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Pet Information</h5>
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <strong>Type:</strong> {{ pet.pet_type|title }}
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Breed:</strong> {{ pet.breed }}
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Color:</strong> {{ pet.color }}
+            </div>
+            <div class="col-md-6 mb-2">
+              <strong>Location:</strong> {{ pet.location }}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Issue Report Form Card -->
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4">
+          <form method="POST" id="report-issue-form">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="{{ form.name.id_for_label }}" class="form-label">Your Name <span class="text-danger">*</span></label>
+              {{ form.name }}
+              {% if form.name.errors %}
+                {% for error in form.name.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.email.id_for_label }}" class="form-label">Your Email <span class="text-danger">*</span></label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.subject.id_for_label }}" class="form-label">Issue Subject <span class="text-muted">(optional)</span></label>
+              {{ form.subject }}
+              {% if form.subject.errors %}
+                {% for error in form.subject.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+              <div class="form-text">Brief description of the issue (optional)</div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="{{ form.message.id_for_label }}" class="form-label">Issue Details <span class="text-danger">*</span></label>
+              {{ form.message }}
+              {% if form.message.errors %}
+                {% for error in form.message.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+              <div class="form-text">Please describe the issue you've noticed with this pet listing.</div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="{% url 'find_pets' %}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>Submit Issue Report
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

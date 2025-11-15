@@ -734,9 +734,26 @@ document.addEventListener('DOMContentLoaded', function() {
                                     timeAgo = timestamp.toLocaleDateString([], {month: 'short', day: 'numeric'});
                                 }
                                 
-                                // Get notification type class
-                                const typeClass = notification.notification_type === 'lost_report' ? 'lost' : 'found';
-                                const typeText = notification.notification_type === 'lost_report' ? 'Lost' : 'Found';
+                                // Get notification type class and text
+                                let typeClass = 'default';
+                                let typeText = 'Notification';
+                                if (notification.notification_type === 'lost_report') {
+                                    typeClass = 'lost';
+                                    typeText = 'Lost';
+                                } else if (notification.notification_type === 'found_report') {
+                                    typeClass = 'found';
+                                    typeText = 'Found';
+                                } else if (notification.notification_type === 'contact_submission') {
+                                    typeClass = 'contact';
+                                    typeText = 'Contact';
+                                } else if (notification.notification_type === 'issue_report') {
+                                    typeClass = 'issue';
+                                    typeText = 'Issue';
+                                }
+                                
+                                // Determine link URL
+                                const linkUrl = notification.link || (notification.request ? '/dashboard/admin/pending-requests/' : '/dashboard/admin/contact-submissions/');
+                                const linkId = notification.request ? notification.request.id : (notification.contact_submission ? notification.contact_submission.id : null);
                                 
             return `
                                     <div class="notification-content">
@@ -756,8 +773,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                             <i class="fas ${notification.is_read ? 'fa-envelope' : 'fa-envelope-open'}"></i>
                                         </button>
                                         <button class="btn open-btn" 
-                                                data-request-id="${notification.request.id}"
-                                                title="Open report">
+                                                data-link-url="${linkUrl}"
+                                                title="Open">
                                             <i class="fas fa-external-link-alt"></i>
                                         </button>
                                     </div>
@@ -781,8 +798,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (openBtn) {
                                 openBtn.addEventListener('click', function(e) {
                                     e.stopPropagation();
-                                    const requestId = this.getAttribute('data-request-id');
-                                    window.location.href = `/dashboard/admin/pending-requests/`;
+                                    const linkUrl = this.getAttribute('data-link-url') || '/dashboard/admin/pending-requests/';
+                                    window.location.href = linkUrl;
                                 });
             }
                                 
@@ -792,7 +809,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (markBtn) {
                     const notificationId = markBtn.getAttribute('data-notification-id');
                                     markNotificationAsRead(notificationId, this);
-                                    window.location.href = `/dashboard/admin/pending-requests/`;
+                                    const openBtn = this.querySelector('.open-btn');
+                                    const linkUrl = openBtn ? openBtn.getAttribute('data-link-url') : '/dashboard/admin/pending-requests/';
+                                    window.location.href = linkUrl;
                 }
                                 });
                                 
@@ -804,7 +823,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (markBtn) {
                         const notificationId = markBtn.getAttribute('data-notification-id');
                                         markNotificationAsRead(notificationId, this);
-                                        window.location.href = `/dashboard/admin/pending-requests/`;
+                                        const openBtn = this.querySelector('.open-btn');
+                                        const linkUrl = openBtn ? openBtn.getAttribute('data-link-url') : '/dashboard/admin/pending-requests/';
+                                        window.location.href = linkUrl;
                     }
                 }
             });

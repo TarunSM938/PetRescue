@@ -160,15 +160,19 @@ class ActivityLog(models.Model):
 
 class Notification(models.Model):
     """
-    Notification model to track admin notifications for new pet reports.
+    Notification model to track admin notifications for new pet reports and contact submissions.
     """
     NOTIFICATION_TYPES = [
         ('lost_report', 'Lost Pet Report'),
         ('found_report', 'Found Pet Report'),
+        ('contact_submission', 'Contact Submission'),
+        ('issue_report', 'Issue Report'),
     ]
     
-    request = models.ForeignKey('Request', on_delete=models.CASCADE,
-                               help_text="The request this notification is related to")
+    request = models.ForeignKey('Request', on_delete=models.CASCADE, null=True, blank=True,
+                               help_text="The request this notification is related to (if any)")
+    contact_submission = models.ForeignKey('ContactSubmission', on_delete=models.CASCADE, null=True, blank=True,
+                                          help_text="The contact submission this notification is related to (if any)")
     message = models.TextField(help_text="Notification message")
     created_at = models.DateTimeField(auto_now_add=True,
                                     help_text="When this notification was created")
@@ -181,8 +185,12 @@ class Notification(models.Model):
         ordering = ['-created_at']  # Latest first
     
     def __str__(self):
-        request = cast('Request', self.request)
-        return f"Notification for {request.request_type} - {self.created_at}"
+        if self.request:
+            request = cast('Request', self.request)
+            return f"Notification for {request.request_type} - {self.created_at}"
+        elif self.contact_submission:
+            return f"Notification for contact submission - {self.created_at}"
+        return f"Notification - {self.created_at}"
 
 
 # Signal Handlers
@@ -206,3 +214,49 @@ def save_user_profile(sender, instance, **kwargs):
     """
     if hasattr(instance, 'profile'):
         instance.profile.save()
+
+
+# Contact Submission Model
+# Stores contact form submissions and issue reports from users
+
+class ContactSubmission(models.Model):
+    """
+    Contact submission model to store messages from users.
+    Can be general contact messages or issue reports linked to specific pets.
+    """
+    SUBMISSION_TYPES = [
+        ('general', 'General Inquiry'),
+        ('issue_report', 'Issue Report'),
+        ('support', 'Support Request'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('reviewed', 'Reviewed'),
+        ('closed', 'Closed'),
+    ]
+    
+    name = models.CharField(max_length=100, help_text="Name of the person submitting")
+    email = models.EmailField(help_text="Email address for contact")
+    subject = models.CharField(max_length=200, help_text="Subject of the message")
+    message = models.TextField(help_text="The message content")
+    submission_type = models.CharField(max_length=20, choices=SUBMISSION_TYPES, default='general',
+                                      help_text="Type of submission")
+    related_pet = models.ForeignKey('Pet', on_delete=models.SET_NULL, null=True, blank=True,
+                                   help_text="Pet this submission is related to (if any)")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                            help_text="User who submitted (if logged in)")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending',
+                             help_text="Current status of the submission")
+    created_at = models.DateTimeField(auto_now_add=True,
+                                     help_text="When this submission was created")
+    updated_at = models.DateTimeField(auto_now=True,
+                                     help_text="When this submission was last updated")
+    
+    class Meta:
+        ordering = ['-created_at']  # Latest first
+        verbose_name = 'Contact Submission'
+        verbose_name_plural = 'Contact Submissions'
+    
+    def __str__(self):
+        return f"{self.name} - {self.subject} ({self.status})"

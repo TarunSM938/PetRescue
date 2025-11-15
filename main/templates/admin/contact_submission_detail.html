@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Submission Details | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Contact Submission Details</h2>
+        <a href="{% url 'admin_contact_submissions' %}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-1"></i>Back to Submissions
+        </a>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-8">
+          <!-- Submission Details Card -->
+          <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white border-0">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Submission Information</h5>
+                <span class="badge 
+                  {% if submission.status == 'pending' %}bg-warning text-dark
+                  {% elif submission.status == 'reviewed' %}bg-primary
+                  {% elif submission.status == 'closed' %}bg-secondary
+                  {% endif %}">
+                  {{ submission.get_status_display }}
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <strong>Name:</strong>
+                  <p class="mb-0">{{ submission.name }}</p>
+                </div>
+                <div class="col-md-6">
+                  <strong>Email:</strong>
+                  <p class="mb-0">
+                    <a href="mailto:{{ submission.email }}">{{ submission.email }}</a>
+                  </p>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <strong>Submission Type:</strong>
+                  <p class="mb-0">
+                    <span class="badge bg-info">{{ submission.get_submission_type_display }}</span>
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <strong>Submitted By:</strong>
+                  <p class="mb-0">
+                    {% if submission.user %}
+                      <a href="#">{{ submission.user.username }}</a> (Logged in user)
+                    {% else %}
+                      Guest user
+                    {% endif %}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <strong>Subject:</strong>
+                <p class="mb-0">{{ submission.subject }}</p>
+              </div>
+              
+              <div class="mb-3">
+                <strong>Message:</strong>
+                <div class="border rounded p-3 bg-light">
+                  {{ submission.message|linebreaks }}
+                </div>
+              </div>
+              
+              {% if submission.related_pet %}
+                <div class="mb-3">
+                  <strong>Related Pet:</strong>
+                  <div class="card mt-2">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <strong>Type:</strong> {{ submission.related_pet.pet_type|title }}<br>
+                          <strong>Breed:</strong> {{ submission.related_pet.breed }}<br>
+                          <strong>Color:</strong> {{ submission.related_pet.color }}
+                        </div>
+                        <div class="col-md-6">
+                          <strong>Location:</strong> {{ submission.related_pet.location }}<br>
+                          <strong>Status:</strong> {{ submission.related_pet.status|title }}<br>
+                          <strong>Reported by:</strong> {{ submission.related_pet.owner.username }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <strong>Created:</strong>
+                  <p class="mb-0">{{ submission.created_at|date:"F d, Y H:i" }}</p>
+                </div>
+                <div class="col-md-6">
+                  <strong>Last Updated:</strong>
+                  <p class="mb-0">{{ submission.updated_at|date:"F d, Y H:i" }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4">
+          <!-- Status Update Card -->
+          <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white border-0">
+              <h5 class="mb-0">Update Status</h5>
+            </div>
+            <div class="card-body">
+              <form method="POST" action="{% url 'admin_update_submission_status' submission.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                  <label for="status" class="form-label">New Status</label>
+                  <select name="status" id="status" class="form-select">
+                    <option value="pending" {% if submission.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="reviewed" {% if submission.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                    <option value="closed" {% if submission.status == 'closed' %}selected{% endif %}>Closed</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="fas fa-save me-1"></i>Update Status
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          <!-- Quick Actions Card -->
+          <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white border-0">
+              <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <a href="mailto:{{ submission.email }}?subject=Re: {{ submission.subject }}" class="btn btn-outline-primary">
+                  <i class="fas fa-envelope me-1"></i>Reply via Email
+                </a>
+                <form method="POST" action="{% url 'admin_update_submission_status' submission.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="status" value="reviewed">
+                  <button type="submit" class="btn btn-outline-success w-100">
+                    <i class="fas fa-check me-1"></i>Mark as Reviewed
+                  </button>
+                </form>
+                <form method="POST" action="{% url 'admin_update_submission_status' submission.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="status" value="closed">
+                  <button type="submit" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-times me-1"></i>Mark as Closed
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
