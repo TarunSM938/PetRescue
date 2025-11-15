@@ -171,8 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 this.innerHTML = originalText;
                             }, 2000);
                         })
-                        .catch(err => {
-                            console.error('Failed to copy: ', err);
+                        .catch(() => {
                             alert(`Copy ${contactType} to clipboard: ${contactInfo}`);
                         });
                 } else {
@@ -233,10 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
         );
         
         // In a real implementation, we would show these suggestions to the user
-        // For now, we'll just log them to the console
-        if (suggestions.length > 0) {
-            console.log('Did you mean:', suggestions[0]);
-        }
+        // Suggestions are available but not displayed in the current implementation
     }
     
     // Simple Levenshtein distance implementation for fuzzy matching
@@ -634,73 +630,234 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Function to update notification count
+        let isDropdownOpen = false;
+        let isLoading = false;
+        let dropdownInstance = null;
+        let mobileDropdownInstance = null;
+        
+        // Function to update notification count for both mobile and desktop
         function updateNotificationCount() {
             fetch('/api/admin/notifications/unread-count/')
                 .then(response => response.json())
                 .then(data => {
+                    // Update desktop count
                     const countElement = document.getElementById('notification-count');
+                    const totalCountElement = document.getElementById('notification-total-count');
+                    
+                    // Update mobile count
+                    const mobileCountElement = document.getElementById('notification-count-mobile');
+                    const mobileTotalCountElement = document.getElementById('notification-total-count-mobile');
+                    
+                    // Update desktop elements
                     if (countElement) {
                         countElement.textContent = data.unread_count;
                         countElement.style.display = data.unread_count > 0 ? 'inline' : 'none';
+                        
+                        // Add animation effect when new notifications arrive
+                        if (data.unread_count > 0) {
+                            // Remove any existing animation classes first
+                            countElement.classList.remove('animate__animated', 'animate__pulse');
+                            // Trigger reflow to restart animation
+                            void countElement.offsetWidth;
+                            // Add animation classes
+                            countElement.classList.add('animate__animated', 'animate__pulse');
+                            setTimeout(() => {
+                                countElement.classList.remove('animate__animated', 'animate__pulse');
+                            }, 1000);
+                        }
+                    }
+                    
+                    if (totalCountElement) {
+                        // Will be updated when notifications are loaded
+                    }
+                    
+                    // Update mobile elements
+                    if (mobileCountElement) {
+                        mobileCountElement.textContent = data.unread_count;
+                        mobileCountElement.style.display = data.unread_count > 0 ? 'inline' : 'none';
+                        
+                        // Add animation effect when new notifications arrive
+                        if (data.unread_count > 0) {
+                            // Remove any existing animation classes first
+                            mobileCountElement.classList.remove('animate__animated', 'animate__pulse');
+                            // Trigger reflow to restart animation
+                            void mobileCountElement.offsetWidth;
+                            // Add animation classes
+                            mobileCountElement.classList.add('animate__animated', 'animate__pulse');
+                            setTimeout(() => {
+                                mobileCountElement.classList.remove('animate__animated', 'animate__pulse');
+                            }, 1000);
+                        }
+                    }
+                    
+                    if (mobileTotalCountElement) {
+                        // Will be updated when notifications are loaded
                     }
                 })
-                .catch(error => console.error('Error fetching notification count:', error));
+                .catch(() => {
+                    // Silently handle notification count fetch errors
+                });
         }
         
-        // Function to load notifications dropdown
-        function loadNotifications() {
-            fetch('/api/admin/notifications/')
-                .then(response => response.json())
-                .then(data => {
-                    const notificationList = document.getElementById('notification-list');
-                    if (notificationList) {
-                        notificationList.innerHTML = '';
-                        
-                        if (data.notifications && data.notifications.length > 0) {
-                            data.notifications.slice(0, 5).forEach(notification => {
-                                const notificationElement = document.createElement('li');
-                                notificationElement.className = `notification-item ${notification.is_read ? '' : 'unread'}`;
-                                notificationElement.innerHTML = `
-                                    <div class="d-flex justify-content-between">
-                                        <div class="notification-message">${notification.message}</div>
-                                        <button class="btn btn-sm btn-outline-secondary mark-read-btn" 
-                                                data-notification-id="${notification.id}">
-                                            Mark Read
+        // Function to create notification element HTML
+        function createNotificationElementHTML(notification) {
+                                // Format the timestamp
+                                const timestamp = new Date(notification.timestamp);
+                                const now = new Date();
+                                const diffMs = now - timestamp;
+                                const diffMins = Math.floor(diffMs / 60000);
+                                const diffHours = Math.floor(diffMs / 3600000);
+                                const diffDays = Math.floor(diffMs / 86400000);
+                                
+                                let timeAgo;
+                                if (diffMins < 1) {
+                                    timeAgo = 'Just now';
+                                } else if (diffMins < 60) {
+                                    timeAgo = `${diffMins}m`;
+                                } else if (diffHours < 24) {
+                                    timeAgo = `${diffHours}h`;
+                                } else if (diffDays < 7) {
+                                    timeAgo = `${diffDays}d`;
+                                } else {
+                                    timeAgo = timestamp.toLocaleDateString([], {month: 'short', day: 'numeric'});
+                                }
+                                
+                                // Get notification type class
+                                const typeClass = notification.notification_type === 'lost_report' ? 'lost' : 'found';
+                                const typeText = notification.notification_type === 'lost_report' ? 'Lost' : 'Found';
+                                
+            return `
+                                    <div class="notification-content">
+                                        <div class="d-flex align-items-center">
+                                            <div class="notification-message">${notification.message}</div>
+                                            <span class="notification-type ${typeClass}">${typeText}</span>
+                                        </div>
+                                        <div class="notification-time">
+                                            <i class="fas fa-clock"></i>
+                                            ${timeAgo}
+                                        </div>
+                                    </div>
+                                    <div class="notification-actions">
+                                        <button class="btn mark-read-btn" 
+                                                data-notification-id="${notification.id}"
+                                                title="${notification.is_read ? 'Mark as unread' : 'Mark as read'}">
+                                            <i class="fas ${notification.is_read ? 'fa-envelope' : 'fa-envelope-open'}"></i>
+                                        </button>
+                                        <button class="btn open-btn" 
+                                                data-request-id="${notification.request.id}"
+                                                title="Open report">
+                                            <i class="fas fa-external-link-alt"></i>
                                         </button>
                                     </div>
-                                    <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
                                 `;
-                                notificationList.appendChild(notificationElement);
+        }
                                 
+        // Function to attach event listeners to notification element
+        function attachNotificationListeners(notificationElement, notification) {
                                 // Add click event to mark as read
                                 const markReadBtn = notificationElement.querySelector('.mark-read-btn');
+            if (markReadBtn) {
                                 markReadBtn.addEventListener('click', function(e) {
                                     e.stopPropagation();
                                     const notificationId = this.getAttribute('data-notification-id');
-                                    markNotificationAsRead(notificationId);
+                                    markNotificationAsRead(notificationId, notificationElement);
                                 });
+            }
+                                
+                                // Add click event to open button
+                                const openBtn = notificationElement.querySelector('.open-btn');
+            if (openBtn) {
+                                openBtn.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    const requestId = this.getAttribute('data-request-id');
+                                    window.location.href = `/dashboard/admin/pending-requests/`;
+                                });
+            }
                                 
                                 // Add click event to the notification item
                                 notificationElement.addEventListener('click', function() {
-                                    markNotificationAsRead(notification.id);
-                                    // Redirect to the request details page
+                const markBtn = this.querySelector('.mark-read-btn');
+                if (markBtn) {
+                    const notificationId = markBtn.getAttribute('data-notification-id');
+                                    markNotificationAsRead(notificationId, this);
                                     window.location.href = `/dashboard/admin/pending-requests/`;
+                }
                                 });
+                                
+                                // Add keyboard support
+                                notificationElement.addEventListener('keydown', function(e) {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                    const markBtn = this.querySelector('.mark-read-btn');
+                    if (markBtn) {
+                        const notificationId = markBtn.getAttribute('data-notification-id');
+                                        markNotificationAsRead(notificationId, this);
+                                        window.location.href = `/dashboard/admin/pending-requests/`;
+                    }
+                }
+            });
+        }
+        
+        // Function to populate a notification container with data
+        function populateNotificationContainer(containerId, totalCountId, notificationsData) {
+            const notificationList = document.getElementById(containerId);
+            const totalCountElement = document.getElementById(totalCountId);
+            
+            if (!notificationList) return;
+            
+            notificationList.innerHTML = '';
+            
+            if (totalCountElement) {
+                totalCountElement.textContent = notificationsData.notifications ? notificationsData.notifications.length : 0;
+            }
+            
+            if (notificationsData.notifications && notificationsData.notifications.length > 0) {
+                // Show newest notifications first (limit to 4 for home page)
+                const notificationsToShow = notificationsData.notifications.slice(0, 4);
+                notificationsToShow.forEach((notification) => {
+                    const notificationElement = document.createElement('div');
+                    notificationElement.className = `notification-item ${notification.is_read ? 'read' : 'unread'}`;
+                    notificationElement.setAttribute('role', 'menuitem');
+                    notificationElement.setAttribute('tabindex', '-1');
+                    
+                    notificationElement.innerHTML = createNotificationElementHTML(notification);
+                    notificationList.appendChild(notificationElement);
+                    
+                    // Attach event listeners
+                    attachNotificationListeners(notificationElement, notification);
                             });
                         } else {
-                            const emptyElement = document.createElement('li');
-                            emptyElement.className = 'dropdown-item text-center text-muted';
-                            emptyElement.textContent = 'No notifications';
+                            const emptyElement = document.createElement('div');
+                            emptyElement.className = 'notification-empty';
+                            emptyElement.innerHTML = `
+                                <i class="fas fa-bell-slash"></i>
+                                <div>No notifications</div>
+                                <small class="text-muted">You're all caught up!</small>
+                            `;
                             notificationList.appendChild(emptyElement);
                         }
                     }
+        
+        // Function to load notifications dropdown (loads both mobile and desktop)
+        function loadNotifications() {
+            if (isLoading) return;
+            isLoading = true;
+            
+            fetch('/api/admin/notifications/')
+                .then(response => response.json())
+                .then(data => {
+                    // Populate both desktop and mobile containers with the same data
+                    populateNotificationContainer('notification-list', 'notification-total-count', data);
+                    populateNotificationContainer('notification-list-mobile', 'notification-total-count-mobile', data);
+                    isLoading = false;
                 })
-                .catch(error => console.error('Error fetching notifications:', error));
+                .catch(() => {
+                    isLoading = false;
+                });
         }
         
         // Function to mark a notification as read
-        function markNotificationAsRead(notificationId) {
+        function markNotificationAsRead(notificationId, element) {
             fetch(`/api/admin/notifications/mark-read/${notificationId}/`, {
                 method: 'POST',
                 headers: {
@@ -711,10 +868,21 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 // Update UI
+                if (element) {
+                    element.classList.remove('unread');
+                    element.classList.add('read');
+                    
+                    // Update mark button icon
+                    const markBtn = element.querySelector('.mark-read-btn');
+                    markBtn.innerHTML = '<i class="fas fa-envelope"></i>';
+                    markBtn.title = 'Mark as unread';
+                }
+                
                 updateNotificationCount();
-                loadNotifications();
             })
-            .catch(error => console.error('Error marking notification as read:', error));
+            .catch(() => {
+                // Silently handle notification mark as read errors
+            });
         }
         
         // Function to mark all notifications as read
@@ -728,11 +896,23 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                // Update UI
+                // Update UI with animation
+                const notificationItems = document.querySelectorAll('.notification-item.unread');
+                notificationItems.forEach(item => {
+                    item.classList.remove('unread');
+                    item.classList.add('read');
+                    
+                    // Update mark button icon
+                    const markBtn = item.querySelector('.mark-read-btn');
+                    markBtn.innerHTML = '<i class="fas fa-envelope"></i>';
+                    markBtn.title = 'Mark as unread';
+                });
+                
                 updateNotificationCount();
-                loadNotifications();
             })
-            .catch(error => console.error('Error marking all notifications as read:', error));
+            .catch(() => {
+                // Silently handle mark all notifications as read errors
+            });
         }
         
         // Helper function to get CSRF token
@@ -751,23 +931,215 @@ document.addEventListener('DOMContentLoaded', function() {
             return cookieValue;
         }
         
-        // Set up event listeners
-        document.getElementById('mark-all-read').addEventListener('click', function(e) {
-            e.preventDefault();
-            markAllNotificationsAsRead();
+        // Function to check if dropdown is actually open (checks both desktop and mobile)
+        function isDropdownActuallyOpen() {
+            const desktopMenu = document.getElementById('notification-dropdown-menu');
+            const mobileMenu = document.getElementById('notification-dropdown-menu-mobile');
+            return (desktopMenu && desktopMenu.classList.contains('show')) || 
+                   (mobileMenu && mobileMenu.classList.contains('show'));
+        }
+        
+        // Function to close all dropdowns
+        function closeAllDropdowns() {
+            if (dropdownInstance) {
+                dropdownInstance.hide();
+            }
+            if (mobileDropdownInstance) {
+                mobileDropdownInstance.hide();
+            }
+            isDropdownOpen = false;
+        }
+        
+        // Legacy function for backwards compatibility
+        function closeDropdown() {
+            closeAllDropdowns();
+        }
+        
+        // Function to initialize a single dropdown
+        function initializeDropdown(dropdownToggleId, dropdownMenuId, instanceVar) {
+            const dropdownToggle = document.getElementById(dropdownToggleId);
+            const dropdownMenu = document.getElementById(dropdownMenuId);
+            
+            if (!dropdownToggle || !dropdownMenu) {
+                return null;
+            }
+            
+            // Ensure dropdown is closed on page load - remove any show classes
+                        dropdownMenu.classList.remove('show');
+                        dropdownToggle.classList.remove('show');
+                        dropdownToggle.setAttribute('aria-expanded', 'false');
+            
+            // Initialize Bootstrap dropdown with click trigger only (no hover/focus)
+            let instance = null;
+            try {
+                instance = new bootstrap.Dropdown(dropdownToggle, {
+                    trigger: 'click', // Only open on click, not hover or focus
+                    boundary: 'viewport', // Keep dropdown within viewport
+                    popperConfig: {
+                        modifiers: [
+                            {
+                                name: 'preventOverflow',
+                                options: {
+                                    boundary: dropdownToggle.closest('.navbar') || document.body
+                                }
+                            }
+                        ]
+                    }
+                });
+            } catch (e) {
+                // If dropdown already initialized, get existing instance
+                instance = bootstrap.Dropdown.getInstance(dropdownToggle);
+                if (!instance) {
+                    // Fallback: create new instance with click-only trigger
+                    instance = new bootstrap.Dropdown(dropdownToggle, {
+                        trigger: 'click'
+                    });
+                }
+            }
+            
+            // Manual click handler to toggle dropdown (since we removed data-bs-toggle)
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Toggle dropdown using Bootstrap's API
+                const isOpen = dropdownMenu.classList.contains('show');
+                if (isOpen) {
+                    instance.hide();
+                } else {
+                    instance.show();
+                }
+            });
+            
+            // Track dropdown state using Bootstrap events
+            dropdownToggle.addEventListener('show.bs.dropdown', function(e) {
+                isDropdownOpen = true;
+            });
+            
+            dropdownToggle.addEventListener('shown.bs.dropdown', function(e) {
+                // Load notifications only when dropdown is actually shown
+                isDropdownOpen = true;
+                loadNotifications();
+            });
+            
+            dropdownToggle.addEventListener('hide.bs.dropdown', function(e) {
+                isDropdownOpen = false;
+            });
+            
+            dropdownToggle.addEventListener('hidden.bs.dropdown', function(e) {
+                // Ensure dropdown is fully closed
+                isDropdownOpen = false;
+                dropdownMenu.classList.remove('show');
+                dropdownToggle.setAttribute('aria-expanded', 'false');
+            });
+            
+            // Prevent dropdown from opening on non-left mouse button clicks
+            dropdownToggle.addEventListener('mousedown', function(e) {
+                // Only allow left mouse button clicks (button 0)
+                if (e.button !== 0) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Close dropdown if it's open
+                    if (dropdownMenu.classList.contains('show')) {
+                        instance.hide();
+                    }
+                }
+            });
+            
+            return instance;
+        }
+        
+        // Set up event listeners for desktop dropdown
+        const dropdownToggle = document.getElementById('notificationDropdown');
+        const markAllReadBtn = document.getElementById('mark-all-read');
+        const dropdownMenu = document.getElementById('notification-dropdown-menu');
+        
+        // Set up event listeners for mobile dropdown
+        const mobileDropdownToggle = document.getElementById('notificationDropdownMobile');
+        const mobileMarkAllReadBtn = document.getElementById('mark-all-read-mobile');
+        const mobileDropdownMenu = document.getElementById('notification-dropdown-menu-mobile');
+        
+        // Initialize desktop dropdown
+        if (dropdownToggle && dropdownMenu) {
+            dropdownInstance = initializeDropdown('notificationDropdown', 'notification-dropdown-menu', 'dropdownInstance');
+        }
+        
+        // Initialize mobile dropdown
+        if (mobileDropdownToggle && mobileDropdownMenu) {
+            mobileDropdownInstance = initializeDropdown('notificationDropdownMobile', 'notification-dropdown-menu-mobile', 'mobileDropdownInstance');
+        }
+        
+        // Handle Escape key to close all dropdowns
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isDropdownActuallyOpen()) {
+                e.preventDefault();
+                closeAllDropdowns();
+            }
         });
         
-        // Initial load
-        updateNotificationCount();
-        loadNotifications();
+        // Close dropdown when clicking outside - handle both desktop and mobile
+            document.addEventListener('click', function(e) {
+            // Check if any dropdown is open
+            const desktopOpen = dropdownMenu && dropdownMenu.classList.contains('show');
+            const mobileOpen = mobileDropdownMenu && mobileDropdownMenu.classList.contains('show');
+            
+            if (!desktopOpen && !mobileOpen) {
+                return;
+            }
+            
+            // Check if click is outside desktop dropdown
+            if (desktopOpen) {
+                const clickedInsideDesktopToggle = dropdownToggle && (dropdownToggle === e.target || dropdownToggle.contains(e.target));
+                const clickedInsideDesktopMenu = dropdownMenu && (dropdownMenu === e.target || dropdownMenu.contains(e.target));
+                const clickedInsideDesktop = clickedInsideDesktopToggle || clickedInsideDesktopMenu;
+                
+                if (!clickedInsideDesktop) {
+                        dropdownInstance.hide();
+                }
+            }
+            
+            // Check if click is outside mobile dropdown
+            if (mobileOpen) {
+                const clickedInsideMobileToggle = mobileDropdownToggle && (mobileDropdownToggle === e.target || mobileDropdownToggle.contains(e.target));
+                const clickedInsideMobileMenu = mobileDropdownMenu && (mobileDropdownMenu === e.target || mobileDropdownMenu.contains(e.target));
+                const clickedInsideMobile = clickedInsideMobileToggle || clickedInsideMobileMenu;
+                
+                if (!clickedInsideMobile) {
+                    mobileDropdownInstance.hide();
+                }
+            }
+        }, false); // Use bubbling phase - toggle handler uses stopPropagation so this won't fire for toggle clicks
         
-        // Set up periodic refresh (every 30 seconds)
+        // Handle mark-all-read buttons for both desktop and mobile
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent event from bubbling up
+                markAllNotificationsAsRead();
+            });
+        }
+        
+        if (mobileMarkAllReadBtn) {
+            mobileMarkAllReadBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent event from bubbling up
+                markAllNotificationsAsRead();
+            });
+        }
+        
+        // Initial load - update count only, do not open dropdown
+        updateNotificationCount();
+        
+        // Set up periodic refresh (every 30 seconds) - only update count, do not check for open state
         setInterval(() => {
             updateNotificationCount();
-            loadNotifications();
+            // Only reload notifications if dropdown is actually open and visible
+            if (isDropdownActuallyOpen() && isDropdownOpen) {
+                loadNotifications();
+            }
         }, 30000);
     }
     
-    // Initialize admin notifications
+    // Initialize admin notifications after DOM is ready
     setupAdminNotifications();
 });

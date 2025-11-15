@@ -1,13 +1,10 @@
 # home/views.py
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 import json
-from django.contrib.auth import logout
-from django.shortcuts import redirect
-from django.shortcuts import render
 
 @csrf_exempt
 def api_login(request):
@@ -66,9 +63,6 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')  
-def profile_view(request):
-  
-    return render(request, 'home/profile.html')
 
-def index(request):
-    return render(request, 'home/index.html')
+def profile_view(request):
+    return render(request, 'home/profile.html')

@@ -29,7 +29,7 @@
   <div class="row">
     <!-- Filter Panel (Left Column) -->
     <div class="col-lg-3 mb-4">
-      <div class="card shadow-sm border-0 rounded-3 sticky-top" style="top: 80px;">
+      <div class="card shadow-sm border-0 rounded-3 filter-sidebar">
         <div class="card-header bg-white border-0">
           <h2 class="mb-0">Filters</h2>
           <p class="text-muted small mb-0">Refine your search results</p>
@@ -354,10 +354,58 @@
     scroll-margin-top: 70px;
   }
   
-  /* Sticky filter panel */
+  /* Sticky filter panel - ensure it stays below navbar */
+  .filter-sidebar {
+    z-index: 1010 !important; /* Lower than navbar z-index (1020) - ensures navbar stays on top */
+  }
+  
+  /* Ensure navbar always stays above sidebar */
+  .navbar.sticky-top {
+    z-index: 1020 !important; /* Higher than sidebar to ensure it stays on top */
+    position: sticky !important;
+    top: 0 !important;
+    background-color: white !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Desktop: enable sticky sidebar with proper spacing */
   @media (min-width: 992px) {
-    .sticky-top {
+    .filter-sidebar {
       position: sticky;
+      top: 150px; /* Account for navbar height (logo ~130px + padding) */
+      max-height: calc(100vh - 170px); /* Prevent overflow, account for navbar + spacing */
+      overflow-y: auto; /* Allow scrolling if content is too tall */
+      z-index: 1010; /* Lower than navbar */
+    }
+    
+    /* Ensure sidebar scrolls smoothly behind navbar */
+    .filter-sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .filter-sidebar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    .filter-sidebar::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+    
+    .filter-sidebar::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
+  
+  /* Mobile: disable sticky sidebar to prevent overlap and layout issues */
+  @media (max-width: 991.98px) {
+    .filter-sidebar {
+      position: relative !important;
+      top: auto !important;
+      max-height: none !important;
+      overflow-y: visible !important;
+      z-index: auto !important;
     }
   }
   

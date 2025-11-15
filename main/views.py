@@ -4,12 +4,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from typing import cast
-from django.db import models
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponseForbidden
 from django.apps import apps
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated

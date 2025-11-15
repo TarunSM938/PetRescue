@@ -13,8 +13,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   
   <!-- Custom CSS -->
-  <link href="{% static 'css/style.css' %}" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}?v=1.0" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Admin CSS - only for admin users -->
+  {% if user.is_authenticated and user.is_superuser %}
+  <link href="{% static 'css/admin.css' %}?v=1.0" rel="stylesheet">
+  {% endif %}
 
   {% block head_extra %}{% endblock %}
 </head>
@@ -25,7 +30,37 @@
       <a class="navbar-brand fw-bold text-success" href="{% url 'home' %}">
         <img src="/media/logo.png" alt="PetRescue Logo" height="130" class="d-inline-block align-text-top">
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      
+      <!-- Mobile: Notification bell (visible next to hamburger, outside collapse menu) -->
+      <!-- Desktop: Hidden (shown in menu instead) -->
+      {% if user.is_authenticated and user.is_superuser %}
+      <div class="d-lg-none notification-bell-mobile">
+        <a class="nav-link dropdown-toggle position-relative p-2" href="#" id="notificationDropdownMobile" role="button" aria-expanded="false" aria-haspopup="true" tabindex="0">
+          <i class="fas fa-bell fa-lg"></i>
+          <span class="badge bg-danger notification-badge rounded-pill" id="notification-count-mobile">0</span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end notification-dropdown shadow-lg" aria-labelledby="notificationDropdownMobile" id="notification-dropdown-menu-mobile">
+          <div class="notification-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+            <span class="fw-bold">Notifications</span>
+            <span class="badge bg-primary rounded-pill" id="notification-total-count-mobile">0</span>
+          </div>
+          <div class="notification-list-container" id="notification-list-mobile" role="menu">
+            <!-- Notifications will be loaded here via AJAX -->
+          </div>
+          <div class="notification-footer d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light sticky-bottom">
+            <a class="btn btn-sm btn-outline-primary" href="/dashboard/admin/notifications/">
+              <i class="fas fa-external-link-alt me-1"></i>View All Notifications
+            </a>
+            <button class="btn btn-sm btn-primary" id="mark-all-read-mobile">
+              <i class="fas fa-check-circle me-1"></i>Mark all as read
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      
+      <!-- Hamburger Button -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -66,23 +101,31 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'profile' %}">My Profile</a>
           </li>
-          <!-- Notification Bell Icon - only visible to admin users -->
+          <!-- Notification Bell Icon - Desktop only (hidden on mobile) -->
+          <!-- Note: data-bs-toggle removed to prevent auto-initialization; JavaScript manually initializes dropdown with click-only behavior -->
           {% if user.is_authenticated and user.is_superuser %}
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fas fa-bell"></i>
-              <span class="badge bg-danger notification-badge" id="notification-count">0</span>
+          <li class="nav-item dropdown d-none d-lg-block">
+            <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationDropdown" role="button" aria-expanded="false" aria-haspopup="true" tabindex="0">
+              <i class="fas fa-bell fa-lg"></i>
+              <span class="badge bg-danger notification-badge rounded-pill" id="notification-count">0</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown" id="notification-dropdown-menu">
-              <li class="dropdown-header">Notifications</li>
-              <li><hr class="dropdown-divider"></li>
-              <div id="notification-list">
+            <div class="dropdown-menu dropdown-menu-end notification-dropdown shadow-lg" aria-labelledby="notificationDropdown" id="notification-dropdown-menu">
+              <div class="notification-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                <span class="fw-bold">Notifications</span>
+                <span class="badge bg-primary rounded-pill" id="notification-total-count">0</span>
+              </div>
+              <div class="notification-list-container" id="notification-list" role="menu">
                 <!-- Notifications will be loaded here via AJAX -->
               </div>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-center" href="#" id="mark-all-read">Mark all as read</a></li>
-              <li><a class="dropdown-item text-center" href="/dashboard/admin/notifications/">View all notifications</a></li>
-            </ul>
+              <div class="notification-footer d-flex justify-content-between align-items-center px-3 py-2 border-top bg-light sticky-bottom">
+                <a class="btn btn-sm btn-outline-primary" href="/dashboard/admin/notifications/">
+                  <i class="fas fa-external-link-alt me-1"></i>View All Notifications
+                </a>
+                <button class="btn btn-sm btn-primary" id="mark-all-read">
+                  <i class="fas fa-check-circle me-1"></i>Mark all as read
+                </button>
+              </div>
+            </div>
           </li>
           {% endif %}
           <li class="nav-item">
