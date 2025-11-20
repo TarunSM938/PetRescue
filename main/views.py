@@ -468,6 +468,57 @@ def report_found_success(request):
     return render(request, 'success_found.html')
 
 
+# Pet detail view
+def pet_detail(request, pet_id):
+    """
+    Display detailed information about a specific pet.
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    
+    # Get the pet object
+    pet = get_object_or_404(PetModel, id=pet_id)
+    
+    # Get associated request if it exists
+    try:
+        pet_request = RequestModel.objects.get(pet=pet)
+    except RequestModel.DoesNotExist:
+        pet_request = None
+    
+    # Check if user has permission to view contact information
+    show_contact_info = False
+    contact_info = None
+    
+    if request.user.is_authenticated:
+        # User is the reporter
+        if pet.owner == request.user:
+            show_contact_info = True
+        # User is admin
+        elif request.user.is_superuser:
+            show_contact_info = True
+        # User has permission (for future implementation)
+        # This could be extended with specific permissions
+    
+    # Prepare contact information if user has permission
+    if show_contact_info and pet_request:
+        contact_info = {
+            'reporter_name': pet.owner.get_full_name() or pet.owner.username,
+            'reporter_email': pet.owner.email,
+            'reporter_phone': pet_request.phone_number or pet.owner.phone_number
+        }
+    
+    context = {
+        'pet': pet,
+        'pet_request': pet_request,
+        'show_contact_info': show_contact_info,
+        'contact_info': contact_info,
+        'now': timezone.now()
+    }
+    return render(request, 'pet_detail.html', context)
+
+
 # Admin Dashboard Views
 # Restricted to admin users only
 

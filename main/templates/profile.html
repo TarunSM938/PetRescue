@@ -84,7 +84,7 @@
               <div class="form-text">Your birth date (optional).</div>
             </div>
             
-            <button type="submit" class="btn btn-success w-100">Save Changes</button>
+            <button type="submit" class="btn btn-success w-100 hover-lift">Save Changes</button>
           </form>
         </div>
       </div>
@@ -145,19 +145,19 @@
             <h6 class="mb-3">Your PetRescue Impact</h6>
             <div class="row text-center">
               <div class="col-4">
-                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center hover-lift" style="width: 60px; height: 60px; transition: var(--transition);">
                   <span class="fw-bold text-success">-</span>
                 </div>
                 <div class="mt-2 small">Pets Reported</div>
               </div>
               <div class="col-4">
-                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center hover-lift" style="width: 60px; height: 60px; transition: var(--transition);">
                   <span class="fw-bold text-primary">-</span>
                 </div>
                 <div class="mt-2 small">Pets Helped</div>
               </div>
               <div class="col-4">
-                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center hover-lift" style="width: 60px; height: 60px; transition: var(--transition);">
                   <span class="fw-bold text-warning">-</span>
                 </div>
                 <div class="mt-2 small">Days Active</div>
@@ -172,17 +172,17 @@
   <!-- Account Actions -->
   <div class="row mt-4">
     <div class="col-12">
-      <div class="card border-0 rounded-3 bg-light">
+      <div class="card border-0 rounded-3 bg-light hover-lift">
         <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
+          <div class="d-flex justify-content-between align-items-center flex-column flex-md-row">
+            <div class="mb-3 mb-md-0 text-center text-md-start">
               <h5 class="mb-1">Account Settings</h5>
               <p class="mb-0 text-muted">Manage your account preferences and security settings.</p>
             </div>
-            <div>
-              <a href="{% url 'user_requests' %}" class="btn btn-outline-primary me-2">My Pet Reports</a>
-              <a href="#" class="btn btn-outline-secondary me-2">Change Password</a>
-              <a href="#" class="btn btn-outline-danger">Delete Account</a>
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-end gap-2">
+              <a href="{% url 'user_requests' %}" class="btn btn-outline-primary hover-lift">My Pet Reports</a>
+              <a href="#" class="btn btn-outline-secondary hover-lift">Change Password</a>
+              <a href="#" class="btn btn-outline-danger hover-lift">Delete Account</a>
             </div>
           </div>
         </div>

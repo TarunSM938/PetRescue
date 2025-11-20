@@ -82,6 +82,9 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('report-issue/<int:pet_id>/', views.report_issue, name='report_issue'),
     
+    # Pet detail page
+    path('pet/<int:pet_id>/', views.pet_detail, name='pet_detail'),
+    
     # Admin Contact Submissions URLs
     path('dashboard/admin/contact-submissions/', views.admin_contact_submissions, name='admin_contact_submissions'),
     path('dashboard/admin/contact-submissions/<int:submission_id>/', views.admin_contact_submission_detail, name='admin_contact_submission_detail'),

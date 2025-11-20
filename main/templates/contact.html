@@ -8,13 +8,13 @@
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <!-- Header Section -->
-      <div class="text-center mb-5">
+      <div class="text-center mb-5 fade-in-up">
         <h1 class="display-5 fw-bold mb-3">Get in Touch</h1>
         <p class="lead text-muted">We're here to help! Send us a message and we'll get back to you as soon as possible.</p>
       </div>
       
       <!-- Contact Form Card -->
-      <div class="card shadow-sm border-0 rounded-3">
+      <div class="card shadow-sm border-0 rounded-3 hover-lift">
         <div class="card-body p-4">
           <form method="POST" id="contact-form">
             {% csrf_token %}
@@ -24,7 +24,7 @@
               {{ form.name }}
               {% if form.name.errors %}
                 {% for error in form.name.errors %}
-                  <div class="text-danger small mt-1">{{ error }}</div>
+                  <div class="invalid-feedback d-block">{{ error }}</div>
                 {% endfor %}
               {% endif %}
             </div>
@@ -34,7 +34,7 @@
               {{ form.email }}
               {% if form.email.errors %}
                 {% for error in form.email.errors %}
-                  <div class="text-danger small mt-1">{{ error }}</div>
+                  <div class="invalid-feedback d-block">{{ error }}</div>
                 {% endfor %}
               {% endif %}
             </div>
@@ -44,7 +44,7 @@
               {{ form.subject }}
               {% if form.subject.errors %}
                 {% for error in form.subject.errors %}
-                  <div class="text-danger small mt-1">{{ error }}</div>
+                  <div class="invalid-feedback d-block">{{ error }}</div>
                 {% endfor %}
               {% endif %}
             </div>
@@ -54,14 +54,14 @@
               {{ form.message }}
               {% if form.message.errors %}
                 {% for error in form.message.errors %}
-                  <div class="text-danger small mt-1">{{ error }}</div>
+                  <div class="invalid-feedback d-block">{{ error }}</div>
                 {% endfor %}
               {% endif %}
               <div class="form-text">Please provide as much detail as possible so we can help you better.</div>
             </div>
             
             <div class="d-grid">
-              <button type="submit" class="btn btn-success btn-lg">
+              <button type="submit" class="btn btn-success btn-lg hover-lift">
                 <i class="fas fa-paper-plane me-2"></i>Send Message
               </button>
             </div>
@@ -72,21 +72,21 @@
       <!-- Additional Information -->
       <div class="row mt-5">
         <div class="col-md-4 text-center mb-4 mb-md-0">
-          <div class="bg-light rounded-circle p-3 d-inline-block mb-3">
+          <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3 hover-lift" style="width: 70px; height: 70px; transition: var(--transition);">
             <i class="fas fa-envelope fa-2x text-success"></i>
           </div>
           <h5>Email Us</h5>
           <p class="text-muted mb-0">info@petrescue.com</p>
         </div>
         <div class="col-md-4 text-center mb-4 mb-md-0">
-          <div class="bg-light rounded-circle p-3 d-inline-block mb-3">
+          <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3 hover-lift" style="width: 70px; height: 70px; transition: var(--transition);">
             <i class="fas fa-phone fa-2x text-success"></i>
           </div>
           <h5>Call Us</h5>
           <p class="text-muted mb-0">+91 9380179429</p>
         </div>
         <div class="col-md-4 text-center">
-          <div class="bg-light rounded-circle p-3 d-inline-block mb-3">
+          <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3 hover-lift" style="width: 70px; height: 70px; transition: var(--transition);">
             <i class="fas fa-clock fa-2x text-success"></i>
           </div>
           <h5>Response Time</h5>
@@ -97,4 +97,3 @@
   </div>
 </div>
 {% endblock %}
-

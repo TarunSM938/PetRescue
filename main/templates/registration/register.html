@@ -6,68 +6,181 @@
 <!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-  .toggle-password {
-    cursor: pointer;
-    padding: 0.375rem 0.75rem;
-  }
-  .password-field {
-    position: relative;
-  }
   .form-container {
     max-width: 500px;
     margin: 2rem auto;
   }
+  
   .card {
-    border-radius: 12px;
+    border-radius: var(--border-radius);
     border: none;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 0;
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-hover);
+  }
+  
   .card-header {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
     color: white;
-    border-radius: 12px 12px 0 0 !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
     text-align: center;
     padding: 1.5rem;
   }
+  
   .card-body {
     padding: 2rem;
   }
+  
   .btn-register {
-    background-color: #FF9800;
+    background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
     border: none;
     padding: 0.75rem;
     font-weight: 600;
     transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: var(--border-radius);
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
+  
   .btn-register:hover {
-    background-color: #e68a00;
+    background: linear-gradient(135deg, #F57C00 0%, #EF6C00 100%);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
   }
+  
   .login-link {
     text-align: center;
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid #eee;
   }
-  /* Adjust form spacing for better mobile experience */
+  
+  .form-control, .form-select {
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    min-height: 44px;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(255, 152, 0, 0.25);
+  }
+  
+  .input-group-text {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+  }
+  
+  .toggle-password {
+    cursor: pointer;
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .password-field {
+    position: relative;
+  }
+  
+  /* Loading spinner */
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  /* Validation feedback */
+  .valid-feedback, .invalid-feedback {
+    font-size: 0.875rem;
+  }
+  
+  .valid-feedback {
+    color: var(--success-color);
+  }
+  
+  .invalid-feedback {
+    color: var(--danger-color);
+  }
+  
+  /* Email status indicator */
+  #email-status {
+    font-size: 0.875rem;
+  }
+  
+  .email-available {
+    color: var(--success-color);
+  }
+  
+  .email-taken {
+    color: var(--danger-color);
+  }
+  
+  /* Password strength indicator */
+  #password-help {
+    font-size: 0.875rem;
+  }
+  
+  /* Password match indicator */
+  #password-match {
+    font-size: 0.875rem;
+  }
+  
+  /* Responsive adjustments */
   @media (max-width: 576px) {
+    .form-container {
+      margin: 1rem;
+      max-width: none;
+    }
+    
     .card-body {
       padding: 1.5rem;
     }
+  }
+  
+  /* Performance optimization: Optimize registration page elements */
+  .form-container, .card, .card-header, .card-body, .btn-register, .login-link {
+    contain: layout style paint;
+  }
+  
+  .form-control, .form-select, .input-group-text, .toggle-password {
+    contain: layout style paint;
+  }
+  
+  .valid-feedback, .invalid-feedback, #email-status, #password-help, #password-match {
+    contain: layout style;
   }
 </style>
 {% endblock %} 
 
 {% block content %}
 <div class="form-container">
-  <div class="card shadow-sm">
+  <div class="card shadow-sm fade-in-up">
     <div class="card-header">
-      <h2>Join the PetRescue Community</h2>
+      <h2><i class="fas fa-user-plus me-2"></i>Join PetRescue</h2>
       <p class="mb-0">Create your account to help pets find their way home</p>
     </div>
     
     <div class="card-body">
-      <form method="POST" id="register-form" novalidate>
+      <!-- Loading indicator -->
+      <div id="register-loading" class="text-center py-3 d-none">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Creating account...</span>
+        </div>
+        <span class="ms-2">Creating your account...</span>
+      </div>
+      
+      <form method="POST" id="register-form" novalidate class="transition-fade">
         {% csrf_token %} 
         
         <!-- Full Name Field -->
@@ -86,7 +199,7 @@
             {{ form.email }}
             {% if form.email.errors %}
               {% for error in form.email.errors %}
-                <div class="text-danger">{{ error }}</div>
+                <div class="invalid-feedback d-block"><small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small></div>
               {% endfor %}
             {% endif %}
             <div id="email-status" class="mt-1"></div>
@@ -109,7 +222,7 @@
             {{ form.username }}
             {% if form.username.errors %}
               {% for error in form.username.errors %}
-                <div class="text-danger">{{ error }}</div>
+                <div class="invalid-feedback d-block"><small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small></div>
               {% endfor %}
             {% endif %}
           </div>
@@ -127,7 +240,7 @@
             </div>
             {% if form.password1.errors %}
               {% for error in form.password1.errors %}
-                <div class="text-danger">{{ error }}</div>
+                <div class="invalid-feedback d-block"><small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small></div>
               {% endfor %}
             {% endif %}
             <div id="password-help" class="form-text">Must be at least 8 characters long</div>
@@ -146,14 +259,17 @@
             </div>
             {% if form.password2.errors %}
               {% for error in form.password2.errors %}
-                <div class="text-danger">{{ error }}</div>
+                <div class="invalid-feedback d-block"><small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small></div>
               {% endfor %}
             {% endif %}
             <div id="password-match" class="mt-1"></div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-register w-100">Create Account</button>
+        <button type="submit" class="btn btn-register">
+          <span class="spinner-border spinner-border-sm d-none me-2" id="register-spinner" role="status" aria-hidden="true"></span>
+          <span id="register-text">Create Account</span>
+        </button>
       </form>
 
       <div class="login-link">
@@ -188,41 +304,81 @@
       });
     });
     
-    // Form validation
+    // Form submission with loading indicator
     const form = document.getElementById('register-form');
     if (form) {
       form.addEventListener('submit', function(e) {
-        let isValid = true;
+        const registerButton = document.querySelector('.btn-register');
+        const registerSpinner = document.getElementById('register-spinner');
+        const registerText = document.getElementById('register-text');
         
-        // Full name validation
-        const fullName = document.getElementById('id_full_name');
-        if (!fullName.value.trim()) {
-          fullName.classList.add('is-invalid');
-          isValid = false;
-        } else {
-          fullName.classList.remove('is-invalid');
-        }
+        // Show loading indicator
+        registerSpinner.classList.remove('d-none');
+        registerText.textContent = 'Creating account...';
+        registerButton.disabled = true;
         
-        // Phone validation (optional but if provided, should be valid)
-        const phone = document.getElementById('id_phone');
-        if (phone.value && !/^[0-9+\-\s()]{10,15}$/.test(phone.value)) {
-          phone.classList.add('is-invalid');
-          isValid = false;
-        } else {
-          phone.classList.remove('is-invalid');
-        }
+        // Add slight delay to show loading state
+        setTimeout(() => {
+          // In a real implementation, the form would submit normally
+          // For demo purposes, we'll reset after 2 seconds
+          setTimeout(() => {
+            registerSpinner.classList.add('d-none');
+            registerText.textContent = 'Create Account';
+            registerButton.disabled = false;
+          }, 2000);
+        }, 100);
+      });
+    }
+    
+    // Real-time email validation (if implemented in backend)
+    const emailField = document.getElementById('{{ form.email.id_for_label }}');
+    if (emailField) {
+      emailField.addEventListener('blur', function() {
+        const email = this.value;
+        const emailStatus = document.getElementById('email-status');
         
-        if (!isValid) {
-          e.preventDefault();
+        if (email && email.includes('@')) {
+          // In a real implementation, this would make an AJAX call to validate email
+          // For now, we'll just simulate the behavior
+          /*
+          fetch('/validate-email/?email=' + encodeURIComponent(email))
+            .then(response => response.json())
+            .then(data => {
+              if (data.is_taken) {
+                emailStatus.textContent = 'This email is already registered.';
+                emailStatus.className = 'email-taken';
+              } else {
+                emailStatus.textContent = 'Email is available.';
+                emailStatus.className = 'email-available';
+              }
+            });
+          */
         }
       });
+    }
+    
+    // Password match validation
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+    const password2 = document.getElementById('{{ form.password2.id_for_label }}');
+    const passwordMatch = document.getElementById('password-match');
+    
+    if (password1 && password2) {
+      function checkPasswordMatch() {
+        if (password1.value && password2.value) {
+          if (password1.value === password2.value) {
+            passwordMatch.textContent = 'Passwords match';
+            passwordMatch.className = 'valid-feedback';
+          } else {
+            passwordMatch.textContent = 'Passwords do not match';
+            passwordMatch.className = 'invalid-feedback';
+          }
+        } else {
+          passwordMatch.textContent = '';
+        }
+      }
       
-      // Real-time validation
-      document.getElementById('id_full_name').addEventListener('blur', function() {
-        if (this.value.trim()) {
-          this.classList.remove('is-invalid');
-        }
-      });
+      password1.addEventListener('input', checkPasswordMatch);
+      password2.addEventListener('input', checkPasswordMatch);
     }
   });
 </script>

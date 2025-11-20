@@ -5,7 +5,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section mb-5">
+<section class="hero-section mb-5 fade-in-up">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-6 mb-4 mb-lg-0">
@@ -13,17 +13,27 @@
         <p class="lead mb-4">PetRescue connects communities to help reunite lost pets with their families and find loving homes for animals in need.</p>
         <div class="d-flex flex-wrap gap-3">
           {% if user.is_authenticated %}
-            <a href="{% url 'report_lost_pet' %}" class="btn btn-danger btn-lg">Report a Lost Pet</a>
-            <a href="{% url 'report_found_pet' %}" class="btn btn-success btn-lg">Report a Found Pet</a>
+            <a href="{% url 'report_lost_pet' %}" class="btn btn-danger btn-lg">
+              <i class="fas fa-search me-2"></i>Report a Lost Pet
+            </a>
+            <a href="{% url 'report_found_pet' %}" class="btn btn-success btn-lg">
+              <i class="fas fa-paw me-2"></i>Report a Found Pet
+            </a>
           {% else %}
-            <a href="{% url 'login' %}" class="btn btn-danger btn-lg">Report a Lost Pet</a>
-            <a href="{% url 'login' %}" class="btn btn-success btn-lg">Report a Found Pet</a>
+            <a href="{% url 'login' %}" class="btn btn-danger btn-lg">
+              <i class="fas fa-search me-2"></i>Report a Lost Pet
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-success btn-lg">
+              <i class="fas fa-paw me-2"></i>Report a Found Pet
+            </a>
           {% endif %}
-          <a href="{% url 'find_pets' %}" class="btn btn-outline-primary btn-lg">Search for Pets</a>
+          <a href="{% url 'find_pets' %}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-list me-2"></i>Search for Pets
+          </a>
         </div>
       </div>
       <div class="col-lg-6">
-        <div class="hero-image-container rounded-3 overflow-hidden shadow-lg">
+        <div class="hero-image-container rounded-3 overflow-hidden shadow-lg fade-in">
           <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
                alt="Happy dog and cat" class="img-fluid">
         </div>
@@ -33,7 +43,7 @@
 </section>
 
 <!-- Mission Section -->
-<section class="mission-section mb-5 bg-light py-5">
+<section class="mission-section mb-5 bg-light py-5 fade-in-up">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8 text-center">
@@ -45,7 +55,7 @@
 </section>
 
 <!-- How It Works Section -->
-<section class="how-it-works-section mb-5">
+<section class="how-it-works-section mb-5 fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-12 text-center mb-5">
@@ -56,7 +66,7 @@
     
     <div class="row g-4">
       <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card">
+        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card fade-in-up">
           <div class="card-body text-center">
             <div class="feature-icon bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
               <i class="fas fa-paw fa-2x text-success"></i>
@@ -68,7 +78,7 @@
       </div>
       
       <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card">
+        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card fade-in-up">
           <div class="card-body text-center">
             <div class="feature-icon bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
               <i class="fas fa-search fa-2x text-warning"></i>
@@ -80,7 +90,7 @@
       </div>
       
       <div class="col-md-6 col-lg-4 mx-auto">
-        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card">
+        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card fade-in-up">
           <div class="card-body text-center">
             <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
               <i class="fas fa-heart fa-2x text-primary"></i>
@@ -95,7 +105,7 @@
 </section>
 
 <!-- Community Impact Section -->
-<section class="community-impact-section mb-5">
+<section class="community-impact-section mb-5 fade-in-up">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-6 mb-4 mb-lg-0">
@@ -103,7 +113,7 @@
         <p class="lead">PetRescue has helped reunite many pets with their families and connected numerous animals with loving homes.</p>
       </div>
       <div class="col-lg-6">
-        <div class="rounded-3 overflow-hidden shadow-lg">
+        <div class="rounded-3 overflow-hidden shadow-lg fade-in">
           <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
                alt="Happy family with pet" class="img-fluid">
         </div>
@@ -113,7 +123,7 @@
 </section>
 
 <!-- Recent Pets Section -->
-<section class="recent-pets-section mb-5">
+<section class="recent-pets-section mb-5 fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-12 text-center mb-5">
@@ -122,24 +132,33 @@
       </div>
     </div>
     
-    <div class="row g-4">
+    <!-- Loading indicator -->
+    <div id="recent-pets-loading" class="text-center py-5 d-none">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading pets...</p>
+    </div>
+    
+    <div class="row g-4" id="recent-pets-container">
       {% if recent_pets %}
         {% for pet in recent_pets %}
-          <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
+          <div class="col-md-6 col-lg-4 fade-in-up">
+            <div class="card h-100 shadow-sm border-0 rounded-3 pet-card hover-lift">
               {% if pet.image %}
-                <img src="{{ pet.image.url }}" class="card-img-top" alt="{{ pet.breed }}" style="height: 200px; object-fit: cover;">
+                <img src="{{ pet.image.url }}" class="card-img-top" alt="{{ pet.breed }}" style="height: 200px; object-fit: cover;" loading="lazy">
               {% else %}
-                <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-                     class="card-img-top" alt="{{ pet.breed }}" style="height: 200px; object-fit: cover;">
+                <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 200px;">
+                  <i class="fas fa-paw fa-3x text-muted"></i>
+                </div>
               {% endif %}
               <div class="card-body d-flex flex-column">
                 {% if pet.status == 'lost' %}
-                  <span class="badge bg-danger align-self-start mb-2">LOST</span>
+                  <span class="status-badge status-badge-lost align-self-start mb-2">LOST</span>
                 {% elif pet.status == 'found' %}
-                  <span class="badge bg-success align-self-start mb-2">FOUND</span>
+                  <span class="status-badge status-badge-found align-self-start mb-2">FOUND</span>
                 {% elif pet.status == 'adoptable' %}
-                  <span class="badge bg-info align-self-start mb-2">NEEDS HOME</span>
+                  <span class="status-badge status-badge-adoptable align-self-start mb-2">NEEDS HOME</span>
                 {% endif %}
                 <h5 class="card-title">{{ pet.breed }}</h5>
                 <p class="card-text flex-grow-1">
@@ -152,7 +171,9 @@
                     Looking for a loving home.
                   {% endif %}
                 </p>
-                <a href="#" class="btn btn-outline-primary mt-auto">View Details</a>
+                <a href="{% url 'pet_detail' pet.id %}" class="btn btn-outline-primary mt-auto">
+                  <i class="fas fa-eye me-1"></i>View Details
+                </a>
               </div>
             </div>
           </div>
@@ -160,14 +181,19 @@
       {% else %}
         <!-- Fallback content if no pets are available -->
         <div class="col-12 text-center">
-          <p class="lead">No pets have been reported yet. You can be the first to help!</p>
+          <div class="py-5">
+            <i class="fas fa-paw fa-3x text-muted mb-3"></i>
+            <p class="lead">No pets have been reported yet. You can be the first to help!</p>
+          </div>
         </div>
       {% endif %}
     </div>
     
     <div class="row mt-4">
       <div class="col-12 text-center">
-        <a href="{% url 'find_pets' %}" class="btn btn-success btn-lg">View All Pets</a>
+        <a href="{% url 'find_pets' %}" class="btn btn-success btn-lg">
+          <i class="fas fa-list me-2"></i>View All Pets
+        </a>
       </div>
     </div>
   </div>
@@ -175,7 +201,7 @@
 
 <!-- CTA Section -->
 {% if not user.is_authenticated %}
-<section class="cta-section mb-5">
+<section class="cta-section mb-5 fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-lg-8 mx-auto">
@@ -183,8 +209,12 @@
           <h3 class="mb-3">Join Our Community Today</h3>
           <p class="mb-4">Create an account to help rescue pets and report lost or found animals in your area. Together, we can make a difference.</p>
           <div class="d-flex flex-wrap justify-content-center gap-3">
-            <a href="{% url 'register' %}" class="btn btn-success btn-lg">Create Account</a>
-            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Sign In</a>
+            <a href="{% url 'register' %}" class="btn btn-success btn-lg">
+              <i class="fas fa-user-plus me-2"></i>Create Account
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+              <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </a>
           </div>
         </div>
       </div>
@@ -203,6 +233,11 @@
   .hero-image-container {
     box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     transition: transform 0.3s ease;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   .hero-image-container:hover {
@@ -211,6 +246,10 @@
   
   .feature-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   .feature-card:hover {
@@ -228,6 +267,10 @@
   
   .pet-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   .pet-card:hover {
@@ -240,5 +283,53 @@
       padding: 2rem 0;
     }
   }
+  
+  /* Performance optimization: Optimize home page elements */
+  .hero-section, .mission-section, .how-it-works-section, .community-impact-section, .recent-pets-section, .cta-section {
+    contain: layout style paint;
+  }
+  
+  .hero-image-container, .feature-card, .feature-icon, .pet-card, .cta-section .card {
+    contain: layout style paint;
+  }
+  
+  /* Performance optimization: Optimize images */
+  .hero-image-container img, .community-impact-section img {
+    contain: layout style paint;
+    /* Add hardware acceleration for images */
+    transform: translateZ(0);
+  }
 </style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Add fade-in animation to elements when they come into view
+  document.addEventListener('DOMContentLoaded', function() {
+    // Simple fade-in animation for elements
+    const fadeElements = document.querySelectorAll('.fade-in-up');
+    fadeElements.forEach((element, index) => {
+      // Add delay for staggered animation
+      element.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Simulate loading for recent pets (in a real app, this would be an AJAX call)
+    const loadingIndicator = document.getElementById('recent-pets-loading');
+    const petsContainer = document.getElementById('recent-pets-container');
+    
+    if (loadingIndicator && petsContainer) {
+      // In a real implementation, this would be replaced with actual AJAX loading
+      // For now, we'll just show the loading indicator briefly
+      /*
+      loadingIndicator.classList.remove('d-none');
+      petsContainer.classList.add('d-none');
+      
+      setTimeout(() => {
+        loadingIndicator.classList.add('d-none');
+        petsContainer.classList.remove('d-none');
+      }, 800);
+      */
+    }
+  });
+</script>
 {% endblock %}

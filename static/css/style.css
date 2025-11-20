@@ -4,20 +4,33 @@ Stylesheet for the PetRescue website with a friendly, compassionate design
 */
 
 :root {
+  /* Updated color palette for consistency */
   --primary-color: #4CAF50; /* Green - represents growth and life */
+  --primary-hover: #45a049;
   --secondary-color: #FF9800; /* Orange - warmth and energy */
+  --secondary-hover: #e68a00;
   --accent-color: #2196F3; /* Blue - trust and reliability */
+  --accent-hover: #1976D2;
   --light-bg: #f8f9fa;
   --dark-text: #333;
   --light-text: #fff;
+  --muted-text: #6c757d;
+  --border-color: #dee2e6;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
   --border-radius: 8px;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --box-shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.15);
   --transition: all 0.3s ease;
+  --transition-fast: all 0.2s ease;
+  --font-family-base: 'Poppins', 'Inter', sans-serif;
+  --font-family-heading: 'Poppins', 'Inter', sans-serif;
 }
 
 /* Base styles */
 body {
-  font-family: 'Poppins', 'Inter', sans-serif;
+  font-family: var(--font-family-base);
   background-color: var(--light-bg);
   color: var(--dark-text);
   line-height: 1.6;
@@ -26,27 +39,52 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-size: 16px;
+  /* Add smooth page transitions */
+  transition: opacity 0.15s ease;
+}
+
+/* Page transition styles */
+body.page-transition {
+  opacity: 0.8;
 }
 
 /* Header styles */
 .navbar {
   box-shadow: var(--box-shadow);
   background-color: white;
+  padding: 0.75rem 0;
+  transition: all 0.3s ease;
+  /* Add hardware acceleration for better performance */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .navbar-brand {
   font-weight: 700;
   color: var(--primary-color) !important;
   font-size: 1.8rem;
+  transition: var(--transition);
+  font-family: var(--font-family-heading);
+}
+
+.navbar-brand:hover {
+  color: var(--primary-hover) !important;
+  transform: translateY(-2px);
 }
 
 .nav-link {
   font-weight: 500;
   transition: var(--transition);
+  padding: 0.5rem 1rem !important;
+  border-radius: var(--border-radius);
+  margin: 0 0.25rem;
+  position: relative;
 }
 
 .nav-link:hover {
   color: var(--secondary-color) !important;
+  background-color: rgba(76, 175, 80, 0.1);
   transform: translateY(-2px);
 }
 
@@ -54,7 +92,42 @@ body {
 .nav-link.active {
   color: var(--primary-color) !important;
   font-weight: 600;
-  border-bottom: 2px solid var(--primary-color);
+  background-color: rgba(76, 175, 80, 0.15);
+}
+
+/* Enhanced navbar for better consistency */
+.navbar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* Better touch target */
+}
+
+/* Navbar dropdown improvements */
+.dropdown-menu {
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  border: none;
+  padding: 0.5rem 0;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Active nav link */
+.nav-link.active {
+  color: var(--primary-color) !important;
+  font-weight: 600;
+  background-color: rgba(76, 175, 80, 0.15);
 }
 
 /* Card styles */
@@ -63,81 +136,233 @@ body {
   border: none;
   box-shadow: var(--box-shadow);
   transition: var(--transition);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .card:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--box-shadow-hover);
   transform: translateY(-5px);
 }
 
+.card-header {
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  margin-top: 0;
+}
+
+.card-footer {
+  background-color: var(--light-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 1.5rem;
+}
+
 /* Form styles */
-.form-control {
+.form-control, .form-select {
   border-radius: var(--border-radius);
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   padding: 0.75rem;
   transition: var(--transition);
+  font-family: var(--font-family-base);
+  font-size: 1rem;
+  min-height: 44px; /* Better touch target */
 }
 
-.form-control:focus {
+.form-control:focus, .form-select:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+  outline: none;
 }
 
-.form-select {
-  border-radius: var(--border-radius);
-  border: 1px solid #ddd;
-  padding: 0.75rem;
-  transition: var(--transition);
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
-.form-select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+/* Form groups */
+.form-group {
+  margin-bottom: 1.5rem;
 }
 
+/* Form text */
+.form-text {
+  font-size: 0.875rem;
+  color: var(--muted-text);
+  margin-top: 0.25rem;
+}
+
+/* Input groups */
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.input-group-text {
+  background-color: var(--light-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+/* Form validation */
+.is-valid {
+  border-color: var(--success-color);
+}
+
+.is-invalid {
+  border-color: var(--danger-color);
+}
+
+.valid-feedback {
+  color: var(--success-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.invalid-feedback {
+  color: var(--danger-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Button styles */
 .btn {
   border-radius: var(--border-radius);
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   transition: var(--transition);
   border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  min-height: 44px; /* Better touch target */
+  font-family: var(--font-family-base);
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.btn:hover {
+  text-decoration: none;
 }
 
 .btn-primary {
   background-color: var(--primary-color);
+  color: var(--light-text);
 }
 
 .btn-primary:hover {
-  background-color: #45a049;
+  background-color: var(--primary-hover);
   transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: var(--light-text);
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
 
 .btn-success {
-  background-color: var(--secondary-color);
+  background-color: var(--success-color);
+  color: var(--light-text);
 }
 
 .btn-success:hover {
-  background-color: #e68a00;
+  background-color: #218838;
   transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  color: var(--light-text);
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+.btn-info {
+  background-color: var(--accent-color);
+  color: var(--light-text);
+}
+
+.btn-info:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
 
 .btn-outline-primary {
   border: 2px solid var(--primary-color);
   color: var(--primary-color);
+  background-color: transparent;
 }
 
 .btn-outline-primary:hover {
   background-color: var(--primary-color);
+  color: var(--light-text);
   transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
 
-.btn-danger {
-  background-color: #dc3545;
+/* Button sizes */
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-height: 36px;
 }
 
-.btn-danger:hover {
-  background-color: #bd2130;
-  transform: translateY(-2px);
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  min-height: 52px;
+}
+
+/* Button groups */
+.btn-group .btn {
+  border-radius: var(--border-radius) !important;
+  margin: 0 0.125rem;
+}
+
+/* Disabled buttons */
+.btn:disabled, .btn.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* Alert styles */
@@ -145,25 +370,119 @@ body {
   border-radius: var(--border-radius);
   border: none;
   box-shadow: var(--box-shadow);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Alert icons */
+.alert i {
+  font-size: 1.2rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Close button for alerts */
+.alert .btn-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.alert .btn-close:hover {
+  opacity: 1;
 }
 
 /* Footer styles */
 footer {
   background-color: white;
   border-top: 1px solid #eee;
-  padding: 1.5rem 0;
+  padding: 2rem 0;
   margin-top: auto;
+  font-family: var(--font-family-base);
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+footer h5, footer h6 {
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+}
+
+footer a {
+  color: var(--dark-text);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+footer a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
 }
 
 .social-icons a {
   color: var(--dark-text);
   font-size: 1.2rem;
   transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 0 0.25rem;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .social-icons a:hover {
   color: var(--primary-color);
+  background-color: rgba(76, 175, 80, 0.1);
   transform: translateY(-3px);
+  text-decoration: none;
+}
+
+/* Footer link lists */
+footer ul {
+  list-style: none;
+  padding: 0;
+}
+
+footer ul li {
+  margin-bottom: 0.5rem;
+}
+
+/* Footer contact info */
+footer .contact-info i {
+  width: 1.5rem;
+  text-align: center;
 }
 
 /* Responsive adjustments */
@@ -188,6 +507,29 @@ footer {
     width: 35px;
     height: 35px;
   }
+  
+  footer .col-lg-4, footer .col-lg-2, footer .col-lg-3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .social-icons {
+    justify-content: center;
+  }
+  
+  /* Improved mobile navigation */
+  .navbar-collapse {
+    padding: 1rem 0;
+  }
+  
+  .navbar-nav .nav-item {
+    margin-bottom: 0.25rem;
+  }
+  
+  .navbar-nav .nav-link {
+    padding: 0.75rem 1rem !important;
+    border-radius: var(--border-radius);
+  }
 }
 
 /* Animations */
@@ -202,9 +544,63 @@ footer {
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .fade-in {
   animation: fadeIn 0.5s ease forwards;
 }
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.fade-in-left {
+  animation: fadeInLeft 0.5s ease forwards;
+}
+
+/* Staggered animations */
+.staggered-animation > * {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.staggered-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.staggered-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.staggered-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.staggered-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.staggered-animation > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* Enhanced staggered animations */
+.staggered-fade-in > * {
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.staggered-fade-in > *:nth-child(1) { animation-delay: 0.1s; }
+.staggered-fade-in > *:nth-child(2) { animation-delay: 0.2s; }
+.staggered-fade-in > *:nth-child(3) { animation-delay: 0.3s; }
+.staggered-fade-in > *:nth-child(4) { animation-delay: 0.4s; }
+.staggered-fade-in > *:nth-child(5) { animation-delay: 0.5s; }
 
 /* Helper classes */
 .text-center {
@@ -221,7 +617,7 @@ footer {
 
 /* Form error styles */
 .text-danger {
-  color: #dc3545;
+  color: var(--danger-color);
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
@@ -242,6 +638,64 @@ a:hover {
 .badge {
   font-weight: 600;
   padding: 0.5em 0.75em;
+  border-radius: var(--border-radius);
+  font-size: 0.875em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-success {
+  background-color: var(--success-color);
+}
+
+.badge-warning {
+  background-color: var(--warning-color);
+  color: #212529;
+}
+
+.badge-danger {
+  background-color: var(--danger-color);
+}
+
+.badge-info {
+  background-color: var(--accent-color);
+}
+
+.badge-primary {
+  background-color: var(--primary-color);
+  color: var(--light-text);
+}
+
+.badge-secondary {
+  background-color: var(--secondary-color);
+  color: var(--light-text);
+}
+
+/* Status badges */
+.status-badge {
+  font-weight: 600;
+  padding: 0.25em 0.75em;
+  border-radius: var(--border-radius);
+  font-size: 0.875em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-badge-lost {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.status-badge-found {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.status-badge-adoptable {
+  background-color: var(--accent-color);
+  color: white;
 }
 
 /* Input group styles */
@@ -251,16 +705,20 @@ a:hover {
 
 /* Feature cards */
 .feature-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: var(--transition);
+  height: 100%;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .feature-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+  box-shadow: var(--box-shadow-hover) !important;
 }
 
 .feature-icon {
-  transition: transform 0.3s ease;
+  transition: var(--transition);
 }
 
 .feature-card:hover .feature-icon {
@@ -286,6 +744,9 @@ a:hover {
 .modal-content {
   border-radius: var(--border-radius);
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .modal-header {
@@ -302,19 +763,29 @@ a:hover {
 }
 
 /* Focus states for accessibility */
-.btn:focus, .form-control:focus, .form-select:focus {
+.btn:focus, .form-control:focus, .form-select:focus, .nav-link:focus {
   outline: none;
   box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
 }
 
+/* Improved focus states for better accessibility */
+*:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 /* Pet card styles */
 .pet-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: var(--transition);
+  height: 100%;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .pet-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+  box-shadow: var(--box-shadow-hover) !important;
 }
 
 /* View toggle buttons */
@@ -351,15 +822,20 @@ a:hover {
 /* Pagination */
 .page-link {
   color: var(--primary-color);
+  border-radius: var(--border-radius);
+  margin: 0 0.1rem;
+  border: 1px solid var(--border-color);
 }
 
 .page-link:hover {
-  color: #45a049;
+  color: var(--primary-hover);
+  background-color: #e9ecef;
 }
 
 .page-item.active .page-link {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
+  color: white;
 }
 
 /* Hero section */
@@ -369,7 +845,12 @@ a:hover {
 
 .hero-image-container {
   box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  transition: transform 0.3s ease;
+  transition: var(--transition);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .hero-image-container:hover {
@@ -378,21 +859,24 @@ a:hover {
 
 /* CTA section */
 .cta-section .card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: var(--transition);
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .cta-section .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+  box-shadow: var(--box-shadow-hover) !important;
 }
 
 /* Sticky navigation */
 .navbar.sticky-top {
   position: sticky;
   top: 0;
-  z-index: 1020; /* Higher than sidebar to stay on top */
-  background-color: white; /* Ensure solid background */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ensure shadow for depth */
+  z-index: 1020;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* Notification Animations */
@@ -407,8 +891,629 @@ a:hover {
   }
 }
 
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* Accessibility - Focus outline */
 .notification-item:focus {
-  outline: 2px solid #4CAF50;
+  outline: 2px solid var(--primary-color);
   outline-offset: -2px;
+}
+
+/* Pulse animation */
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Shake animation */
+.shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Loading spinner */
+.spinner-border {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Enhanced loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid rgba(76, 175, 80, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.loading-overlay.show {
+  opacity: 1;
+}
+
+/* Loading text */
+.loading-text {
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: ">";
+  color: var(--muted-text);
+}
+
+.breadcrumb-item a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+  color: var(--muted-text);
+}
+
+/* Image placeholder */
+.image-placeholder {
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-text);
+  border-radius: var(--border-radius);
+}
+
+/* Responsive image */
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Image styling */
+.img-thumbnail {
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  padding: 0.25rem;
+}
+
+/* Image hover effect */
+.hover-zoom {
+  overflow: hidden;
+  border-radius: var(--border-radius);
+}
+
+.hover-zoom img {
+  transition: transform 0.3s ease;
+}
+
+.hover-zoom:hover img {
+  transform: scale(1.05);
+}
+
+/* Transition classes */
+.transition-fade {
+  transition: opacity 0.3s ease;
+}
+
+/* Smooth transitions */
+.smooth-transition {
+  transition: all 0.3s ease;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in-animation {
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
+
+/* Slide in from right */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+/* Enhanced hover effects */
+.hover-scale {
+  transition: transform 0.3s ease;
+  /* Add hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Ripple effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.ripple:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(50, 50);
+    opacity: 0;
+  }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improved typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
+/* Performance optimizations */
+/* Contain layout, style, and paint for better performance */
+.card, .btn, .alert, .navbar, footer, .modal-content, .feature-card, .pet-card, .hero-image-container, .cta-section .card, .hover-lift, .hover-scale {
+  contain: layout style paint;
+}
+
+/* Use transform and opacity for animations (they can be handled by the compositor) */
+.fade-in, .fade-in-up, .fade-in-left, .slide-in-left, .slide-in-right {
+  will-change: transform, opacity;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  footer {
+    display: none;
+  }
+  
+  .navbar {
+    display: none;
+  }
+}
+
+/* Enhanced accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Performance optimization: Optimize images with contain property */
+img {
+  contain: layout style paint;
+  /* Add hardware acceleration for images */
+  transform: translateZ(0);
+}
+
+/* Performance optimization: Optimize form elements */
+.form-control, .form-select {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize text elements */
+p, span, div {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize lists */
+ul, ol {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize links */
+a {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize headings */
+h1, h2, h3, h4, h5, h6 {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize buttons */
+.btn {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize cards */
+.card {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize alerts */
+.alert {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize navigation */
+.navbar {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize footer */
+footer {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize modals */
+.modal-content {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize feature cards */
+.feature-card {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize pet cards */
+.pet-card {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize hero image containers */
+.hero-image-container {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize CTA section cards */
+.cta-section .card {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize hover effects */
+.hover-lift, .hover-scale {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize dropdown menus */
+.dropdown-menu {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize dropdown items */
+.dropdown-item {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize nav links */
+.nav-link {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize badges */
+.badge, .status-badge {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize form groups */
+.form-group {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize input groups */
+.input-group {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize pagination */
+.page-link, .page-item {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize breadcrumb */
+.breadcrumb, .breadcrumb-item {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize social icons */
+.social-icons a {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize loading spinners */
+.spinner-border, .loading-spinner {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize loading overlays */
+.loading-overlay {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize image placeholders */
+.image-placeholder {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize hover zoom effects */
+.hover-zoom {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize ripple effects */
+.ripple {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize focus states */
+*:focus {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize form validation feedback */
+.valid-feedback, .invalid-feedback {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize form text */
+.form-text {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize form labels */
+.form-label {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize card headers */
+.card-header {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize card bodies */
+.card-body {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize card footers */
+.card-footer {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize modal headers */
+.modal-header {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize modal footers */
+.modal-footer {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize modal titles */
+.modal-title {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize input group texts */
+.input-group-text {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize feature icons */
+.feature-icon {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize notification items */
+.notification-item {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize notification headers */
+.notification-header {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize notification footers */
+.notification-footer {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize notification lists */
+.notification-list-container {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize notification badges */
+.notification-badge {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize close buttons */
+.btn-close {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize text utilities */
+.text-center, .mt-4, .mb-4, .text-danger {
+  contain: layout style;
+}
+
+/* Performance optimization: Optimize helper classes */
+.transition-fade, .smooth-transition, .fade-in-animation {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize animation classes */
+.slide-in-left, .slide-in-right {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize staggered animations */
+.staggered-animation, .staggered-fade-in {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize sr-only class */
+.sr-only {
+  contain: layout style paint;
+}
+
+/* Performance optimization: Optimize print styles */
+@media print {
+  .no-print {
+    contain: layout style paint;
+  }
+}
+
+/* Performance optimization: Optimize responsive adjustments */
+@media (max-width: 768px) {
+  .container, .navbar-brand, .card, .social-icons, .btn-group .btn, footer .col-lg-4, footer .col-lg-2, footer .col-lg-3, .navbar-collapse, .navbar-nav .nav-item, .navbar-nav .nav-link {
+    contain: layout style paint;
+  }
 }

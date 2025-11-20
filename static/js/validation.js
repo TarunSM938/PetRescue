@@ -575,14 +575,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add fade-in animation to elements when they come into view
         const fadeElements = document.querySelectorAll('.feature-card, .pet-card, .cta-section .card');
         
+        // Use Intersection Observer for better performance
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('fade-in');
+                    // Unobserve to prevent re-triggering
+                    observer.unobserve(entry.target);
                 }
             });
         }, {
-            threshold: 0.1
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px' // Trigger slightly before element is in view
         });
         
         fadeElements.forEach(element => {
@@ -590,18 +594,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Set up button hover effects
+    // Set up button hover effects with better performance
     function setupButtonHoverEffects() {
-        const buttons = document.querySelectorAll('.btn');
+        // Use event delegation for better performance
+        document.addEventListener('mouseover', function(e) {
+            if (e.target.classList.contains('btn')) {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.transition = 'transform 0.2s ease';
+            }
+        });
         
-        buttons.forEach(button => {
-            button.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-            });
-            
-            button.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
+        document.addEventListener('mouseout', function(e) {
+            if (e.target.classList.contains('btn')) {
+                e.target.style.transform = 'translateY(0)';
+            }
         });
     }
     
@@ -635,7 +641,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Admin Notification System
+    // Optimized Admin Notification System
     function setupAdminNotifications() {
         // Only run for authenticated admin users
         if (!document.querySelector('.notification-badge')) {
@@ -646,6 +652,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let isLoading = false;
         let dropdownInstance = null;
         let mobileDropdownInstance = null;
+        
+        // Debounced function to update notification count
+        const debouncedUpdateNotificationCount = debounce(function() {
+            updateNotificationCount();
+        }, 300);
         
         // Function to update notification count for both mobile and desktop
         function updateNotificationCount() {
@@ -709,6 +720,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(() => {
                     // Silently handle notification count fetch errors
                 });
+        }
+        
+        // Simple debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
         
         // Function to create notification element HTML
@@ -1165,7 +1189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set up periodic refresh (every 30 seconds) - only update count, do not check for open state
         setInterval(() => {
-            updateNotificationCount();
+            debouncedUpdateNotificationCount();
             // Only reload notifications if dropdown is actually open and visible
             if (isDropdownActuallyOpen() && isDropdownOpen) {
                 loadNotifications();
@@ -1175,4 +1199,73 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize admin notifications after DOM is ready
     setupAdminNotifications();
+});
+
+// Add performance optimizations for image loading
+document.addEventListener('DOMContentLoaded', function() {
+    // Lazy load images with better performance
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    // Only process if image has a data-src attribute
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                    }
+                    imageObserver.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '50px 0px', // Start loading 50px before image enters viewport
+            threshold: 0.01
+        });
+        
+        images.forEach(img => {
+            // Only observe images that have data-src
+            if (img.dataset.src) {
+                imageObserver.observe(img);
+            }
+        });
+    } else {
+        // Fallback for browsers that don't support Intersection Observer
+        images.forEach(img => {
+            if (img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+            }
+        });
+    }
+    
+    // Add smooth transitions for page navigation
+    const links = document.querySelectorAll('a[href]:not([target="_blank"]):not(.no-transition)');
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Don't interfere with form submissions or special links
+            if (this.classList.contains('btn') || this.getAttribute('type') === 'submit') {
+                return;
+            }
+            
+            // Add a slight delay to allow for visual feedback
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('/') && !href.startsWith('/#')) {
+                e.preventDefault();
+                
+                // Add transition class to body
+                document.body.classList.add('page-transition');
+                
+                // Navigate after a short delay
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 150);
+            }
+        });
+    });
+    
+    // Remove transition class when page loads
+    window.addEventListener('pageshow', function() {
+        document.body.classList.remove('page-transition');
+    });
 });

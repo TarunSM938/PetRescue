@@ -124,7 +124,7 @@
                   <div class="card-body d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                       <h5 class="card-title mb-0">{{ pet.breed }}</h5>
-                      <span class="badge bg-success">Found</span>
+                      <span class="status-badge status-badge-found">Found</span>
                     </div>
                     <p class="card-text">
                       <small class="text-muted">
@@ -136,6 +136,9 @@
                     </p>
                     <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
                     <div class="d-grid gap-2 mt-auto">
+                      <a href="{% url 'pet_detail' pet.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>View Details
+                      </a>
                       <button class="btn btn-outline-primary contact-reporter-btn" 
                               data-pet-id="{{ pet.id }}" 
                               data-pet-name="{{ pet.breed }}"
@@ -246,6 +249,9 @@
                       </p>
                       <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
                       <div class="d-grid gap-2 mt-auto">
+                        <a href="{% url 'pet_detail' pet.id %}" class="btn btn-outline-primary">
+                          <i class="fas fa-eye me-1"></i>View Details
+                        </a>
                         <button class="btn btn-outline-primary contact-reporter-btn" 
                                 data-pet-id="{{ pet.id }}" 
                                 data-pet-name="{{ pet.breed }}"
@@ -348,6 +354,9 @@
   
   .pet-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   .pet-card:hover {
@@ -422,6 +431,9 @@
   /* Lazy loading placeholder */
   .pet-image {
     background-color: #f8f9fa;
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
   
   /* Accessibility improvements */
@@ -439,6 +451,19 @@
   
   #contact-info-section .d-flex:hover {
     background-color: #e9ecef;
+  }
+  
+  /* Performance optimization: Optimize find pets page elements */
+  .card, .card-header, .card-body, .filter-sidebar, .pet-card, .modal-content {
+    contain: layout style paint;
+  }
+  
+  .form-control, .form-select, .input-group-text, .btn {
+    contain: layout style paint;
+  }
+  
+  .pet-image, .status-badge, .badge {
+    contain: layout style paint;
   }
 </style>
 <script>
@@ -479,6 +504,13 @@
         
         // Show loading indicator
         showLoadingIndicator();
+        
+        // Add slight delay to show loading state
+        setTimeout(() => {
+          // In a real implementation, the form would submit normally
+          // For demo purposes, we'll hide after 1 second
+          setTimeout(hideLoadingIndicator, 1000);
+        }, 100);
       });
     }
     

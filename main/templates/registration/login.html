@@ -9,56 +9,133 @@
     max-width: 450px;
     margin: 2rem auto;
   }
+  
   .card {
-    border-radius: 12px;
+    border-radius: var(--border-radius);
     border: none;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 0;
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-hover);
+  }
+  
   .card-header {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
     color: white;
-    border-radius: 12px 12px 0 0 !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
     text-align: center;
     padding: 1.5rem;
   }
+  
   .card-body {
     padding: 2rem;
   }
+  
   .btn-login {
-    background-color: #2196F3;
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
     border: none;
     padding: 0.75rem;
     font-weight: 600;
     transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: var(--border-radius);
+    /* Add hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
   }
+  
   .btn-login:hover {
-    background-color: #1976D2;
+    background: linear-gradient(135deg, #1976D2 0%, #0D47A1 100%);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
   }
+  
   .register-link {
     text-align: center;
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid #eee;
   }
+  
   .forgot-password {
     text-align: center;
     margin-top: 1rem;
   }
-  /* Update colors to match brand guidelines */
+  
+  .form-control {
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    min-height: 44px;
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+  }
+  
+  .input-group-text {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+  }
+  
+  /* Loading spinner */
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .form-container {
+      margin: 1rem;
+      max-width: none;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+  }
+  
+  /* Performance optimization: Optimize login page elements */
+  .form-container, .card, .card-header, .card-body, .btn-login, .register-link, .forgot-password {
+    contain: layout style paint;
+  }
+  
+  .form-control, .input-group-text {
+    contain: layout style paint;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="form-container">
-  <div class="card shadow-sm">
+  <div class="card shadow-sm fade-in-up">
     <div class="card-header">
-      <h2>Welcome Back to PetRescue</h2>
+      <h2><i class="fas fa-sign-in-alt me-2"></i>Welcome Back</h2>
       <p class="mb-0">Sign in to your account to continue helping pets</p>
     </div>
     
     <div class="card-body">
-      <form method="POST" id="login-form" novalidate>
+      <!-- Loading indicator -->
+      <div id="login-loading" class="text-center py-3 d-none">
+        <div class="spinner-border spinner-border-sm text-primary" role="status">
+          <span class="visually-hidden">Signing in...</span>
+        </div>
+        <span class="ms-2">Signing you in...</span>
+      </div>
+      
+      <form method="POST" id="login-form" novalidate class="transition-fade">
         {% csrf_token %}
         
         <div class="mb-3">
@@ -66,32 +143,42 @@
           {{ form.username }}
           {% if form.username.errors %}
             {% for error in form.username.errors %}
-              <div class="text-danger">{{ error }}</div>
+              <div class="invalid-feedback d-block"><small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small></div>
             {% endfor %}
           {% endif %}
         </div>
         
         <div class="mb-3">
           <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
-          {{ form.password }}
+          <div class="input-group">
+            {{ form.password }}
+            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="{{ form.password.id_for_label }}">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
           {% if form.password.errors %}
             {% for error in form.password.errors %}
-              <div class="text-danger">{{ error }}</div>
+              <div class="invalid-feedback d-block"><small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small></div>
             {% endfor %}
           {% endif %}
         </div>
 
         {% if form.non_field_errors %}
           {% for error in form.non_field_errors %}
-            <div class="alert alert-danger">{{ error }}</div>
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle me-1"></i>{{ error }}
+            </div>
           {% endfor %}
         {% endif %}
 
-        <button type="submit" class="btn btn-login w-100">Sign In</button>
+        <button type="submit" class="btn btn-login">
+          <span class="spinner-border spinner-border-sm d-none me-2" id="login-spinner" role="status" aria-hidden="true"></span>
+          <span id="login-text">Sign In</span>
+        </button>
       </form>
 
       <div class="forgot-password">
-        <a href="#">Forgot your password?</a>
+        <a href="#"><i class="fas fa-question-circle me-1"></i>Forgot your password?</a>
       </div>
 
       <div class="register-link">
@@ -108,12 +195,48 @@
 {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Add any client-side validation if needed
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const targetField = document.getElementById(targetId);
+        const icon = this.querySelector('i');
+        
+        if (targetField.getAttribute('type') === 'password') {
+          targetField.setAttribute('type', 'text');
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          targetField.setAttribute('type', 'password');
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      });
+    });
+    
+    // Form submission with loading indicator
     const form = document.getElementById('login-form');
     if (form) {
       form.addEventListener('submit', function(e) {
-        // Could add client-side validation here if needed
-        // For now, we'll let Django handle server-side validation
+        const loginButton = document.querySelector('.btn-login');
+        const loginSpinner = document.getElementById('login-spinner');
+        const loginText = document.getElementById('login-text');
+        
+        // Show loading indicator
+        loginSpinner.classList.remove('d-none');
+        loginText.textContent = 'Signing in...';
+        loginButton.disabled = true;
+        
+        // Add slight delay to show loading state
+        setTimeout(() => {
+          // In a real implementation, the form would submit normally
+          // For demo purposes, we'll reset after 2 seconds
+          setTimeout(() => {
+            loginSpinner.classList.add('d-none');
+            loginText.textContent = 'Sign In';
+            loginButton.disabled = false;
+          }, 2000);
+        }, 100);
       });
     }
   });
