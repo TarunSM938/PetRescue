@@ -80,12 +80,26 @@ body.page-transition {
   border-radius: var(--border-radius);
   margin: 0 0.25rem;
   position: relative;
+  text-decoration: none;
 }
 
 .nav-link:hover {
   color: var(--secondary-color) !important;
   background-color: rgba(76, 175, 80, 0.1);
   transform: translateY(-2px);
+  text-decoration: none;
+}
+
+/* Ensure navigation links don't inherit underline */
+a.nav-link {
+  text-decoration: none;
+}
+
+a.nav-link:hover {
+  color: var(--secondary-color) !important;
+  background-color: rgba(76, 175, 80, 0.1);
+  transform: translateY(-2px);
+  text-decoration: none;
 }
 
 /* Active nav link */
@@ -256,6 +270,22 @@ body.page-transition {
 }
 
 .btn:hover {
+  text-decoration: none;
+}
+
+/* Make sure all button variants explicitly don't have underline */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-success:hover,
+.btn-danger:hover,
+.btn-warning:hover,
+.btn-info:hover,
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-outline-success:hover,
+.btn-outline-danger:hover,
+.btn-outline-warning:hover,
+.btn-outline-info:hover {
   text-decoration: none;
 }
 
@@ -632,6 +662,11 @@ a {
 a:hover {
   color: var(--primary-color);
   text-decoration: underline;
+}
+
+/* Ensure buttons styled as links don't inherit underline */
+a.btn:hover {
+  text-decoration: none;
 }
 
 /* Badge styles */

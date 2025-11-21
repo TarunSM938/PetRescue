@@ -9,7 +9,11 @@
   <nav aria-label="breadcrumb" class="fade-in">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'find_pets' %}">Find Pets</a></li>
+      {% if referrer == 'find_pets' %}
+        <li class="breadcrumb-item"><a href="{% url 'find_pets' %}">Find Pets</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{% url 'all_pets' %}">All Pets</a></li>
+      {% endif %}
       <li class="breadcrumb-item active" aria-current="page">{{ pet.get_pet_type_display }} - {{ pet.breed }}</li>
     </ol>
   </nav>
@@ -29,8 +33,18 @@
         <div class="card-body">
           <!-- Main Image -->
           <div class="main-image-container text-center mb-3">
-            {% if pet.image %}
-              <img id="main-image" src="{{ pet.image.url }}" alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" loading="lazy">
+            {% if pet.image or pet_images %}
+              {% if pet.image %}
+                <img id="main-image" src="{{ pet.image.url }}" alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" loading="lazy">
+              {% else %}
+                {% if pet_images.first %}
+                  <img id="main-image" src="{{ pet_images.first.image.url }}" alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}" class="img-fluid rounded" style="max-height: 400px; object-fit: cover; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#imageModal" loading="lazy">
+                {% else %}
+                  <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 400px;">
+                    <i class="fas fa-paw fa-5x text-muted"></i>
+                  </div>
+                {% endif %}
+              {% endif %}
             {% else %}
               <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 400px;">
                 <i class="fas fa-paw fa-5x text-muted"></i>
@@ -38,12 +52,19 @@
             {% endif %}
           </div>
 
-          <!-- Thumbnails (if we had multiple images) -->
-          {% if pet.image %}
-          <div class="thumbnail-container d-flex justify-content-center">
-            <div class="thumbnail active mx-1" data-image="{{ pet.image.url }}">
-              <img src="{{ pet.image.url }}" alt="{{ pet.breed }} thumbnail" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" loading="lazy">
-            </div>
+          <!-- Thumbnails for multiple images -->
+          {% if pet_images or pet.image %}
+          <div class="thumbnail-container d-flex justify-content-center flex-wrap">
+            {% if pet.image %}
+              <div class="thumbnail active mx-1 mb-2" data-image="{{ pet.image.url }}" data-alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}">
+                <img src="{{ pet.image.url }}" alt="{{ pet.breed }} thumbnail" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" loading="lazy">
+              </div>
+            {% endif %}
+            {% for pet_image in pet_images %}
+              <div class="thumbnail mx-1 mb-2" data-image="{{ pet_image.image.url }}" data-alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}">
+                <img src="{{ pet_image.image.url }}" alt="{{ pet.breed }} thumbnail" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;" loading="lazy">
+              </div>
+            {% endfor %}
           </div>
           {% endif %}
         </div>
@@ -157,12 +178,38 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body text-center">
-        {% if pet.image %}
-          <img src="{{ pet.image.url }}" alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}" class="img-fluid rounded" style="max-height: 70vh;" loading="lazy">
+        {% if pet.image or pet_images %}
+          {% if pet.image %}
+            <img id="modal-main-image" src="{{ pet.image.url }}" alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}" class="img-fluid rounded" style="max-height: 70vh;" loading="lazy">
+          {% else %}
+            {% if pet_images.first %}
+              <img id="modal-main-image" src="{{ pet_images.first.image.url }}" alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}" class="img-fluid rounded" style="max-height: 70vh;" loading="lazy">
+            {% else %}
+              <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 70vh;">
+                <i class="fas fa-paw fa-5x text-muted"></i>
+              </div>
+            {% endif %}
+          {% endif %}
         {% else %}
           <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 70vh;">
             <i class="fas fa-paw fa-5x text-muted"></i>
           </div>
+        {% endif %}
+        
+        <!-- Thumbnails in modal for multiple images -->
+        {% if pet_images or pet.image %}
+        <div class="thumbnail-container d-flex justify-content-center flex-wrap mt-3">
+          {% if pet.image %}
+            <div class="thumbnail active mx-1 mb-2" data-modal-image="{{ pet.image.url }}" data-modal-alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}">
+              <img src="{{ pet.image.url }}" alt="{{ pet.breed }} thumbnail" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;" loading="lazy">
+            </div>
+          {% endif %}
+          {% for pet_image in pet_images %}
+            <div class="thumbnail mx-1 mb-2" data-modal-image="{{ pet_image.image.url }}" data-modal-alt="{{ pet.breed }} - {{ pet.color }} {{ pet.get_pet_type_display }}">
+              <img src="{{ pet_image.image.url }}" alt="{{ pet.breed }} thumbnail" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;" loading="lazy">
+            </div>
+          {% endfor %}
+        </div>
         {% endif %}
       </div>
     </div>
@@ -216,6 +263,16 @@
     .modal-body img {
       max-height: 50vh;
     }
+    
+    .thumbnail-container {
+      justify-content: flex-start !important;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+    
+    .thumbnail {
+      flex: 0 0 auto;
+    }
   }
   
   @media (max-width: 576px) {
@@ -226,6 +283,16 @@
     .share-btn {
       flex: 1 1 auto;
       margin-bottom: 0.5rem;
+    }
+    
+    .thumbnail-container {
+      justify-content: flex-start !important;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+    
+    .thumbnail {
+      flex: 0 0 auto;
     }
   }
   
@@ -274,6 +341,47 @@
   .breadcrumb, .breadcrumb-item {
     contain: layout style;
   }
+  
+  /* Gallery specific styles */
+  .thumbnail-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--light-bg);
+  }
+  
+  .thumbnail-container::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .thumbnail-container::-webkit-scrollbar-track {
+    background: var(--light-bg);
+    border-radius: 3px;
+  }
+  
+  .thumbnail-container::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+  }
+  
+  /* Ensure thumbnails are responsive */
+  .thumbnail img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+  }
+  
+  @media (max-width: 768px) {
+    .thumbnail img {
+      width: 60px;
+      height: 60px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .thumbnail img {
+      width: 50px;
+      height: 50px;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -292,7 +400,7 @@
       });
     });
     
-    // Thumbnail switching functionality
+    // Thumbnail switching functionality for main image
     const thumbnails = document.querySelectorAll('.thumbnail');
     const mainImage = document.getElementById('main-image');
     
@@ -307,16 +415,64 @@
         // Update main image
         if (mainImage) {
           const newImageSrc = this.getAttribute('data-image');
-          mainImage.src = newImageSrc;
+          const newAltText = this.getAttribute('data-alt');
+          if (newImageSrc) {
+            mainImage.src = newImageSrc;
+            if (newAltText) {
+              mainImage.alt = newAltText;
+            }
+          }
         }
       });
     });
+    
+    // Modal functionality
+    const imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+      imageModal.addEventListener('show.bs.modal', function() {
+        // Set up modal thumbnail switching
+        const modalThumbnails = imageModal.querySelectorAll('.thumbnail');
+        const modalMainImage = document.getElementById('modal-main-image');
+        
+        modalThumbnails.forEach(thumbnail => {
+          thumbnail.addEventListener('click', function() {
+            // Remove active class from all thumbnails in modal
+            modalThumbnails.forEach(t => t.classList.remove('active'));
+            
+            // Add active class to clicked thumbnail
+            this.classList.add('active');
+            
+            // Update modal main image
+            if (modalMainImage) {
+              const newImageSrc = this.getAttribute('data-modal-image');
+              const newAltText = this.getAttribute('data-modal-alt');
+              if (newImageSrc) {
+                modalMainImage.src = newImageSrc;
+                if (newAltText) {
+                  modalMainImage.alt = newAltText;
+                }
+              }
+            }
+          });
+        });
+      });
+      
+      // Keyboard navigation for image modal
+      imageModal.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          bootstrap.Modal.getInstance(imageModal).hide();
+        }
+      });
+    }
     
     // Function to handle sharing to different platforms
     function shareToPlatform(platform, url, buttonElement) {
       // Show loading indicator
       const originalText = buttonElement ? buttonElement.innerHTML : null;
       if (buttonElement) {
+        // Preserve button width to prevent layout shift
+        const originalWidth = buttonElement.offsetWidth;
+        buttonElement.style.width = originalWidth + 'px';
         buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Sharing...';
         buttonElement.disabled = true;
       }
@@ -328,54 +484,46 @@
       switch(platform) {
         case 'facebook':
           window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+          resetButton(buttonElement, originalText);
           break;
         case 'twitter':
           window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+          resetButton(buttonElement, originalText);
           break;
         case 'whatsapp':
           window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
+          resetButton(buttonElement, originalText);
           break;
         case 'copy':
           // Copy to clipboard
           navigator.clipboard.writeText(url).then(() => {
             // Show success message
             if (buttonElement) {
-              const originalHTML = buttonElement.innerHTML;
               buttonElement.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
               setTimeout(() => {
-                buttonElement.innerHTML = originalHTML;
-                buttonElement.disabled = false;
+                resetButton(buttonElement, originalText);
               }, 2000);
             }
           }).catch(err => {
             console.error('Failed to copy: ', err);
             // Fallback: show URL in prompt
             prompt('Copy this link:', url);
-            if (buttonElement) {
-              buttonElement.innerHTML = originalText;
-              buttonElement.disabled = false;
-            }
+            resetButton(buttonElement, originalText);
           });
           return; // Don't restore button text immediately for copy
       }
-      
-      // Restore button text after a short delay
-      if (buttonElement) {
-        setTimeout(() => {
-          buttonElement.innerHTML = originalText;
-          buttonElement.disabled = false;
-        }, 1000);
-      }
     }
     
-    // Keyboard navigation for image modal
-    const imageModal = document.getElementById('imageModal');
-    if (imageModal) {
-      imageModal.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          bootstrap.Modal.getInstance(imageModal).hide();
-        }
-      });
+    // Helper function to reset button to original state
+    function resetButton(buttonElement, originalText) {
+      if (buttonElement) {
+        buttonElement.innerHTML = originalText;
+        buttonElement.disabled = false;
+        // Remove fixed width after a short delay to allow for content change
+        setTimeout(() => {
+          buttonElement.style.width = '';
+        }, 100);
+      }
     }
     
     // Ensure main image is focusable for accessibility

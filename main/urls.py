@@ -85,6 +85,9 @@ urlpatterns = [
     # Pet detail page
     path('pet/<int:pet_id>/', views.pet_detail, name='pet_detail'),
     
+    # All Pets page - shows all accepted pets (both lost and found)
+    path('all-pets/', views.all_pets, name='all_pets'),
+    
     # Admin Contact Submissions URLs
     path('dashboard/admin/contact-submissions/', views.admin_contact_submissions, name='admin_contact_submissions'),
     path('dashboard/admin/contact-submissions/<int:submission_id>/', views.admin_contact_submission_detail, name='admin_contact_submission_detail'),

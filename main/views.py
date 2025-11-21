@@ -159,6 +159,50 @@ def donate(request):
     return render(request, 'donate.html', context)
 
 
+# All Pets page view
+# Shows all accepted pets (both lost and found) in a gallery format
+
+def all_pets(request):
+    """
+    Display all accepted pets (both lost and found) in a gallery format.
+    Only pets with accepted requests are shown.
+    """
+    # Get model classes using apps.get_model to avoid linter issues
+    from django.apps import apps
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    
+    # Get all accepted lost pets
+    accepted_lost_pets = PetModel.objects.filter(
+        status='lost',
+        request__status='accepted',
+        request__request_type='lost'
+    ).select_related('owner')
+    
+    # Get all accepted found pets
+    accepted_found_pets = PetModel.objects.filter(
+        status='found',
+        request__status='accepted',
+        request__request_type='found'
+    ).select_related('owner')
+    
+    # Combine both querysets
+    all_accepted_pets = accepted_lost_pets.union(accepted_found_pets).order_by('-created_at')
+    
+    # Apply pagination
+    paginator = Paginator(all_accepted_pets, 12)  # Show 12 pets per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'now': timezone.now(),
+        'pets': page_obj,
+        'paginator': paginator,
+        'page_obj': page_obj
+    }
+    return render(request, 'all_pets.html', context)
+
+
 # User registration view
 # Handles new user signups with form validation and profile creation
 
@@ -260,8 +304,27 @@ def profile(request):
     """
     # Ensure the user has a profile
     from django.apps import apps
+    from django.utils import timezone
     ProfileModel = apps.get_model('main', 'Profile')
     profile_obj, created = ProfileModel.objects.get_or_create(user=request.user)
+    
+    # Calculate impact metrics
+    PetModel = apps.get_model('main', 'Pet')
+    RequestModel = apps.get_model('main', 'Request')
+    
+    # Pets Reported - total number of pets the user has reported (both lost and found)
+    pets_reported_count = PetModel.objects.filter(owner=request.user).count()
+    
+    # Pets Helped - total number of pets the user helped (reports accepted and closed as reunited)
+    pets_helped_count = RequestModel.objects.filter(
+        pet__owner=request.user,
+        status='accepted'
+    ).count()
+    
+    # Days Active - number of days the user has been active on the platform
+    # Calculate from the user's registration date
+    user = request.user
+    days_active = (timezone.now().date() - user.date_joined.date()).days
 
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
@@ -279,7 +342,10 @@ def profile(request):
 
     context = {
         'u_form': u_form,
-        'p_form': p_form
+        'p_form': p_form,
+        'pets_reported_count': pets_reported_count,
+        'pets_helped_count': pets_helped_count,
+        'days_active': days_active
     }
     return render(request, 'profile.html', context)
 
@@ -477,6 +543,7 @@ def pet_detail(request, pet_id):
     from django.apps import apps
     PetModel = apps.get_model('main', 'Pet')
     RequestModel = apps.get_model('main', 'Request')
+    PetImageModel = apps.get_model('main', 'PetImage')
     
     # Get the pet object
     pet = get_object_or_404(PetModel, id=pet_id)
@@ -486,6 +553,9 @@ def pet_detail(request, pet_id):
         pet_request = RequestModel.objects.get(pet=pet)
     except RequestModel.DoesNotExist:
         pet_request = None
+    
+    # Get all images for this pet
+    pet_images = PetImageModel.objects.filter(pet=pet)
     
     # Check if user has permission to view contact information
     show_contact_info = False
@@ -509,12 +579,17 @@ def pet_detail(request, pet_id):
             'reporter_phone': pet_request.phone_number or pet.owner.phone_number
         }
     
+    # Determine breadcrumb based on referrer
+    referrer = request.GET.get('ref', 'all_pets')  # Default to 'all_pets'
+    
     context = {
         'pet': pet,
         'pet_request': pet_request,
+        'pet_images': pet_images,
         'show_contact_info': show_contact_info,
         'contact_info': contact_info,
-        'now': timezone.now()
+        'now': timezone.now(),
+        'referrer': referrer
     }
     return render(request, 'pet_detail.html', context)
 

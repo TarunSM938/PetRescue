@@ -136,7 +136,7 @@
                     </p>
                     <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
                     <div class="d-grid gap-2 mt-auto">
-                      <a href="{% url 'pet_detail' pet.id %}" class="btn btn-outline-primary">
+                      <a href="{% url 'pet_detail' pet.id %}?ref=find_pets" class="btn btn-outline-primary">
                         <i class="fas fa-eye me-1"></i>View Details
                       </a>
                       <button class="btn btn-outline-primary contact-reporter-btn" 
@@ -249,7 +249,7 @@
                       </p>
                       <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
                       <div class="d-grid gap-2 mt-auto">
-                        <a href="{% url 'pet_detail' pet.id %}" class="btn btn-outline-primary">
+                        <a href="{% url 'pet_detail' pet.id %}?ref=find_pets" class="btn btn-outline-primary">
                           <i class="fas fa-eye me-1"></i>View Details
                         </a>
                         <button class="btn btn-outline-primary contact-reporter-btn" 

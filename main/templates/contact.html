@@ -6,94 +6,317 @@
 {% block content %}
 <div class="container mt-4 mb-5">
   <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-lg-10">
       <!-- Header Section -->
       <div class="text-center mb-5 fade-in-up">
         <h1 class="display-5 fw-bold mb-3">Get in Touch</h1>
         <p class="lead text-muted">We're here to help! Send us a message and we'll get back to you as soon as possible.</p>
       </div>
       
-      <!-- Contact Form Card -->
-      <div class="card shadow-sm border-0 rounded-3 hover-lift">
-        <div class="card-body p-4">
-          <form method="POST" id="contact-form">
-            {% csrf_token %}
-            
-            <div class="mb-3">
-              <label for="{{ form.name.id_for_label }}" class="form-label">Your Name <span class="text-danger">*</span></label>
-              {{ form.name }}
-              {% if form.name.errors %}
-                {% for error in form.name.errors %}
-                  <div class="invalid-feedback d-block">{{ error }}</div>
-                {% endfor %}
-              {% endif %}
+      <div class="row">
+        <!-- Contact Form Section -->
+        <div class="col-lg-7 mb-4 mb-lg-0">
+          <div class="card shadow-sm border-0 rounded-3 hover-lift h-100">
+            <div class="card-body p-4">
+              <!-- Loading Spinner -->
+              <div id="loading-spinner" class="text-center py-4 d-none">
+                <div class="spinner-border text-success" role="status">
+                  <span class="visually-hidden">Sending message...</span>
+                </div>
+                <p class="mt-2 mb-0">Sending your message...</p>
+              </div>
+              
+              <!-- Contact Form -->
+              <form method="POST" id="contact-form" class="fade-in-up">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                  <label for="{{ form.name.id_for_label }}" class="form-label">
+                    <i class="fas fa-user me-1"></i>Your Name <span class="text-danger">*</span>
+                  </label>
+                  {{ form.name }}
+                  {% if form.name.errors %}
+                    {% for error in form.name.errors %}
+                      <div class="invalid-feedback d-block">
+                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                  <label for="{{ form.email.id_for_label }}" class="form-label">
+                    <i class="fas fa-envelope me-1"></i>Your Email <span class="text-danger">*</span>
+                  </label>
+                  {{ form.email }}
+                  {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                      <div class="invalid-feedback d-block">
+                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                  <label for="{{ form.subject.id_for_label }}" class="form-label">
+                    <i class="fas fa-tag me-1"></i>Subject <span class="text-danger">*</span>
+                  </label>
+                  {{ form.subject }}
+                  {% if form.subject.errors %}
+                    {% for error in form.subject.errors %}
+                      <div class="invalid-feedback d-block">
+                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+                
+                <div class="mb-4">
+                  <label for="{{ form.message.id_for_label }}" class="form-label">
+                    <i class="fas fa-comment me-1"></i>Your Message <span class="text-danger">*</span>
+                  </label>
+                  {{ form.message }}
+                  {% if form.message.errors %}
+                    {% for error in form.message.errors %}
+                      <div class="invalid-feedback d-block">
+                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                  <div class="form-text">Please provide as much detail as possible so we can help you better.</div>
+                </div>
+                
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-success btn-lg hover-lift" id="submit-btn">
+                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                  </button>
+                </div>
+              </form>
             </div>
-            
-            <div class="mb-3">
-              <label for="{{ form.email.id_for_label }}" class="form-label">Your Email <span class="text-danger">*</span></label>
-              {{ form.email }}
-              {% if form.email.errors %}
-                {% for error in form.email.errors %}
-                  <div class="invalid-feedback d-block">{{ error }}</div>
-                {% endfor %}
-              {% endif %}
-            </div>
-            
-            <div class="mb-3">
-              <label for="{{ form.subject.id_for_label }}" class="form-label">Subject <span class="text-danger">*</span></label>
-              {{ form.subject }}
-              {% if form.subject.errors %}
-                {% for error in form.subject.errors %}
-                  <div class="invalid-feedback d-block">{{ error }}</div>
-                {% endfor %}
-              {% endif %}
-            </div>
-            
-            <div class="mb-4">
-              <label for="{{ form.message.id_for_label }}" class="form-label">Your Message <span class="text-danger">*</span></label>
-              {{ form.message }}
-              {% if form.message.errors %}
-                {% for error in form.message.errors %}
-                  <div class="invalid-feedback d-block">{{ error }}</div>
-                {% endfor %}
-              {% endif %}
-              <div class="form-text">Please provide as much detail as possible so we can help you better.</div>
-            </div>
-            
-            <div class="d-grid">
-              <button type="submit" class="btn btn-success btn-lg hover-lift">
-                <i class="fas fa-paper-plane me-2"></i>Send Message
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-      
-      <!-- Additional Information -->
-      <div class="row mt-5">
-        <div class="col-md-4 text-center mb-4 mb-md-0">
-          <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3 hover-lift" style="width: 70px; height: 70px; transition: var(--transition);">
-            <i class="fas fa-envelope fa-2x text-success"></i>
           </div>
-          <h5>Email Us</h5>
-          <p class="text-muted mb-0">info@petrescue.com</p>
         </div>
-        <div class="col-md-4 text-center mb-4 mb-md-0">
-          <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3 hover-lift" style="width: 70px; height: 70px; transition: var(--transition);">
-            <i class="fas fa-phone fa-2x text-success"></i>
+        
+        <!-- Contact Information Section -->
+        <div class="col-lg-5">
+          <div class="card shadow-sm border-0 rounded-3 hover-lift h-100">
+            <div class="card-body p-4">
+              <h3 class="card-title mb-4">
+                <i class="fas fa-info-circle me-2"></i>Contact Information
+              </h3>
+              
+              <div class="d-flex mb-4">
+                <div class="flex-shrink-0">
+                  <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-envelope fa-lg text-success"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h5>Email Us</h5>
+                  <p class="text-muted mb-0">info@petrescue.com</p>
+                  <p class="text-muted small mb-0">For general inquiries</p>
+                </div>
+              </div>
+              
+              <div class="d-flex mb-4">
+                <div class="flex-shrink-0">
+                  <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-phone fa-lg text-success"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h5>Call Us</h5>
+                  <p class="text-muted mb-0">+91 9380179429</p>
+                  <p class="text-muted small mb-0">Mon-Fri, 9am-5pm</p>
+                </div>
+              </div>
+              
+              <div class="d-flex mb-4">
+                <div class="flex-shrink-0">
+                  <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-map-marker-alt fa-lg text-success"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h5>Visit Us</h5>
+                  <p class="text-muted mb-0">123 Pet Rescue Lane</p>
+                  <p class="text-muted mb-0">Bangalore, Karnataka 560001</p>
+                  <p class="text-muted small mb-0">India</p>
+                </div>
+              </div>
+              
+              <div class="d-flex mb-4">
+                <div class="flex-shrink-0">
+                  <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <i class="fas fa-clock fa-lg text-success"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <h5>Response Time</h5>
+                  <p class="text-muted mb-0">Usually within 24 hours</p>
+                  <p class="text-muted small mb-0">During business hours</p>
+                </div>
+              </div>
+              
+              <!-- Social Media Links -->
+              <div class="mt-4 pt-3 border-top">
+                <h5 class="mb-3">Connect With Us</h5>
+                <div class="d-flex gap-3">
+                  <a href="#" class="btn btn-outline-primary rounded-circle" aria-label="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                  </a>
+                  <a href="#" class="btn btn-outline-info rounded-circle" aria-label="Twitter">
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                  <a href="#" class="btn btn-outline-danger rounded-circle" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                  </a>
+                  <a href="#" class="btn btn-outline-primary rounded-circle" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                  </a>
+                </div>
+              </div>
+              
+              <!-- Map Placeholder -->
+              <div class="mt-4">
+                <h5 class="mb-3">Our Location</h5>
+                <div class="rounded-3 overflow-hidden" style="height: 150px; background-color: #f8f9fa;">
+                  <div class="d-flex align-items-center justify-content-center h-100">
+                    <div class="text-center">
+                      <i class="fas fa-map-marked-alt fa-2x text-muted mb-2"></i>
+                      <p class="text-muted mb-0">Interactive Map</p>
+                      <p class="text-muted small mb-0">Coming Soon</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h5>Call Us</h5>
-          <p class="text-muted mb-0">+91 9380179429</p>
-        </div>
-        <div class="col-md-4 text-center">
-          <div class="bg-light rounded-circle p-3 d-inline-flex align-items-center justify-content-center mb-3 hover-lift" style="width: 70px; height: 70px; transition: var(--transition);">
-            <i class="fas fa-clock fa-2x text-success"></i>
-          </div>
-          <h5>Response Time</h5>
-          <p class="text-muted mb-0">Usually within 24 hours</p>
         </div>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block head_extra %}
+<style>
+  /* Enhanced form styling */
+  .form-control, .form-select {
+    border: 1px solid #e1e5e9;
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+  }
+  
+  .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Card hover effect */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+  }
+  
+  /* Button styling */
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-success {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  
+  .btn-success:hover {
+    background-color: #449d48;
+    border-color: #449d48;
+    transform: translateY(-2px);
+  }
+  
+  /* Alert styling */
+  .alert {
+    border-radius: var(--border-radius);
+  }
+  
+  /* Social media buttons */
+  .btn-outline-primary, .btn-outline-info, .btn-outline-danger {
+    border-width: 2px;
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  
+  .btn-outline-info:hover {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .card-body {
+      padding: 1.5rem !important;
+    }
+    
+    .d-flex .flex-shrink-0 {
+      margin-bottom: 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contact-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    
+    // Form submission handling
+    if (contactForm) {
+      contactForm.addEventListener('submit', function(e) {
+        // Show loading spinner and disable submit button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+        loadingSpinner.classList.remove('d-none');
+        
+        // In a real implementation, you might want to handle AJAX submission here
+        // For now, we'll let Django handle the form submission normally
+      });
+    }
+    
+    // Add focus states to form elements for better accessibility
+    const formControls = document.querySelectorAll('.form-control, .form-select');
+    formControls.forEach(function(control) {
+      control.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+      
+      control.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
+    });
+  });
+</script>
 {% endblock %}

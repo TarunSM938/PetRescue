@@ -260,3 +260,22 @@ class ContactSubmission(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.subject} ({self.status})"
+
+
+# Pet Image Model
+# Stores multiple images for each pet
+
+class PetImage(models.Model):
+    """
+    Pet image model to store multiple images for each pet.
+    Each pet can have multiple images associated with it.
+    """
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='pet_images/', help_text="Photo of the pet")
+    uploaded_at = models.DateTimeField(auto_now_add=True, help_text="When this image was uploaded")
+    
+    class Meta:
+        ordering = ['uploaded_at']
+    
+    def __str__(self):
+        return f"Image for {self.pet.breed} uploaded at {self.uploaded_at}"
