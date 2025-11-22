@@ -104,3 +104,44 @@ class AdminDashboardTestCase(TestCase):
         # Check that the request status was updated
         self.request.refresh_from_db()
         self.assertEqual(self.request.status, 'accepted')
+
+    def test_user_profile_creation(self):
+        """Test that user profiles are created automatically"""
+        # Create a new user
+        new_user = User.objects.create_user(
+            username='newuser',
+            email='newuser@example.com',
+            password='newuserpass123'
+        )
+        
+        # Check that profile was created
+        self.assertTrue(hasattr(new_user, 'profile'))
+        self.assertEqual(new_user.profile.user, new_user)
+
+    def test_pet_model_str_representation(self):
+        """Test that pet model string representation works correctly"""
+        expected_str = "dog - Labrador (lost)"
+        self.assertEqual(str(self.pet), expected_str)
+
+    def test_request_model_str_representation(self):
+        """Test that request model string representation works correctly"""
+        expected_str = "user - lost - dog"
+        self.assertEqual(str(self.request), expected_str)
+
+    def test_home_page_loads(self):
+        """Test that home page loads successfully"""
+        response = self.client.get(reverse('home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "PetRescue")
+
+    def test_user_registration_page_loads(self):
+        """Test that registration page loads successfully"""
+        response = self.client.get(reverse('register'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sign Up")
+
+    def test_user_login_page_loads(self):
+        """Test that login page loads successfully"""
+        response = self.client.get(reverse('login'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Login")

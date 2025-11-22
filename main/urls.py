@@ -8,10 +8,10 @@ including authentication, pet listings, user profiles, and support pages.
 from django.urls import path
 from . import views
 
-# URL patterns for the main application
 urlpatterns = [
-    # Home page - the main landing page for the site
+    # Public pages
     path('', views.home, name='home'),
+    path('health/', views.health_check, name='health_check'),
     
     # Pet search page - browse pets available for adoption
     # Requires user authentication

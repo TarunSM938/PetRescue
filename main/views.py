@@ -1780,3 +1780,16 @@ def admin_update_submission_status(request, submission_id):
         return redirect('admin_contact_submissions')
     
     return HttpResponseForbidden(b"Method not allowed")
+
+
+# Health check endpoint for deployment verification
+def health_check(request):
+    """
+    Simple health check endpoint for deployment verification.
+    Returns a JSON response indicating the application is running.
+    """
+    return JsonResponse({
+        'status': 'healthy',
+        'message': 'PetRescue application is running normally',
+        'timestamp': timezone.now().isoformat()
+    })
