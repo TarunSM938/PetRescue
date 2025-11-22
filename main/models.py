@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from typing import cast
+import math
 
 # Custom User Model
 # Extends Django's AbstractUser to add a phone number field for better user contact
@@ -35,7 +36,6 @@ class Profile(models.Model):
     def __str__(self):
         user = cast('User', self.user)
         return f"{user.username}'s Profile"
-
 
 
 # Pet Model
@@ -77,7 +77,18 @@ class Pet(models.Model):
 
     def __str__(self):
         return f"{self.pet_type} - {self.breed} ({self.status})"
-
+    
+    def calculate_distance(self, other_location):
+        """
+        Calculate distance between this pet's location and another location.
+        For simplicity, we're just returning a mock distance.
+        In a real implementation, you would use geocoding and calculate actual distance.
+        """
+        # This is a simplified implementation - in a real app you would:
+        # 1. Geocode both locations to get latitude/longitude
+        # 2. Calculate the actual distance using Haversine formula or similar
+        # For now, we'll just return a mock distance
+        return round(math.sqrt(hash(self.location) % 100 + hash(other_location) % 100), 1)
 
 
 # Request Model

@@ -7,35 +7,38 @@
 <!-- Hero Section -->
 <section class="hero-section mb-5 fade-in-up">
   <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-6 mb-4 mb-lg-0">
-        <h1 class="display-4 fw-bold mb-3">Helping Pets Find Their Way Home</h1>
-        <p class="lead mb-4">PetRescue connects communities to help reunite lost pets with their families and find loving homes for animals in need.</p>
-        <div class="d-flex flex-wrap gap-3">
-          {% if user.is_authenticated %}
-            <a href="{% url 'report_lost_pet' %}" class="btn btn-danger btn-lg">
-              <i class="fas fa-search me-2"></i>Report a Lost Pet
+    <div class="row align-items-center min-vh-50">
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <div class="hero-content">
+          <span class="hero-badge mb-3">Welcome to PetRescue</span>
+          <h1 class="display-3 fw-bold mb-4 hero-title">Helping Pets Find Their Way Home</h1>
+          <p class="lead mb-4 hero-subtitle">PetRescue connects communities to help reunite lost pets with their families and find loving homes for animals in need. Together, we make a difference.</p>
+          <div class="d-flex flex-wrap gap-3 hero-buttons">
+            {% if user.is_authenticated %}
+              <a href="{% url 'report_lost_pet' %}" class="btn btn-danger btn-lg hero-btn-primary">
+                <i class="fas fa-search me-2"></i>Report a Lost Pet
+              </a>
+              <a href="{% url 'report_found_pet' %}" class="btn btn-success btn-lg hero-btn-success">
+                <i class="fas fa-paw me-2"></i>Report a Found Pet
+              </a>
+            {% else %}
+              <a href="{% url 'login' %}" class="btn btn-danger btn-lg hero-btn-primary">
+                <i class="fas fa-search me-2"></i>Report a Lost Pet
+              </a>
+              <a href="{% url 'login' %}" class="btn btn-success btn-lg hero-btn-success">
+                <i class="fas fa-paw me-2"></i>Report a Found Pet
+              </a>
+            {% endif %}
+            <a href="{% url 'find_pets' %}" class="btn btn-primary btn-lg hero-btn-outline">
+              <i class="fas fa-list me-2"></i>Search for Pets
             </a>
-            <a href="{% url 'report_found_pet' %}" class="btn btn-success btn-lg">
-              <i class="fas fa-paw me-2"></i>Report a Found Pet
-            </a>
-          {% else %}
-            <a href="{% url 'login' %}" class="btn btn-danger btn-lg">
-              <i class="fas fa-search me-2"></i>Report a Lost Pet
-            </a>
-            <a href="{% url 'login' %}" class="btn btn-success btn-lg">
-              <i class="fas fa-paw me-2"></i>Report a Found Pet
-            </a>
-          {% endif %}
-          <a href="{% url 'find_pets' %}" class="btn btn-outline-primary btn-lg">
-            <i class="fas fa-list me-2"></i>Search for Pets
-          </a>
+          </div>
         </div>
       </div>
       <div class="col-lg-6">
-        <div class="hero-image-container rounded-3 overflow-hidden shadow-lg fade-in">
+        <div class="hero-image-container rounded-4 overflow-hidden shadow-xl fade-in">
           <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
-               alt="Happy dog and cat" class="img-fluid">
+               alt="Happy dog and cat" class="img-fluid hero-image">
         </div>
       </div>
     </div>
@@ -43,60 +46,74 @@
 </section>
 
 <!-- Mission Section -->
-<section class="mission-section mb-5 bg-light py-5 fade-in-up">
+<section class="mission-section mb-5 py-5 fade-in-up">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-lg-8 text-center">
-        <h2 class="mb-4">Our Mission: Every Pet Deserves a Home</h2>
-        <p class="lead">We believe every pet deserves safety, love, and a place in a family. Our platform brings communities together to help lost pets return home and find caring families for animals in need.</p>
+      <div class="col-lg-10">
+        <div class="mission-card card border-0 shadow-sm rounded-4 p-5">
+          <div class="row align-items-center">
+            <div class="col-md-3 text-center mb-4 mb-md-0">
+              <div class="mission-icon-wrapper">
+                <div class="mission-icon bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block">
+                  <i class="fas fa-heart fa-3x text-primary"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-9 text-center text-md-start">
+              <h2 class="mb-3 fw-bold">Our Mission: Every Pet Deserves a Home</h2>
+              <p class="lead mb-0">We believe every pet deserves safety, love, and a place in a family. Our platform brings communities together to help lost pets return home and find caring families for animals in need.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- How It Works Section -->
-<section class="how-it-works-section mb-5 fade-in-up">
+<section class="how-it-works-section mb-5 py-5 fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-12 text-center mb-5">
-        <h2 class="mb-3">How PetRescue Works</h2>
-        <p class="lead">Our straightforward process helps reunite pets with their families quickly</p>
+        <span class="section-badge mb-3">How It Works</span>
+        <h2 class="mb-3 fw-bold">Simple Steps to Help Pets</h2>
+        <p class="lead text-muted">Our straightforward process helps reunite pets with their families quickly</p>
       </div>
     </div>
     
     <div class="row g-4">
       <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card fade-in-up">
-          <div class="card-body text-center">
-            <div class="feature-icon bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+        <div class="card h-100 shadow-sm border-0 rounded-4 feature-card fade-in-up">
+          <div class="card-body text-center p-4">
+            <div class="feature-icon bg-success bg-opacity-10 rounded-circle p-4 d-inline-block mb-4">
               <i class="fas fa-paw fa-2x text-success"></i>
             </div>
-            <h3 class="card-title">Report Lost Pets</h3>
-            <p class="card-text">Create a detailed report for your missing pet with photos, location, and description to help others recognize them.</p>
+            <h3 class="card-title fw-bold mb-3">Report Lost Pets</h3>
+            <p class="card-text text-muted">Create a detailed report for your missing pet with photos, location, and description to help others recognize them.</p>
           </div>
         </div>
       </div>
       
       <div class="col-md-6 col-lg-4">
-        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card fade-in-up">
-          <div class="card-body text-center">
-            <div class="feature-icon bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+        <div class="card h-100 shadow-sm border-0 rounded-4 feature-card fade-in-up">
+          <div class="card-body text-center p-4">
+            <div class="feature-icon bg-warning bg-opacity-10 rounded-circle p-4 d-inline-block mb-4">
               <i class="fas fa-search fa-2x text-warning"></i>
             </div>
-            <h3 class="card-title">Find Found Pets</h3>
-            <p class="card-text">Browse pets found in your area and help connect them with their families through our community network.</p>
+            <h3 class="card-title fw-bold mb-3">Find Found Pets</h3>
+            <p class="card-text text-muted">Browse pets found in your area and help connect them with their families through our community network.</p>
           </div>
         </div>
       </div>
       
       <div class="col-md-6 col-lg-4 mx-auto">
-        <div class="card h-100 shadow-sm border-0 rounded-3 feature-card fade-in-up">
-          <div class="card-body text-center">
-            <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+        <div class="card h-100 shadow-sm border-0 rounded-4 feature-card fade-in-up">
+          <div class="card-body text-center p-4">
+            <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block mb-4">
               <i class="fas fa-heart fa-2x text-primary"></i>
             </div>
-            <h3 class="card-title">Support Animal Welfare</h3>
-            <p class="card-text">Join our community of animal lovers working together to protect and care for pets in need.</p>
+            <h3 class="card-title fw-bold mb-3">Support Animal Welfare</h3>
+            <p class="card-text text-muted">Join our community of animal lovers working together to protect and care for pets in need.</p>
           </div>
         </div>
       </div>
@@ -105,15 +122,30 @@
 </section>
 
 <!-- Community Impact Section -->
-<section class="community-impact-section mb-5 fade-in-up">
+<section class="community-impact-section mb-5 py-5 fade-in-up">
   <div class="container">
     <div class="row align-items-center">
-      <div class="col-lg-6 mb-4 mb-lg-0">
-        <h2 class="mb-4">Making a Difference Together</h2>
-        <p class="lead">PetRescue has helped reunite many pets with their families and connected numerous animals with loving homes.</p>
+      <div class="col-lg-6 mb-5 mb-lg-0">
+        <span class="section-badge mb-3">Community Impact</span>
+        <h2 class="mb-4 fw-bold">Making a Difference Together</h2>
+        <p class="lead mb-4">PetRescue has helped reunite many pets with their families and connected numerous animals with loving homes. Join thousands of compassionate community members making a real difference.</p>
+        <div class="impact-stats d-flex flex-wrap gap-4 mt-4">
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold fs-2">{{ pets_reunited_count }}</div>
+            <div class="stat-label text-muted">Pets Reunited</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number text-success fw-bold fs-2">{{ reports_handled_count }}</div>
+            <div class="stat-label text-muted">Reports Handled</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number text-warning fw-bold fs-2">{{ active_members_count }}</div>
+            <div class="stat-label text-muted">Active Members</div>
+          </div>
+        </div>
       </div>
       <div class="col-lg-6">
-        <div class="rounded-3 overflow-hidden shadow-lg fade-in">
+        <div class="community-image-container rounded-4 overflow-hidden shadow-xl fade-in">
           <img src="https://images.unsplash.com/photo-1583337130417-3346a1be7dee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
                alt="Happy family with pet" class="img-fluid">
         </div>
@@ -123,12 +155,13 @@
 </section>
 
 <!-- Recent Pets Section -->
-<section class="recent-pets-section mb-5 fade-in-up">
+<section class="recent-pets-section mb-5 py-5 fade-in-up">
   <div class="container">
     <div class="row">
       <div class="col-12 text-center mb-5">
-        <h2 class="mb-3">Recently Reported Pets</h2>
-        <p class="lead">These pets are looking for their families. Can you help them?</p>
+        <span class="section-badge mb-3">Recent Reports</span>
+        <h2 class="mb-3 fw-bold">Recently Reported Pets</h2>
+        <p class="lead text-muted">These pets are looking for their families. Can you help them?</p>
       </div>
     </div>
     
@@ -144,24 +177,26 @@
       {% if recent_pets %}
         {% for pet in recent_pets %}
           <div class="col-md-6 col-lg-4 fade-in-up">
-            <div class="card h-100 shadow-sm border-0 rounded-3 pet-card hover-lift">
+            <div class="card h-100 shadow-sm border-0 rounded-4 pet-card hover-lift overflow-hidden">
               {% if pet.image %}
-                <img src="{{ pet.image.url }}" class="card-img-top" alt="{{ pet.breed }}" style="height: 200px; object-fit: cover;" loading="lazy">
+                <div class="pet-image-wrapper">
+                  <img src="{{ pet.image.url }}" class="card-img-top pet-image" alt="{{ pet.breed }}" loading="lazy">
+                </div>
               {% else %}
-                <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 200px;">
+                <div class="d-flex align-items-center justify-content-center image-placeholder pet-image-placeholder">
                   <i class="fas fa-paw fa-3x text-muted"></i>
                 </div>
               {% endif %}
-              <div class="card-body d-flex flex-column">
+              <div class="card-body d-flex flex-column p-4">
                 {% if pet.status == 'lost' %}
-                  <span class="status-badge status-badge-lost align-self-start mb-2">LOST</span>
+                  <span class="status-badge status-badge-lost align-self-start mb-3">LOST</span>
                 {% elif pet.status == 'found' %}
-                  <span class="status-badge status-badge-found align-self-start mb-2">FOUND</span>
+                  <span class="status-badge status-badge-found align-self-start mb-3">FOUND</span>
                 {% elif pet.status == 'adoptable' %}
-                  <span class="status-badge status-badge-adoptable align-self-start mb-2">NEEDS HOME</span>
+                  <span class="status-badge status-badge-adoptable align-self-start mb-3">NEEDS HOME</span>
                 {% endif %}
-                <h5 class="card-title">{{ pet.breed }}</h5>
-                <p class="card-text flex-grow-1">
+                <h5 class="card-title fw-bold mb-2">{{ pet.breed }}</h5>
+                <p class="card-text flex-grow-1 text-muted mb-3">
                   {{ pet.pet_type|title }}, {{ pet.color }}. 
                   {% if pet.status == 'lost' %}
                     Last seen near {{ pet.location }}.
@@ -189,9 +224,9 @@
       {% endif %}
     </div>
     
-    <div class="row mt-4">
+    <div class="row mt-5">
       <div class="col-12 text-center">
-        <a href="{% url 'all_pets' %}" class="btn btn-success btn-lg">
+        <a href="{% url 'all_pets' %}" class="btn btn-success btn-lg px-5 py-3 rounded-pill">
           <i class="fas fa-list me-2"></i>View All Pets
         </a>
       </div>
@@ -201,18 +236,23 @@
 
 <!-- CTA Section -->
 {% if not user.is_authenticated %}
-<section class="cta-section mb-5 fade-in-up">
+<section class="cta-section mb-5 py-5 fade-in-up">
   <div class="container">
     <div class="row">
-      <div class="col-lg-8 mx-auto">
-        <div class="card border-0 rounded-3 bg-light p-5 text-center">
-          <h3 class="mb-3">Join Our Community Today</h3>
-          <p class="mb-4">Create an account to help rescue pets and report lost or found animals in your area. Together, we can make a difference.</p>
+      <div class="col-lg-10 mx-auto">
+        <div class="card border-0 rounded-4 shadow-lg cta-card p-5 text-center">
+          <div class="cta-icon-wrapper mb-4">
+            <div class="cta-icon bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block">
+              <i class="fas fa-users fa-3x text-primary"></i>
+            </div>
+          </div>
+          <h3 class="mb-3 fw-bold">Join Our Community Today</h3>
+          <p class="lead mb-4 text-muted">Create an account to help rescue pets and report lost or found animals in your area. Together, we can make a difference.</p>
           <div class="d-flex flex-wrap justify-content-center gap-3">
-            <a href="{% url 'register' %}" class="btn btn-success btn-lg">
+            <a href="{% url 'register' %}" class="btn btn-success btn-lg px-5 py-3 rounded-pill">
               <i class="fas fa-user-plus me-2"></i>Create Account
             </a>
-            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-5 py-3 rounded-pill">
               <i class="fas fa-sign-in-alt me-2"></i>Sign In
             </a>
           </div>
@@ -226,77 +266,440 @@
 
 {% block head_extra %}
 <style>
+  /* ============================================
+     HOME PAGE ENHANCED STYLES
+     ============================================ */
+  
+  /* Hero Section */
   .hero-section {
-    padding: 3rem 0;
+    padding: 4rem 0 5rem;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.03) 0%, rgba(33, 150, 243, 0.03) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .hero-badge {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--primary-color);
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .hero-title {
+    color: #2c3e50;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+  
+  .hero-subtitle {
+    color: #5a6c7d;
+    font-size: 1.125rem;
+    line-height: 1.7;
+  }
+  
+  .hero-buttons {
+    margin-top: 2rem;
+  }
+  
+  .hero-btn-primary,
+  .hero-btn-success {
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+  }
+  
+  .hero-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+  }
+  
+  .hero-btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+  }
+  
+  .hero-btn-outline {
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    border-width: 2px;
+    transition: all 0.3s ease;
+  }
+  
+  .hero-btn-outline:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
   }
   
   .hero-image-container {
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    transition: transform 0.3s ease;
-    border-radius: var(--border-radius);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
     overflow: hidden;
-    /* Add hardware acceleration */
+    position: relative;
     transform: translateZ(0);
     will-change: transform;
   }
   
-  .hero-image-container:hover {
-    transform: translateY(-5px);
+  .hero-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
   
+  .hero-image-container:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+  }
+  
+  .hero-image-container:hover::after {
+    opacity: 1;
+  }
+  
+  .hero-image {
+    transition: transform 0.4s ease;
+    width: 100%;
+    height: auto;
+  }
+  
+  .hero-image-container:hover .hero-image {
+    transform: scale(1.05);
+  }
+  
+  /* Section Badge */
+  .section-badge {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--primary-color);
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Mission Section */
+  .mission-section {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.02) 0%, rgba(33, 150, 243, 0.02) 100%);
+  }
+  
+  .mission-card {
+    background: white;
+    transition: all 0.3s ease;
+  }
+  
+  .mission-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .mission-icon-wrapper {
+    position: relative;
+  }
+  
+  .mission-icon {
+    transition: all 0.3s ease;
+  }
+  
+  .mission-card:hover .mission-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
+  
+  /* Feature Cards */
   .feature-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
     height: 100%;
-    /* Add hardware acceleration */
+    background: white;
     transform: translateZ(0);
     will-change: transform;
   }
   
   .feature-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12) !important;
   }
   
   .feature-icon {
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .feature-card:hover .feature-icon {
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(5deg);
   }
   
+  /* Community Impact Section */
+  .community-impact-section {
+    background: white;
+  }
+  
+  .impact-stats {
+    margin-top: 2rem;
+  }
+  
+  .stat-item {
+    text-align: center;
+  }
+  
+  .stat-number {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .community-image-container {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s ease;
+    overflow: hidden;
+    transform: translateZ(0);
+  }
+  
+  .community-image-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
+  }
+  
+  .community-image-container img {
+    transition: transform 0.4s ease;
+    width: 100%;
+    height: auto;
+  }
+  
+  .community-image-container:hover img {
+    transform: scale(1.05);
+  }
+  
+  /* Pet Cards */
   .pet-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
     height: 100%;
-    /* Add hardware acceleration */
+    background: white;
     transform: translateZ(0);
     will-change: transform;
   }
   
   .pet-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12) !important;
+  }
+  
+  .pet-image-wrapper {
+    overflow: hidden;
+    height: 250px;
+    background: #f8f9fa;
+  }
+  
+  .pet-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  
+  .pet-card:hover .pet-image {
+    transform: scale(1.1);
+  }
+  
+  .pet-image-placeholder {
+    height: 250px;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%);
+  }
+  
+  /* CTA Section */
+  .cta-section {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.05) 100%);
+  }
+  
+  .cta-card {
+    background: white;
+    transition: all 0.3s ease;
+  }
+  
+  .cta-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  .cta-icon-wrapper {
+    position: relative;
+  }
+  
+  .cta-icon {
+    transition: all 0.3s ease;
+  }
+  
+  .cta-card:hover .cta-icon {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  
+  /* Fade-in animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+    opacity: 0;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 992px) {
+    .hero-section {
+      padding: 3rem 0 4rem;
+    }
+    
+    .hero-title {
+      font-size: 2.5rem;
+    }
+    
+    .min-vh-50 {
+      min-height: auto;
+    }
   }
   
   @media (max-width: 768px) {
     .hero-section {
-      padding: 2rem 0;
+      padding: 2rem 0 3rem;
+    }
+    
+    .hero-title {
+      font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+    
+    .hero-buttons {
+      flex-direction: column;
+      gap: 1rem !important;
+    }
+    
+    .hero-btn-primary,
+    .hero-btn-success,
+    .hero-btn-outline {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .mission-card,
+    .cta-card {
+      padding: 2rem !important;
+    }
+    
+    .impact-stats {
+      justify-content: center;
+      gap: 2rem !important;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+    }
+    
+    .feature-card,
+    .pet-card {
+      margin-bottom: 1.5rem;
     }
   }
   
-  /* Performance optimization: Optimize home page elements */
-  .hero-section, .mission-section, .how-it-works-section, .community-impact-section, .recent-pets-section, .cta-section {
+  @media (max-width: 576px) {
+    .hero-title {
+      font-size: 1.75rem;
+    }
+    
+    .section-badge,
+    .hero-badge {
+      font-size: 0.75rem;
+      padding: 0.4rem 1rem;
+    }
+    
+    .mission-icon,
+    .cta-icon {
+      width: 60px !important;
+      height: 60px !important;
+      padding: 1rem !important;
+    }
+    
+    .mission-icon i,
+    .cta-icon i {
+      font-size: 2rem !important;
+    }
+  }
+  
+  /* Performance optimization */
+  .hero-section, .mission-section, .how-it-works-section, 
+  .community-impact-section, .recent-pets-section, .cta-section {
     contain: layout style paint;
   }
   
-  .hero-image-container, .feature-card, .feature-icon, .pet-card, .cta-section .card {
+  .hero-image-container, .feature-card, .feature-icon, 
+  .pet-card, .cta-section .card, .community-image-container {
     contain: layout style paint;
   }
   
-  /* Performance optimization: Optimize images */
-  .hero-image-container img, .community-impact-section img {
+  .hero-image-container img, .community-image-container img, .pet-image {
     contain: layout style paint;
-    /* Add hardware acceleration for images */
     transform: translateZ(0);
   }
 </style>
@@ -304,32 +707,50 @@
 
 {% block scripts %}
 <script>
-  // Add fade-in animation to elements when they come into view
+  // Enhanced fade-in animations with Intersection Observer
   document.addEventListener('DOMContentLoaded', function() {
-    // Simple fade-in animation for elements
-    const fadeElements = document.querySelectorAll('.fade-in-up');
-    fadeElements.forEach((element, index) => {
-      // Add delay for staggered animation
-      element.style.animationDelay = `${index * 0.1}s`;
+    // Use Intersection Observer for better performance
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          // Add staggered delay for smooth appearance
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
+          }, index * 100);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    
+    // Observe all fade-in elements
+    const fadeElements = document.querySelectorAll('.fade-in-up, .fade-in');
+    fadeElements.forEach(element => {
+      element.style.opacity = '0';
+      observer.observe(element);
     });
     
-    // Simulate loading for recent pets (in a real app, this would be an AJAX call)
-    const loadingIndicator = document.getElementById('recent-pets-loading');
-    const petsContainer = document.getElementById('recent-pets-container');
-    
-    if (loadingIndicator && petsContainer) {
-      // In a real implementation, this would be replaced with actual AJAX loading
-      // For now, we'll just show the loading indicator briefly
-      /*
-      loadingIndicator.classList.remove('d-none');
-      petsContainer.classList.add('d-none');
-      
-      setTimeout(() => {
-        loadingIndicator.classList.add('d-none');
-        petsContainer.classList.remove('d-none');
-      }, 800);
-      */
-    }
+    // Add smooth scroll behavior for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href !== '#' && href.length > 1) {
+          const target = document.querySelector(href);
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }
+      });
+    });
   });
 </script>
 {% endblock %}

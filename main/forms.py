@@ -374,6 +374,21 @@ class PetSearchForm(forms.Form):
         })
     )
     
+    # New radius field for location-based search
+    radius = forms.ChoiceField(
+        choices=[
+            ('', 'Any Distance'),
+            ('5', '5 km'),
+            ('10', '10 km'),
+            ('25', '25 km'),
+            ('50', '50 km')
+        ],
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        })
+    )
+    
     start_date = forms.DateField(
         required=False,
         widget=forms.DateInput(attrs={
@@ -392,6 +407,28 @@ class PetSearchForm(forms.Form):
             'placeholder': 'To date'
         }),
         help_text="End date for search"
+    )
+    
+    # New status filter
+    status = forms.ChoiceField(
+        choices=[('', 'All Statuses')] + Pet.PET_STATUS_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        })
+    )
+    
+    # New sort field
+    sort = forms.ChoiceField(
+        choices=[
+            ('newest', 'Newest first'),
+            ('oldest', 'Oldest first'),
+            ('updated', 'Most recently updated')
+        ],
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select'
+        })
     )
     
     def clean(self):

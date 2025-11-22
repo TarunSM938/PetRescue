@@ -21,22 +21,118 @@
     </div>
   </div>
 
-  <!-- Filter Buttons -->
+  <!-- Filter Panel -->
   <div class="row mb-4">
     <div class="col-12">
-      <div class="d-flex flex-wrap justify-content-center gap-2 fade-in-up">
-        <button class="btn btn-outline-primary filter-btn active" data-filter="all">
-          <i class="fas fa-list me-1"></i>All Pets
-        </button>
-        <button class="btn btn-outline-danger filter-btn" data-filter="lost">
-          <i class="fas fa-search me-1"></i>Lost Pets
-        </button>
-        <button class="btn btn-outline-success filter-btn" data-filter="found">
-          <i class="fas fa-home me-1"></i>Found Pets
-        </button>
+      <div class="card shadow-sm border-0 rounded-3 mb-4">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+          <div>
+            <h2 class="mb-0">Advanced Search</h2>
+            <p class="text-muted small mb-0">Refine your search results</p>
+          </div>
+          <button class="btn btn-outline-primary d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilterCollapse" aria-expanded="true" aria-controls="advancedFilterCollapse">
+            <i class="fas fa-filter"></i>
+          </button>
+        </div>
+        <div class="collapse show" id="advancedFilterCollapse">
+          <div class="card-body">
+            <form method="GET" id="pet-search-form" class="row g-3">
+              <div class="col-md-3">
+                <label for="pet_type" class="form-label">Pet Type</label>
+                <select name="pet_type" id="pet_type" class="form-select">
+                  <option value="">All Pet Types</option>
+                  <option value="dog" {% if request.GET.pet_type == 'dog' %}selected{% endif %}>Dog</option>
+                  <option value="cat" {% if request.GET.pet_type == 'cat' %}selected{% endif %}>Cat</option>
+                  <option value="bird" {% if request.GET.pet_type == 'bird' %}selected{% endif %}>Bird</option>
+                  <option value="rabbit" {% if request.GET.pet_type == 'rabbit' %}selected{% endif %}>Rabbit</option>
+                  <option value="other" {% if request.GET.pet_type == 'other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+              
+              <div class="col-md-3">
+                <label for="breed" class="form-label">Breed</label>
+                <input type="text" name="breed" id="breed" class="form-control" placeholder="Breed" value="{{ request.GET.breed }}">
+              </div>
+              
+              <div class="col-md-3">
+                <label for="location" class="form-label">Location</label>
+                <input type="text" name="location" id="location" class="form-control" placeholder="Location" value="{{ request.GET.location }}">
+              </div>
+              
+              <div class="col-md-3">
+                <label for="radius" class="form-label">Radius</label>
+                <select name="radius" id="radius" class="form-select">
+                  <option value="">Any Distance</option>
+                  <option value="5" {% if request.GET.radius == '5' %}selected{% endif %}>5 km</option>
+                  <option value="10" {% if request.GET.radius == '10' %}selected{% endif %}>10 km</option>
+                  <option value="25" {% if request.GET.radius == '25' %}selected{% endif %}>25 km</option>
+                  <option value="50" {% if request.GET.radius == '50' %}selected{% endif %}>50 km</option>
+                </select>
+              </div>
+              
+              <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select">
+                  <option value="">All Statuses</option>
+                  <option value="lost" {% if request.GET.status == 'lost' %}selected{% endif %}>Lost</option>
+                  <option value="found" {% if request.GET.status == 'found' %}selected{% endif %}>Found</option>
+                  <option value="adoptable" {% if request.GET.status == 'adoptable' %}selected{% endif %}>Available for Adoption</option>
+                </select>
+              </div>
+              
+              <div class="col-md-3">
+                <label for="sort" class="form-label">Sort By</label>
+                <select name="sort" id="sort" class="form-select">
+                  <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest first</option>
+                  <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+                  <option value="updated" {% if request.GET.sort == 'updated' %}selected{% endif %}>Most recently updated</option>
+                </select>
+              </div>
+              
+              <div class="col-md-3">
+                <label for="start_date" class="form-label">From Date</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request.GET.start_date }}">
+              </div>
+              
+              <div class="col-md-3">
+                <label for="end_date" class="form-label">To Date</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request.GET.end_date }}">
+              </div>
+              
+              <div class="col-12">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i>Search Pets
+                  </button>
+                  <a href="{% url 'all_pets' %}" class="btn btn-outline-secondary">Reset Filters</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Applied Filters Section -->
+  {% if request.GET %}
+  <div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 class="mb-0">Search Results</h3>
+      <a href="{% url 'all_pets' %}" class="btn btn-sm btn-outline-secondary">Clear All Filters</a>
+    </div>
+    <div class="mt-2">
+      {% for key, value in request.GET.items %}
+        {% if value and key != 'page' %}
+          <span class="badge bg-primary me-1 mb-1">
+            {{ key|title }}: {{ value }}
+            <a href="?{% for k, v in request.GET.items %}{% if k != key %}{{ k }}={{ v }}{% if not forloop.last %}&{% endif %}{% endif %}{% endfor %}" class="text-white ms-1" style="text-decoration: none;">×</a>
+          </span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Loading indicator -->
   <div id="pets-loading" class="text-center py-5 d-none">
@@ -64,12 +160,18 @@
                 <span class="status-badge status-badge-lost align-self-start mb-2">LOST</span>
               {% elif pet.status == 'found' %}
                 <span class="status-badge status-badge-found align-self-start mb-2">FOUND</span>
+              {% elif pet.status == 'adoptable' %}
+                <span class="status-badge status-badge-adoptable align-self-start mb-2">NEEDS HOME</span>
               {% endif %}
               <h5 class="card-title">{{ pet.breed }}</h5>
               <p class="card-text flex-grow-1">
                 <strong><i class="fas fa-paw me-1"></i></strong> {{ pet.get_pet_type_display }}<br>
                 <strong><i class="fas fa-palette me-1"></i></strong> {{ pet.color }}<br>
-                <strong><i class="fas fa-map-marker-alt me-1"></i></strong> {{ pet.location }}
+                <strong><i class="fas fa-map-marker-alt me-1"></i></strong> {{ pet.location }}<br>
+                {% if pet.distance %}
+                  <strong><i class="fas fa-road me-1"></i></strong> {{ pet.distance|floatformat:1 }} km<br>
+                {% endif %}
+                <strong><i class="fas fa-calendar-alt me-1"></i></strong> {{ pet.created_at|date:"M d, Y" }}
               </p>
               <a href="{% url 'pet_detail' pet.id %}?ref=all_pets" class="btn btn-outline-primary mt-auto">
                 <i class="fas fa-eye me-1"></i>View Details
@@ -98,7 +200,7 @@
         <ul class="pagination">
           {% if pets.has_previous %}
             <li class="page-item">
-              <a class="page-link" href="?page={{ pets.previous_page_number }}" aria-label="Previous">
+              <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ pets.previous_page_number }}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
@@ -115,14 +217,14 @@
               </li>
             {% elif num > pets.number|add:'-3' and num < pets.number|add:'3' %}
               <li class="page-item">
-                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
               </li>
             {% endif %}
           {% endfor %}
           
           {% if pets.has_next %}
             <li class="page-item">
-              <a class="page-link" href="?page={{ pets.next_page_number }}" aria-label="Next">
+              <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ pets.next_page_number }}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
@@ -191,42 +293,27 @@
   .breadcrumb, .filter-btn, .pet-card, .image-placeholder {
     contain: layout style paint;
   }
+  
+  /* Filter collapse button for mobile */
+  @media (max-width: 991.98px) {
+    .card-header {
+      padding: 1rem !important;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const petCards = document.querySelectorAll('.pet-card-wrapper');
-    
-    filterButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        // Remove active class from all buttons
-        filterButtons.forEach(btn => btn.classList.remove('active'));
-        
-        // Add active class to clicked button
-        this.classList.add('active');
-        
-        // Get filter value
-        const filterValue = this.getAttribute('data-filter');
-        
-        // Show/hide pet cards based on filter
-        petCards.forEach(card => {
-          if (filterValue === 'all') {
-            card.style.display = 'block';
-          } else {
-            const petStatus = card.getAttribute('data-status');
-            if (petStatus === filterValue) {
-              card.style.display = 'block';
-            } else {
-              card.style.display = 'none';
-            }
-          }
-        });
-      });
-    });
+    // Handle filter collapse for mobile
+    const filterCollapse = document.getElementById('advancedFilterCollapse');
+    if (filterCollapse) {
+      // On mobile, collapse by default
+      if (window.innerWidth < 992) {
+        filterCollapse.classList.remove('show');
+      }
+    }
     
     // Add fade-in animation to pet cards
     const petCardWrappers = document.querySelectorAll('.pet-card-wrapper');

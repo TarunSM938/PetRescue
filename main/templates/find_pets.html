@@ -4,151 +4,258 @@
 {% block title %}Search Lost Pets | PetRescue{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container mt-4">
+  <!-- Breadcrumb Navigation -->
+  <nav aria-label="breadcrumb" class="fade-in">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Find Pets</li>
+    </ol>
+  </nav>
+
+  <!-- Page Header -->
   <div class="row">
+    <div class="col-12 text-center mb-4 fade-in-up">
+      <h1 class="display-4 mb-3">Find Your Lost Pet</h1>
+      <p class="lead">Search our database of found pets to help reunite you with your missing companion.</p>
+    </div>
+  </div>
+
+  <!-- Horizontal Filter Bar -->
+  <div class="row mb-4">
     <div class="col-12">
-      <!-- Hero Section -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="card border-0 rounded-3 overflow-hidden shadow-lg">
-            <img src="https://images.unsplash.com/photo-1517423568366-8b83523034fd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80" 
-                 class="card-img-top" alt="Lost pet search" style="max-height: 300px; object-fit: cover;">
-            <div class="card-img-overlay d-flex align-items-center justify-content-center">
-              <div class="bg-dark bg-opacity-75 p-4 rounded text-center text-white" style="max-width: 600px;">
-                <h1 class="card-title mb-3">Find Your Lost Pet</h1>
-                <p class="card-text mb-4">Search our database of found pets to help reunite you with your missing companion.</p>
+      <div class="card shadow-sm border-0 rounded-3 filter-bar">
+        <div class="card-body p-3">
+          <form method="GET" id="pet-search-form" class="d-flex flex-wrap align-items-center gap-3">
+            <!-- Pet Type -->
+            <div class="flex-grow-1 min-w-150">
+              <label for="{{ search_form.pet_type.id_for_label }}" class="form-label small mb-1">Pet Type</label>
+              {{ search_form.pet_type }}
+            </div>
+            
+            <!-- Breed -->
+            <div class="flex-grow-1 min-w-150">
+              <label for="{{ search_form.breed.id_for_label }}" class="form-label small mb-1">Breed</label>
+              {{ search_form.breed }}
+            </div>
+            
+            <!-- Color -->
+            <div class="flex-grow-1 min-w-150">
+              <label for="{{ search_form.color.id_for_label }}" class="form-label small mb-1">Color</label>
+              {{ search_form.color }}
+            </div>
+            
+            <!-- Location -->
+            <div class="flex-grow-1 min-w-150">
+              <label for="{{ search_form.location.id_for_label }}" class="form-label small mb-1">
+                <i class="fas fa-map-marker-alt me-1"></i>Location
+              </label>
+              {{ search_form.location }}
+            </div>
+            
+            <!-- Radius -->
+            <div class="flex-grow-1 min-w-150">
+              <label for="{{ search_form.radius.id_for_label }}" class="form-label small mb-1">Radius</label>
+              {{ search_form.radius }}
+            </div>
+            
+            <!-- Status -->
+            <div class="flex-grow-1 min-w-150">
+              <label for="{{ search_form.status.id_for_label }}" class="form-label small mb-1">Status</label>
+              {{ search_form.status }}
+            </div>
+            
+            <!-- Sort -->
+            <div class="flex-grow-1 min-w-150">
+              <label for="{{ search_form.sort.id_for_label }}" class="form-label small mb-1">Sort By</label>
+              {{ search_form.sort }}
+            </div>
+            
+            <!-- Date Range -->
+            <div class="d-flex flex-wrap gap-2 align-items-end">
+              <div>
+                <label for="{{ search_form.start_date.id_for_label }}" class="form-label small mb-1">From</label>
+                {{ search_form.start_date }}
+              </div>
+              <div>
+                <label for="{{ search_form.end_date.id_for_label }}" class="form-label small mb-1">To</label>
+                {{ search_form.end_date }}
               </div>
             </div>
-          </div>
+            
+            <!-- Buttons -->
+            <div class="d-flex gap-2 ms-auto">
+              <button type="submit" class="btn btn-primary" id="search-button">
+                <span class="spinner-border spinner-border-sm d-none" id="search-spinner" role="status" aria-hidden="true"></span>
+                <span id="search-text"><i class="fas fa-search me-1"></i>Search</span>
+              </button>
+              <a href="{% url 'find_pets' %}" class="btn btn-outline-secondary"><i class="fas fa-redo me-1"></i>Reset</a>
+            </div>
+          </form>
+          
+          <!-- Date Error Message -->
+          <div id="date-error" class="text-danger small mt-2 d-none">Start date must be before end date</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Two-column layout for filter and results -->
-  <div class="row">
-    <!-- Filter Panel (Left Column) -->
-    <div class="col-lg-3 mb-4">
-      <div class="card shadow-sm border-0 rounded-3 filter-sidebar">
-        <div class="card-header bg-white border-0">
-          <h2 class="mb-0">Filters</h2>
-          <p class="text-muted small mb-0">Refine your search results</p>
-        </div>
-        <div class="card-body">
-          <form method="GET" id="pet-search-form">
-            <div class="mb-3">
-              <label for="{{ search_form.pet_type.id_for_label }}" class="form-label">Pet Type</label>
-              {{ search_form.pet_type }}
-            </div>
-            
-            <div class="mb-3">
-              <label for="{{ search_form.breed.id_for_label }}" class="form-label">Breed</label>
-              {{ search_form.breed }}
-              <div class="form-text">Search accepts partial names and common misspellings</div>
-            </div>
-            
-            <div class="mb-3">
-              <label for="{{ search_form.color.id_for_label }}" class="form-label">Color</label>
-              {{ search_form.color }}
-            </div>
-            
-            <div class="mb-3">
-              <label for="{{ search_form.location.id_for_label }}" class="form-label">Location</label>
-              {{ search_form.location }}
-              <div class="form-text">Enter city, neighborhood, or address</div>
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label">Date Range</label>
-              <div class="row g-2">
-                <div class="col-6">
-                  <label for="{{ search_form.start_date.id_for_label }}" class="form-label small">From</label>
-                  {{ search_form.start_date }}
-                </div>
-                <div class="col-6">
-                  <label for="{{ search_form.end_date.id_for_label }}" class="form-label small">To</label>
-                  {{ search_form.end_date }}
-                </div>
-              </div>
-              <div id="date-error" class="text-danger small mt-1 d-none">Start date must be before end date</div>
-            </div>
-            
-            <div class="d-grid gap-2 mt-4">
-              <button type="submit" class="btn btn-primary" id="search-button">
-                <span class="spinner-border spinner-border-sm d-none" id="search-spinner" role="status" aria-hidden="true"></span>
-                <span id="search-text">Search Found Pets</span>
-              </button>
-              <a href="{% url 'find_pets' %}" class="btn btn-outline-secondary">Reset Filters</a>
-            </div>
-          </form>
-        </div>
+  <!-- Applied Filters Section -->
+  {% if request.GET %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">Search Results</h3>
+        <a href="{% url 'find_pets' %}" class="btn btn-sm btn-outline-secondary">Clear All Filters</a>
+      </div>
+      <div class="mt-2">
+        {% for key, value in request.GET.items %}
+          {% if value and key != 'page' %}
+            <span class="badge bg-primary me-1 mb-1">
+              {{ key|title }}: {{ value }}
+              <a href="?{% for k, v in request.GET.items %}{% if k != key %}{{ k }}={{ v }}{% if not forloop.last %}&{% endif %}{% endif %}{% endfor %}" class="text-white ms-1" style="text-decoration: none;">×</a>
+            </span>
+          {% endif %}
+        {% endfor %}
       </div>
     </div>
+  </div>
+  {% endif %}
+  
+  <!-- Loading indicator -->
+  <div id="loading-indicator" class="text-center py-5 d-none">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Searching for pets...</p>
+  </div>
 
-    <!-- Results Section (Right Column) -->
-    <div class="col-lg-9">
-      <!-- Loading indicator -->
-      <div id="loading-indicator" class="text-center py-5 d-none">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-2">Searching for pets...</p>
+  <!-- Search Results Section -->
+  <div id="search-results-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">Found Pets</h2>
+      <div class="text-muted">
+        {% if pets %}
+          {{ pets|length }} pet{{ pets|length|pluralize }} found
+        {% else %}
+          No pets found
+        {% endif %}
       </div>
-
-      <!-- Search Results Section -->
-      <div id="search-results-section">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="mb-0">Found Pets</h2>
-          <div class="text-muted">
-            {% if pets %}
-              {{ pets|length }} pet{{ pets|length|pluralize }} found
-            {% else %}
-              No pets found
-            {% endif %}
+    </div>
+    
+    {% if pets %}
+      <!-- Pet Grid -->
+      <div class="row g-4" id="pet-grid">
+        {% for pet in pets %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 rounded-3 pet-card hover-lift">
+              {% if pet.image %}
+                <img src="{{ pet.image.url }}" class="card-img-top pet-image" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}, {{ pet.color }}" style="height: 200px; object-fit: cover;" loading="lazy">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 200px;">
+                  <i class="fas fa-paw fa-3x text-muted"></i>
+                </div>
+              {% endif %}
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h5 class="card-title mb-0">{{ pet.breed }}</h5>
+                  <span class="status-badge status-badge-found">Found</span>
+                </div>
+                <p class="card-text">
+                  <small class="text-muted">
+                    <i class="fas fa-paw me-1"></i> {{ pet.get_pet_type_display }}<br>
+                    <i class="fas fa-palette me-1"></i> {{ pet.color }}<br>
+                    <i class="fas fa-map-marker-alt me-1"></i> {{ pet.location }}<br>
+                    {% if pet.distance %}
+                      <i class="fas fa-road me-1"></i> {{ pet.distance|floatformat:1 }} km<br>
+                    {% endif %}
+                    <i class="fas fa-calendar-alt me-1"></i> {{ pet.created_at|date:"M d, Y" }}
+                  </small>
+                </p>
+                <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
+                <div class="d-grid gap-2 mt-auto">
+                  <a href="{% url 'pet_detail' pet.id %}?ref=find_pets" class="btn btn-outline-primary">
+                    <i class="fas fa-eye me-1"></i>View Details
+                  </a>
+                  <button class="btn btn-outline-primary contact-reporter-btn" 
+                          data-pet-id="{{ pet.id }}" 
+                          data-pet-name="{{ pet.breed }}"
+                          data-pet-type="{{ pet.get_pet_type_display }}"
+                          data-pet-color="{{ pet.color }}"
+                          data-pet-owner="{{ pet.owner.username }}">
+                    <i class="fas fa-envelope me-1"></i>Contact Reporter
+                  </button>
+                  <a href="{% url 'report_issue' pet.id %}" class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-exclamation-triangle me-1"></i>Report Issue
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- No Results Message -->
+      <div class="text-center py-5" id="no-results-message">
+        <div class="mb-4">
+          <i class="fas fa-search fa-3x text-muted"></i>
+        </div>
+        <h3>No Found Pets Match Your Search</h3>
+        <p class="lead">Try removing filters, widening date range, or check spelling.</p>
+        <div class="d-grid gap-2 col-lg-6 mx-auto">
+          <a href="{% url 'find_pets' %}" class="btn btn-primary">Reset All Filters</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'report_lost_pet' %}" class="btn btn-outline-success">Report a Lost Pet</a>
+            <a href="{% url 'report_found_pet' %}" class="btn btn-outline-info">Post a Found Pet</a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-success">Report a Lost Pet</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-info">Post a Found Pet</a>
+          {% endif %}
         </div>
         
-        {% if pets %}
-          <!-- Pet Grid -->
-          <div class="row g-4" id="pet-grid">
-            {% for pet in pets %}
-              <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
+        <!-- Recent pets carousel as fallback -->
+        {% if all_pets %}
+        <div class="mt-5">
+          <h4 class="mb-4">Recently Reported Pets</h4>
+          <div class="row g-4 mt-3">
+            {% for pet in all_pets|slice:":3" %}
+              <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 rounded-3 hover-lift pet-card">
                   {% if pet.image %}
-                    <img src="{{ pet.image.url }}" class="card-img-top pet-image" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}, {{ pet.color }}" style="height: 200px; object-fit: cover;" loading="lazy">
+                    <img src="{{ pet.image.url }}" class="card-img-top" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}" style="height: 200px; object-fit: cover;" loading="lazy">
                   {% else %}
-                    <div class="d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
+                    <div class="d-flex align-items-center justify-content-center image-placeholder" style="height: 200px;">
                       <i class="fas fa-paw fa-3x text-muted"></i>
                     </div>
                   {% endif %}
                   <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
                       <h5 class="card-title mb-0">{{ pet.breed }}</h5>
                       <span class="status-badge status-badge-found">Found</span>
                     </div>
-                    <p class="card-text">
-                      <small class="text-muted">
-                        <i class="fas fa-paw me-1"></i> {{ pet.get_pet_type_display }}<br>
-                        <i class="fas fa-palette me-1"></i> {{ pet.color }}<br>
-                        <i class="fas fa-map-marker-alt me-1"></i> {{ pet.location }}<br>
-                        <i class="fas fa-calendar-alt me-1"></i> {{ pet.created_at|date:"M d, Y" }}
-                      </small>
-                    </p>
-                    <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
-                    <div class="d-grid gap-2 mt-auto">
-                      <a href="{% url 'pet_detail' pet.id %}?ref=find_pets" class="btn btn-outline-primary">
+                    <div class="mt-2 text-start">
+                      <p class="card-text mb-1">
+                        <i class="fas fa-paw text-muted me-2"></i>
+                        <span>{{ pet.get_pet_type_display }}</span>
+                      </p>
+                      <p class="card-text mb-1">
+                        <i class="fas fa-palette text-muted me-2"></i>
+                        <span>{{ pet.color }}</span>
+                      </p>
+                      <p class="card-text mb-1">
+                        <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                        <span>{{ pet.location }}</span>
+                      </p>
+                      {% if pet.distance %}
+                      <p class="card-text mb-0">
+                        <i class="fas fa-road text-muted me-2"></i>
+                        <span>{{ pet.distance|floatformat:1 }} km away</span>
+                      </p>
+                      {% endif %}
+                    </div>
+                    <div class="mt-auto pt-3">
+                      <a href="{% url 'pet_detail' pet.id %}?ref=find_pets" class="btn btn-outline-primary w-100">
                         <i class="fas fa-eye me-1"></i>View Details
-                      </a>
-                      <button class="btn btn-outline-primary contact-reporter-btn" 
-                              data-pet-id="{{ pet.id }}" 
-                              data-pet-name="{{ pet.breed }}"
-                              data-pet-type="{{ pet.get_pet_type_display }}"
-                              data-pet-color="{{ pet.color }}"
-                              data-pet-owner="{{ pet.owner.username }}">
-                        <i class="fas fa-envelope me-1"></i>Contact Reporter
-                      </button>
-                      <a href="{% url 'report_issue' pet.id %}" class="btn btn-outline-warning btn-sm">
-                        <i class="fas fa-exclamation-triangle me-1"></i>Report Issue
                       </a>
                     </div>
                   </div>
@@ -156,141 +263,27 @@
               </div>
             {% endfor %}
           </div>
-        {% else %}
-          <!-- No Results Message -->
-          <div class="text-center py-5" id="no-results-message">
-            <div class="mb-4">
-              <i class="fas fa-search fa-3x text-muted"></i>
-            </div>
-            <h3>No Found Pets Match Your Search</h3>
-            <p class="lead">Try removing filters, widening date range, or check spelling.</p>
-            <div class="d-grid gap-2 col-lg-6 mx-auto">
-              <a href="{% url 'find_pets' %}" class="btn btn-primary">Reset All Filters</a>
-              {% if user.is_authenticated %}
-                <a href="{% url 'report_lost_pet' %}" class="btn btn-outline-success">Report a Lost Pet</a>
-                <a href="{% url 'report_found_pet' %}" class="btn btn-outline-info">Post a Found Pet</a>
-              {% else %}
-                <a href="{% url 'login' %}" class="btn btn-outline-success">Report a Lost Pet</a>
-                <a href="{% url 'login' %}" class="btn btn-outline-info">Post a Found Pet</a>
-              {% endif %}
-            </div>
-            
-            <!-- Recent pets carousel as fallback -->
-            {% if all_pets %}
-            <div class="mt-5">
-              <h4>Recently Reported Pets</h4>
-              <div class="row g-3 mt-3">
-                {% for pet in all_pets|slice:":3" %}
-                  <div class="col-md-4">
-                    <div class="card h-100 shadow-sm border-0 rounded-3">
-                      {% if pet.image %}
-                        <img src="{{ pet.image.url }}" class="card-img-top" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}" style="height: 120px; object-fit: cover;" loading="lazy">
-                      {% else %}
-                        <div class="d-flex align-items-center justify-content-center" style="height: 120px; background-color: #f8f9fa;">
-                          <i class="fas fa-paw fa-2x text-muted"></i>
-                        </div>
-                      {% endif %}
-                      <div class="card-body p-2">
-                        <h6 class="card-title mb-1">{{ pet.breed }}</h6>
-                        <p class="card-text small text-muted mb-0">
-                          {{ pet.get_pet_type_display }}, {{ pet.color }}<br>
-                          {{ pet.location }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                {% endfor %}
-              </div>
-            </div>
-            {% endif %}
-          </div>
+        </div>
         {% endif %}
       </div>
-
-      <!-- All Available Pets Section -->
-      <div class="row mt-5">
-        <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">All Founded Pets</h2>
-            <div class="text-muted">
-              {% if all_pets %}
-                {{ all_pets|length }} pet{{ all_pets|length|pluralize }} founded
-              {% else %}
-                No pets founded
-              {% endif %}
-            </div>
-          </div>
-          
-          {% if all_pets %}
-            <!-- Available Pets Grid -->
-            <div class="row g-4">
-              {% for pet in all_pets %}
-                <div class="col-md-6 col-lg-4">
-                  <div class="card h-100 shadow-sm border-0 rounded-3 pet-card">
-                    {% if pet.image %}
-                      <img src="{{ pet.image.url }}" class="card-img-top pet-image" alt="Found {{ pet.get_pet_type_display }}, {{ pet.breed }}, {{ pet.color }}" style="height: 200px; object-fit: cover;" loading="lazy">
-                    {% else %}
-                      <div class="d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
-                        <i class="fas fa-paw fa-3x text-muted"></i>
-                      </div>
-                    {% endif %}
-                    <div class="card-body d-flex flex-column">
-                      <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title mb-0">{{ pet.breed }}</h5>
-                        <span class="badge bg-success">Founded</span>
-                      </div>
-                      <p class="card-text">
-                        <small class="text-muted">
-                          <i class="fas fa-paw me-1"></i> {{ pet.get_pet_type_display }}<br>
-                          <i class="fas fa-palette me-1"></i> {{ pet.color }}<br>
-                          <i class="fas fa-map-marker-alt me-1"></i> {{ pet.location }}<br>
-                          <i class="fas fa-calendar-alt me-1"></i> {{ pet.created_at|date:"M d, Y" }}
-                        </small>
-                      </p>
-                      <p class="flex-grow-1">{{ pet.description|truncatewords:15 }}</p>
-                      <div class="d-grid gap-2 mt-auto">
-                        <a href="{% url 'pet_detail' pet.id %}?ref=find_pets" class="btn btn-outline-primary">
-                          <i class="fas fa-eye me-1"></i>View Details
-                        </a>
-                        <button class="btn btn-outline-primary contact-reporter-btn" 
-                                data-pet-id="{{ pet.id }}" 
-                                data-pet-name="{{ pet.breed }}"
-                                data-pet-type="{{ pet.get_pet_type_display }}"
-                                data-pet-color="{{ pet.color }}"
-                                data-pet-owner="{{ pet.owner.username }}">
-                          <i class="fas fa-envelope me-1"></i>Contact Reporter
-                        </button>
-                        <a href="{% url 'report_issue' pet.id %}" class="btn btn-outline-warning btn-sm">
-                          <i class="fas fa-exclamation-triangle me-1"></i>Report Issue
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <!-- No Available Pets Message -->
-            <div class="text-center py-5">
-              <div class="mb-4">
-                <i class="fas fa-paw fa-3x text-muted"></i>
-              </div>
-              <h3>No Pets Founded</h3>
-              <p class="lead">Check back later as new pets are added regularly.</p>
-            </div>
-          {% endif %}
-        </div>
-      </div>
-    </div>
+    {% endif %}
   </div>
 </div>
 
 <!-- Contact Reporter Modal -->
 <div class="modal fade" id="contactReporterModal" tabindex="-1" aria-labelledby="contactReporterModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="contactReporterModalLabel">Contact Reporter</h5>
+    <div class="modal-content border-0 rounded-3 shadow-lg">
+      <div class="modal-header bg-light border-0 rounded-top-3">
+        <div class="d-flex align-items-center">
+          <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+            <i class="fas fa-user text-primary"></i>
+          </div>
+          <div>
+            <h5 class="modal-title" id="contactReporterModalLabel">Contact Reporter</h5>
+            <p class="mb-0 text-muted small">Get in touch with the person who found this pet</p>
+          </div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -304,20 +297,20 @@
         </div>
         
         <div class="alert alert-info">
-          <h6 class="alert-heading">Privacy Notice</h6>
-          <p class="mb-0">Please respect reporter privacy. Use contact info only to reunite pets.</p>
+          <h6 class="alert-heading"><i class="fas fa-info-circle me-1"></i> Privacy Notice</h6>
+          <p class="mb-0">Please respect reporter privacy. Use contact info only to reunite pets with their families.</p>
         </div>
         
         <div class="mt-4" id="contact-info-section">
           <h6>Contact Information</h6>
-          <div class="d-flex align-items-center mb-3">
+          <div class="d-flex align-items-center mb-3 p-3 rounded-3 bg-light">
             <i class="fas fa-phone me-2"></i>
             <span id="reporter-phone">Phone number not available</span>
             <button class="btn btn-outline-primary btn-sm ms-auto copy-contact-btn" data-contact-type="phone">
               <i class="fas fa-copy me-1"></i> Copy
             </button>
           </div>
-          <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center p-3 rounded-3 bg-light">
             <i class="fas fa-envelope me-2"></i>
             <span id="reporter-email">Email not available</span>
             <button class="btn btn-outline-primary btn-sm ms-auto copy-contact-btn" data-contact-type="email">
@@ -338,8 +331,8 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -373,9 +366,11 @@
     scroll-margin-top: 70px;
   }
   
-  /* Sticky filter panel - ensure it stays below navbar */
-  .filter-sidebar {
-    z-index: 1010 !important; /* Lower than navbar z-index (1020) - ensures navbar stays on top */
+  /* Filter bar styles */
+  .filter-bar {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: white;
   }
   
   /* Ensure navbar always stays above sidebar */
@@ -385,47 +380,6 @@
     top: 0 !important;
     background-color: white !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-  }
-  
-  /* Desktop: enable sticky sidebar with proper spacing */
-  @media (min-width: 992px) {
-    .filter-sidebar {
-      position: sticky;
-      top: 150px; /* Account for navbar height (logo ~130px + padding) */
-      max-height: calc(100vh - 170px); /* Prevent overflow, account for navbar + spacing */
-      overflow-y: auto; /* Allow scrolling if content is too tall */
-      z-index: 1010; /* Lower than navbar */
-    }
-    
-    /* Ensure sidebar scrolls smoothly behind navbar */
-    .filter-sidebar::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    .filter-sidebar::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 3px;
-    }
-    
-    .filter-sidebar::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 3px;
-    }
-    
-    .filter-sidebar::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  }
-  
-  /* Mobile: disable sticky sidebar to prevent overlap and layout issues */
-  @media (max-width: 991.98px) {
-    .filter-sidebar {
-      position: relative !important;
-      top: auto !important;
-      max-height: none !important;
-      overflow-y: visible !important;
-      z-index: auto !important;
-    }
   }
   
   /* Lazy loading placeholder */
@@ -454,7 +408,7 @@
   }
   
   /* Performance optimization: Optimize find pets page elements */
-  .card, .card-header, .card-body, .filter-sidebar, .pet-card, .modal-content {
+  .card, .card-header, .card-body, .filter-bar, .pet-card, .modal-content {
     contain: layout style paint;
   }
   
@@ -464,6 +418,71 @@
   
   .pet-image, .status-badge, .badge {
     contain: layout style paint;
+  }
+  
+  /* Image placeholder */
+  .image-placeholder {
+    background-color: var(--light-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-text);
+    border-radius: var(--border-radius);
+  }
+  
+  /* Minimum width for filter fields */
+  .min-w-150 {
+    min-width: 150px;
+  }
+  
+  /* Responsive adjustments for filter bar */
+  @media (max-width: 1199.98px) {
+    .filter-bar .card-body {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 1rem;
+    }
+    
+    .filter-bar form {
+      flex-wrap: nowrap;
+      min-width: max-content;
+    }
+    
+    .min-w-150 {
+      min-width: 130px;
+    }
+  }
+  
+  @media (max-width: 767.98px) {
+    .filter-bar .card-body {
+      padding: 0.75rem;
+    }
+    
+    .min-w-150 {
+      min-width: 120px;
+    }
+    
+    .filter-bar form .d-flex {
+      flex-wrap: nowrap;
+    }
+    
+    .filter-bar form .btn {
+      white-space: nowrap;
+    }
+  }
+  
+  @media (max-width: 575.98px) {
+    .filter-bar form .d-flex.align-items-end {
+      display: none;
+    }
+    
+    .filter-bar form .flex-grow-1:nth-child(n+5) {
+      display: none;
+    }
+    
+    .filter-bar form .d-flex.gap-2.ms-auto {
+      margin-left: 0 !important;
+    }
   }
 </style>
 <script>
@@ -600,7 +619,7 @@
     function hideLoadingIndicator() {
       if (searchButton) {
         searchSpinner.classList.add('d-none');
-        searchText.textContent = 'Search Found Pets';
+        searchText.textContent = 'Search';
         searchButton.disabled = false;
       }
       

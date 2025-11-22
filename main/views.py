@@ -27,6 +27,7 @@ def home(request):
     # Get model classes using apps.get_model to avoid linter issues
     PetModel = apps.get_model('main', 'Pet')
     RequestModel = apps.get_model('main', 'Request')
+    UserModel = apps.get_model('main', 'User')
     
     # Get recently reported pets that have accepted requests
     # We'll get pets that have associated accepted requests, ordered by most recent
@@ -34,9 +35,27 @@ def home(request):
         request__status='accepted'
     ).select_related('owner').order_by('-created_at')[:6]  # Limit to 6 most recent
     
+    # Calculate statistics
+    # Pets reunited = accepted lost pet requests
+    pets_reunited_count = RequestModel.objects.filter(
+        request_type='lost',
+        status='accepted'
+    ).count()
+    
+    # Reports handled = all accepted requests (both lost and found)
+    reports_handled_count = RequestModel.objects.filter(
+        status='accepted'
+    ).count()
+    
+    # Active members = all registered users
+    active_members_count = UserModel.objects.count()
+    
     context = {
         'now': timezone.now(),
-        'recent_pets': recent_pets
+        'recent_pets': recent_pets,
+        'pets_reunited_count': pets_reunited_count,
+        'reports_handled_count': reports_handled_count,
+        'active_members_count': active_members_count
     }
     return render(request, 'home.html', context) 
 
@@ -67,11 +86,14 @@ def adopt(request):
         breed = search_form.cleaned_data.get('breed')
         color = search_form.cleaned_data.get('color')
         location = search_form.cleaned_data.get('location')
+        radius = search_form.cleaned_data.get('radius')
         start_date = search_form.cleaned_data.get('start_date')
         end_date = search_form.cleaned_data.get('end_date')
+        status = search_form.cleaned_data.get('status')
+        sort = search_form.cleaned_data.get('sort')
         
         # Only perform search if at least one filter is provided
-        if pet_type or breed or color or location or start_date or end_date:
+        if pet_type or breed or color or location or start_date or end_date or status:
             # Start with all found pets that have been accepted (for search results)
             pets = PetModel.objects.filter(status='found').select_related('owner')
             
@@ -118,10 +140,36 @@ def adopt(request):
                 pets = pets.filter(created_at__date__gte=start_date)
             if end_date:
                 pets = pets.filter(created_at__date__lte=end_date)
+                
+            # Apply status filter
+            if status:
+                pets = pets.filter(status=status)
+            
+            # Convert to list to add distance attribute
+            pet_list = list(pets)
+            
+            # Add distance calculation if location is provided
+            if location:
+                for pet in pet_list:
+                    pet.distance = pet.calculate_distance(location)
+            
+            # Apply sorting
+            if sort == 'oldest':
+                pet_list.sort(key=lambda x: x.created_at)
+            elif sort == 'updated':
+                # Assuming there's an updated_at field, if not we can use created_at
+                pet_list.sort(key=lambda x: x.created_at)
+            else:  # newest (default)
+                pet_list.sort(key=lambda x: x.created_at, reverse=True)
+            
+            pets = pet_list
+        else:
+            pets = list(pets)
     
     # Sort by most recent entries first (only if there are pets)
-    if pets.exists():
-        pets = pets.order_by('-created_at')
+    if isinstance(pets, list) and len(pets) > 0:
+        if not request.GET.get('sort'):  # Only sort by default if no sort specified
+            pets.sort(key=lambda x: x.created_at, reverse=True)
     
     # Get all available pets (explicitly adoptable pets and found pets with accepted requests)
     # First get explicitly adoptable pets
@@ -135,13 +183,26 @@ def adopt(request):
     ).select_related('owner')
     
     # Combine both querysets
-    all_pets = adoptable_pets.union(accepted_found_pets).order_by('-created_at')
+    all_pets = adoptable_pets.union(accepted_found_pets)
+    
+    # Convert to list to add distance attribute
+    all_pets_list = list(all_pets)
+    
+    # Add distance calculation if location is provided in the search form
+    if request.GET and search_form and search_form.is_valid():
+        location = search_form.cleaned_data.get('location')
+        if location:
+            for pet in all_pets_list:
+                pet.distance = pet.calculate_distance(location)
+    
+    # Sort by most recent
+    all_pets_list.sort(key=lambda x: x.created_at, reverse=True)
     
     context = {
         'now': timezone.now(),
         'search_form': search_form,
         'pets': pets,  # Found pets matching search criteria (empty if no search)
-        'all_pets': all_pets  # All available pets
+        'all_pets': all_pets_list  # All available pets
     }
     return render(request, 'find_pets.html', context)
 
@@ -172,14 +233,23 @@ def all_pets(request):
     PetModel = apps.get_model('main', 'Pet')
     RequestModel = apps.get_model('main', 'Request')
     
-    # Get all accepted lost pets
+    # Get search parameters
+    pet_type = request.GET.get('pet_type', '')
+    breed = request.GET.get('breed', '')
+    location = request.GET.get('location', '')
+    radius = request.GET.get('radius', '')
+    status = request.GET.get('status', '')
+    sort = request.GET.get('sort', 'newest')
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
+    
+    # Start with all accepted pets (both lost and found)
     accepted_lost_pets = PetModel.objects.filter(
         status='lost',
         request__status='accepted',
         request__request_type='lost'
     ).select_related('owner')
     
-    # Get all accepted found pets
     accepted_found_pets = PetModel.objects.filter(
         status='found',
         request__status='accepted',
@@ -187,10 +257,46 @@ def all_pets(request):
     ).select_related('owner')
     
     # Combine both querysets
-    all_accepted_pets = accepted_lost_pets.union(accepted_found_pets).order_by('-created_at')
+    all_accepted_pets = accepted_lost_pets.union(accepted_found_pets)
+    
+    # Apply filters
+    if pet_type:
+        all_accepted_pets = all_accepted_pets.filter(pet_type=pet_type)
+    
+    if breed:
+        all_accepted_pets = all_accepted_pets.filter(breed__icontains=breed)
+    
+    if location:
+        all_accepted_pets = all_accepted_pets.filter(location__icontains=location)
+    
+    if status:
+        all_accepted_pets = all_accepted_pets.filter(status=status)
+    
+    if start_date:
+        all_accepted_pets = all_accepted_pets.filter(created_at__date__gte=start_date)
+    
+    if end_date:
+        all_accepted_pets = all_accepted_pets.filter(created_at__date__lte=end_date)
+    
+    # Convert to list to add distance attribute
+    pet_list = list(all_accepted_pets)
+    
+    # Add distance calculation if location is provided
+    if location:
+        for pet in pet_list:
+            pet.distance = pet.calculate_distance(location)
+    
+    # Apply sorting
+    if sort == 'oldest':
+        pet_list.sort(key=lambda x: x.created_at)
+    elif sort == 'updated':
+        # Assuming there's an updated_at field, if not we can use created_at
+        pet_list.sort(key=lambda x: x.created_at)
+    else:  # newest (default)
+        pet_list.sort(key=lambda x: x.created_at, reverse=True)
     
     # Apply pagination
-    paginator = Paginator(all_accepted_pets, 12)  # Show 12 pets per page
+    paginator = Paginator(pet_list, 12)  # Show 12 pets per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -582,6 +688,16 @@ def pet_detail(request, pet_id):
     # Determine breadcrumb based on referrer
     referrer = request.GET.get('ref', 'all_pets')  # Default to 'all_pets'
     
+    # Get similar pets based on breed, type, and location
+    similar_pets = PetModel.objects.filter(
+        pet_type=pet.pet_type,
+        breed=pet.breed
+    ).exclude(id=pet.id)[:6]  # Limit to 6 similar pets
+    
+    # Add distance to similar pets if location is available
+    for similar_pet in similar_pets:
+        similar_pet.distance = similar_pet.calculate_distance(pet.location)
+    
     context = {
         'pet': pet,
         'pet_request': pet_request,
@@ -589,7 +705,8 @@ def pet_detail(request, pet_id):
         'show_contact_info': show_contact_info,
         'contact_info': contact_info,
         'now': timezone.now(),
-        'referrer': referrer
+        'referrer': referrer,
+        'similar_pets': similar_pets
     }
     return render(request, 'pet_detail.html', context)
 
