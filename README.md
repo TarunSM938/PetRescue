@@ -17,63 +17,61 @@ PetRescue is a Django web application designed to help connect lost pets with th
 Before you begin, ensure you have met the following requirements:
 
 - Python 3.8 or higher
-- MySQL 8.0 or higher
+- MySQL 5.7 or higher (or compatible database)
 - pip (Python package installer)
 - Virtual environment (recommended)
 
 ## Installation
 
-### 1. Clone the Repository
+### Quick Setup (Recommended)
 
+For Windows:
 ```bash
-git clone https://github.com/yourusername/petrescue.git
-cd petrescue
+setup.bat
 ```
 
-### 2. Create a Virtual Environment
-
+For macOS/Linux:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+chmod +x setup.sh
+./setup.sh
 ```
 
-### 3. Install Dependencies
+### Manual Setup
 
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Database Setup
-
-1. Create a MySQL database:
-   ```sql
-   CREATE DATABASE petrescue_db;
-   CREATE USER 'petrescue_user'@'localhost' IDENTIFIED BY 'your_secure_password';
-   GRANT ALL PRIVILEGES ON petrescue_db.* TO 'petrescue_user'@'localhost';
-   FLUSH PRIVILEGES;
+1. **Create a virtual environment**:
+   ```bash
+   python -m venv venv
    ```
 
-2. Update database settings in `petrescue/settings.py` with your database credentials
+2. **Activate the virtual environment**:
+   - Windows:
+     ```bash
+     venv\Scripts\activate
+     ```
+   - macOS/Linux:
+     ```bash
+     source venv/bin/activate
+     ```
 
-### 5. Run Migrations
+3. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-python manage.py migrate
-```
+4. **Set up the database**:
+   ```bash
+   python manage.py migrate
+   ```
 
-### 6. Create a Superuser (Admin)
+5. **Create a superuser (admin account)**:
+   ```bash
+   python manage.py createsuperuser
+   ```
 
-```bash
-python manage.py createsuperuser
-```
-
-Follow the prompts to create an admin account.
-
-### 7. Collect Static Files
-
-```bash
-python manage.py collectstatic
-```
+6. **Collect static files**:
+   ```bash
+   python manage.py collectstatic --noinput
+   ```
 
 ## Running the Application
 
@@ -85,93 +83,122 @@ python manage.py runserver
 
 The application will be available at `http://127.0.0.1:8000/`
 
-### Production Server
+### Production Deployment
 
 For production deployment, use Gunicorn:
-
 ```bash
-gunicorn petrescue.wsgi:application --bind 0.0.0.0:8000
+gunicorn petrescue.wsgi:application --bind 0.0.0.0:8000 --workers 3
 ```
 
 ## Environment Variables
 
-For production deployment, set the following environment variables:
+The following environment variables should be set in production:
 
 ```bash
+# Django Settings
 SECRET_KEY=your_secret_key_here
 DEBUG=False
 ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+
+# Database Configuration
+DB_ENGINE=django.db.backends.mysql
 DB_NAME=petrescue_production
 DB_USER=petrescue_user
 DB_PASSWORD=your_secure_password
 DB_HOST=your_database_host
 DB_PORT=3306
+
+# Email Configuration
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=your_smtp_host
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your_email@domain.com
+EMAIL_HOST_PASSWORD=your_email_password
+DEFAULT_FROM_EMAIL=noreply@yourdomain.com
 ```
 
-## Project Structure
+## Database Setup
 
-```
-petrescue/
-├── main/                 # Main application
-│   ├── models.py         # Data models
-│   ├── views.py          # View functions
-│   ├── forms.py          # Form definitions
-│   ├── templates/        # HTML templates
-│   └── static/           # Static files (CSS, JS, images)
-├── petrescue/            # Project settings
-│   ├── settings.py       # Configuration settings
-│   ├── urls.py           # URL routing
-│   └── wsgi.py           # WSGI entry point
-├── manage.py             # Django management script
-├── requirements.txt      # Python dependencies
-└── README.md             # This file
-```
+1. Create a MySQL database:
+   ```sql
+   CREATE DATABASE petrescue_db;
+   CREATE USER 'petrescue_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+   GRANT ALL PRIVILEGES ON petrescue_db.* TO 'petrescue_user'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
 
-## Key Models
+2. Update `petrescue/settings.py` with your database credentials
 
-- **User**: Custom user model with phone number field
-- **Profile**: Extended user profile information
-- **Pet**: Pet information (lost, found, or adoptable)
-- **Request**: User requests related to pets
-- **ActivityLog**: Tracking of all activities
-- **Notification**: Admin notifications
-- **ContactSubmission**: User contact form submissions
+3. Run migrations:
+   ```bash
+   python manage.py migrate
+   ```
 
 ## Testing
 
 ### Running Tests
 
 ```bash
+# Run all tests
 python manage.py test
+
+# Run specific test suite
+python manage.py test main.tests.AdminDashboardTestCase
+
+# Run syntax check
+python -m py_compile main/models.py main/views.py main/forms.py
+
+# Run system checks
+python manage.py check
 ```
 
 ### Test Coverage
 
 The project includes:
 - Unit tests for models and views
-- Integration tests for key workflows
-- Admin permission tests
-- Form validation tests
+- Integration tests for user flows
+- Admin functionality tests
+- Cross-browser compatibility tests
+- Mobile responsiveness tests
+- Security tests
+- Performance tests
 
 ## Documentation
 
 - [User Guide](docs/user_guide.md) - How to use the platform
 - [Admin Guide](docs/admin_guide.md) - How to manage the platform
-- [Deployment Checklist](docs/deployment_checklist.md) - Steps for production deployment
-- [Test Matrix](docs/test_matrix.md) - Comprehensive testing documentation
+- [Deployment Checklist](docs/deployment_checklist.md) - Steps for deployment
+- [Test Matrix](docs/test_matrix.md) - Detailed testing documentation
+- [UI Components Guide](docs/ui_components.md) - UI component documentation
+- [QA Report](docs/qa_report.md) - Quality assurance report
 
-## Deployment
+## Project Structure
 
-See [Deployment Checklist](docs/deployment_checklist.md) for detailed deployment instructions.
+```
+PetRescue/
+├── main/                 # Main application
+│   ├── models.py         # Data models
+│   ├── views.py          # View functions
+│   ├── forms.py          # Form definitions
+│   ├── urls.py           # URL routing
+│   ├── tests.py          # Test cases
+│   └── templates/        # HTML templates
+├── petrescue/            # Django project settings
+├── static/               # Static files (CSS, JS, images)
+├── media/                # User-uploaded files
+├── docs/                 # Documentation files
+├── requirements.txt      # Python dependencies
+├── manage.py             # Django management script
+└── README.md             # This file
+```
 
-### Quick Deployment Steps
+## Health Check Endpoint
 
-1. Set up production database
-2. Configure environment variables
-3. Run migrations
-4. Collect static files
-5. Start Gunicorn server
-6. Configure Nginx reverse proxy (recommended)
+A health check endpoint is available at `/health/` for deployment verification:
+```bash
+curl http://127.0.0.1:8000/health/
+```
 
 ## Contributing
 
@@ -183,16 +210,8 @@ See [Deployment Checklist](docs/deployment_checklist.md) for detailed deployment
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
-For support, please contact:
-- Email: support@petrescue.com
-- GitHub Issues: [Create an issue](https://github.com/yourusername/petrescue/issues)
-
-## Acknowledgements
-
-- Thanks to all contributors who have helped build this platform
-- Inspired by the need to help pets find their way home
-- Built with Django, Bootstrap, and ❤️
+For support, please contact the development team or refer to the documentation.
