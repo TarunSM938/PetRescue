@@ -234,55 +234,87 @@ def all_pets(request):
     RequestModel = apps.get_model('main', 'Request')
     
     # Get search parameters
-    pet_type = request.GET.get('pet_type', '')
-    breed = request.GET.get('breed', '')
-    location = request.GET.get('location', '')
-    radius = request.GET.get('radius', '')
-    status = request.GET.get('status', '')
+    pet_type = request.GET.get('pet_type', '').strip()
+    breed = request.GET.get('breed', '').strip()
+    location = request.GET.get('location', '').strip()
+    radius = request.GET.get('radius', '').strip()
+    status = request.GET.get('status', '').strip()
     sort = request.GET.get('sort', 'newest')
-    start_date = request.GET.get('start_date', '')
-    end_date = request.GET.get('end_date', '')
+    start_date = request.GET.get('start_date', '').strip()
+    end_date = request.GET.get('end_date', '').strip()
     
-    # Start with all accepted pets (both lost and found)
+    # Build queries for each pet type to allow filtering before union
+    # For lost pets with accepted requests
     accepted_lost_pets = PetModel.objects.filter(
         status='lost',
         request__status='accepted',
         request__request_type='lost'
     ).select_related('owner')
     
+    # For found pets with accepted requests
     accepted_found_pets = PetModel.objects.filter(
         status='found',
         request__status='accepted',
         request__request_type='found'
     ).select_related('owner')
     
-    # Combine both querysets
-    all_accepted_pets = accepted_lost_pets.union(accepted_found_pets)
+    # For adoptable pets (no request required)
+    adoptable_pets = PetModel.objects.filter(status='adoptable').select_related('owner')
     
-    # Apply filters
+    # Apply filters to each queryset individually before union
     if pet_type:
-        all_accepted_pets = all_accepted_pets.filter(pet_type=pet_type)
+        accepted_lost_pets = accepted_lost_pets.filter(pet_type=pet_type)
+        accepted_found_pets = accepted_found_pets.filter(pet_type=pet_type)
+        adoptable_pets = adoptable_pets.filter(pet_type=pet_type)
     
     if breed:
-        all_accepted_pets = all_accepted_pets.filter(breed__icontains=breed)
+        accepted_lost_pets = accepted_lost_pets.filter(breed__icontains=breed)
+        accepted_found_pets = accepted_found_pets.filter(breed__icontains=breed)
+        adoptable_pets = adoptable_pets.filter(breed__icontains=breed)
     
     if location:
-        all_accepted_pets = all_accepted_pets.filter(location__icontains=location)
+        accepted_lost_pets = accepted_lost_pets.filter(location__icontains=location)
+        accepted_found_pets = accepted_found_pets.filter(location__icontains=location)
+        adoptable_pets = adoptable_pets.filter(location__icontains=location)
     
     if status:
-        all_accepted_pets = all_accepted_pets.filter(status=status)
+        accepted_lost_pets = accepted_lost_pets.filter(status=status)
+        accepted_found_pets = accepted_found_pets.filter(status=status)
+        adoptable_pets = adoptable_pets.filter(status=status)
     
     if start_date:
-        all_accepted_pets = all_accepted_pets.filter(created_at__date__gte=start_date)
+        accepted_lost_pets = accepted_lost_pets.filter(created_at__date__gte=start_date)
+        accepted_found_pets = accepted_found_pets.filter(created_at__date__gte=start_date)
+        adoptable_pets = adoptable_pets.filter(created_at__date__gte=start_date)
     
     if end_date:
-        all_accepted_pets = all_accepted_pets.filter(created_at__date__lte=end_date)
+        accepted_lost_pets = accepted_lost_pets.filter(created_at__date__lte=end_date)
+        accepted_found_pets = accepted_found_pets.filter(created_at__date__lte=end_date)
+        adoptable_pets = adoptable_pets.filter(created_at__date__lte=end_date)
+    
+    # Now we can union the filtered querysets
+    all_pets = accepted_lost_pets.union(accepted_found_pets).union(adoptable_pets)
     
     # Convert to list to add distance attribute
-    pet_list = list(all_accepted_pets)
+    pet_list = list(all_pets)
     
-    # Add distance calculation if location is provided
-    if location:
+    # Filter by radius if location and radius are provided
+    if location and radius:
+        try:
+            radius_value = float(radius)
+            filtered_pets = []
+            for pet in pet_list:
+                pet.distance = pet.calculate_distance(location)
+                # Include pet if distance is within radius or distance calculation failed
+                if pet.distance is None or pet.distance <= radius_value:
+                    filtered_pets.append(pet)
+            pet_list = filtered_pets
+        except ValueError:
+            # If radius is not a valid number, calculate distances but don't filter
+            for pet in pet_list:
+                pet.distance = pet.calculate_distance(location)
+    elif location:
+        # If only location is provided, calculate distances for display
         for pet in pet_list:
             pet.distance = pet.calculate_distance(location)
     

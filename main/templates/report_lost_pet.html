@@ -198,8 +198,8 @@
     background: rgba(255, 255, 255, 0.9);
     border: 2px solid var(--warm-red);
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -216,73 +216,35 @@
   
   .add-more-btn i {
     color: var(--warm-red);
-    font-size: 18px;
+    font-size: 14px;
   }
   
   .add-more-btn:hover i {
     color: white;
   }
   
-  /* Buttons */
-  .btn-lost-pet {
+  /* Submit button */
+  .submit-btn {
     background: linear-gradient(to right, var(--warm-red), var(--pastel-orange));
     border: none;
-    border-radius: 12px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
     color: white;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
     box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
   }
-
-  .btn-lost-pet:hover {
+  
+  .submit-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-    background: linear-gradient(to right, #ff5252, var(--warm-red));
   }
-
-  .btn-lost-pet:active {
-    transform: translateY(0);
+  
+  .submit-btn:active {
+    transform: translateY(-1px);
   }
-
-  .btn-cancel {
-    background-color: #6c757d;
-    border: none;
-    border-radius: 12px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    color: white;
-  }
-
-  .btn-cancel:hover {
-    background-color: #5a6268;
-    transform: translateY(-3px);
-  }
-
-  /* Alert styling */
-  .alert-lost {
-    border-radius: 12px;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(to right, #fff0f0, #ffe8d6);
-    border-left: 5px solid var(--warm-red);
-  }
-
-  .alert-lost .alert-heading {
-    color: var(--warm-red);
-    font-weight: 600;
-  }
-
-  /* Error messages */
-  .error-message {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    display: none;
-  }
-
+  
   /* Animations */
   @keyframes fadeInDown {
     from {
@@ -294,61 +256,21 @@
       transform: translateY(0);
     }
   }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    50% {
+      transform: scale(1.05);
     }
-  }
-
-  .fade-in-up {
-    animation: fadeInUp 0.6s ease;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .lost-pet-bg {
-      padding: 1rem 0;
-    }
-    
-    .form-container {
-      padding: 1.5rem;
-    }
-    
-    .card-header-lost {
-      padding: 1rem;
-    }
-    
-    .btn-lost-pet, .btn-cancel {
-      width: 100%;
-      margin-bottom: 0.5rem;
+    100% {
+      transform: scale(1);
     }
   }
-
-  /* Paw print icons */
-  .paw-icon {
-    display: inline-block;
-    margin: 0 0.5rem;
-    color: var(--warm-red);
-  }
-
-  /* Help section */
-  .help-section {
-    background: linear-gradient(135deg, #fff8f0 0%, #fff0e6 100%);
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-    border: 1px solid #ffe0cc;
-  }
-
-  .help-section h5 {
-    color: var(--warm-red);
-    font-weight: 600;
+  
+  .pulse {
+    animation: pulse 2s infinite;
   }
 </style>
 {% endblock %}
@@ -356,40 +278,26 @@
 {% block content %}
 <div class="lost-pet-bg">
   <div class="container">
-    <!-- Header Section -->
-    <div class="header-section">
-      <h1>We're here to help you find your pet ❤️</h1>
-      <p>Please share as many details as you can. Every detail helps bring your pet closer to home.</p>
-    </div>
-    
-    <!-- Heart-touching message -->
     <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="alert alert-lost text-center fade-in-up" role="alert">
-          <h4 class="alert-heading">Don't lose hope! Our community is here to help</h4>
-          <p class="mb-0">We understand how important your pet is to you. Our team and community members will do everything we can to help reunite you with your missing companion.</p>
+      <div class="col-lg-10">
+        <!-- Back button placed at the top-left area of the page content -->
+        <a href="javascript:void(0)" onclick="goBack()" class="btn btn-outline-dark btn-sm mb-3" style="z-index: 1000; position: relative;" aria-label="Go back">
+          <i class="fas fa-arrow-left me-1"></i>Back
+        </a>
+        
+        <div class="header-section">
+          <h1><i class="fas fa-heart-broken me-2"></i>Report a Lost Pet</h1>
+          <p class="lead">Help us find your missing companion by providing detailed information about your lost pet.</p>
         </div>
-      </div>
-    </div>
-    
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center fade-in-up" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
-
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="report-card fade-in-up">
+        
+        <div class="report-card">
           <div class="card-header-lost">
-            <h2><i class="fas fa-paw"></i> Pet Information <i class="fas fa-paw"></i></h2>
-            <p>Please provide as much information as possible to help us find your pet</p>
+            <h2><i class="fas fa-paw me-2"></i>Lost Pet Details</h2>
+            <p>Please fill in all required fields marked with *</p>
           </div>
+          
           <div class="form-container">
-            <form method="POST" enctype="multipart/form-data" id="lost-pet-form">
+            <form id="lostPetForm" method="post" enctype="multipart/form-data">
               {% csrf_token %}
               
               <div class="row">
@@ -476,21 +384,12 @@
               </div>
               
               <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
-                <button type="submit" class="btn-lost-pet flex-fill" id="submit-btn">
+                <button type="submit" class="submit-btn flex-fill" id="submit-btn">
                   Report Lost Pet
                 </button>
-                <a href="{% url 'home' %}" class="btn-cancel flex-fill ms-md-2 mt-2 mt-md-0">
-                  <i class="fas fa-arrow-left"></i> Back to Home
-                </a>
               </div>
             </form>
           </div>
-        </div>
-        
-        <div class="help-section fade-in-up">
-          <h5><i class="fas fa-lightbulb"></i> Help Us Find Your Pet</h5>
-          <p>By reporting your lost pet, you're helping us create a comprehensive search effort. Our team will review your submission and take appropriate action to help find your pet.</p>
-          <p class="mb-0">If you have additional information or updates, please contact us at <a href="mailto:info@petrescue.com">info@petrescue.com</a>.</p>
         </div>
       </div>
     </div>
@@ -593,7 +492,7 @@
     }
     
     // Real-time validation with automatic error clearing
-    const form = document.getElementById('lost-pet-form');
+    const form = document.getElementById('lostPetForm');
     const submitBtn = document.getElementById('submit-btn');
     
     if (form) {
@@ -761,5 +660,10 @@
       errors.forEach(error => error.style.display = 'none');
     }
   });
+
+  // Function to go back to the previous page
+  function goBack() {
+    window.history.back();
+  }
 </script>
 {% endblock %}

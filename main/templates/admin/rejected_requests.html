@@ -7,6 +7,10 @@
 <div class="container-fluid mt-4">
   <div class="row">
     <div class="col-12">
+      <!-- Back button placed at the top-left area of the page content -->
+      <a href="javascript:void(0)" onclick="goBack()" class="btn btn-outline-secondary btn-sm mb-3" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 1000; position: relative;" aria-label="Go back">
+        <i class="fas fa-arrow-left me-1"></i>Back
+      </a>
       <h2>Rejected Requests</h2>
       <p>Manage requests that have been rejected.</p>
     </div>
@@ -204,5 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
     toast.show();
   }
 });
+
+function goBack() {
+  window.history.back();
+}
+
 </script>
 {% endblock %}
