@@ -10,7 +10,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   
   <!-- Custom CSS -->
   <link href="{% static 'css/style.css' %}?v=1.0" rel="stylesheet">
@@ -150,10 +150,19 @@
       transition: right 0.3s ease;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .mobile-menu.active {
       right: 0;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-menu {
+        transition: none;
+      }
     }
 
     .mobile-menu-overlay {
@@ -165,12 +174,21 @@
       background: rgba(0,0,0,0.5);
       z-index: 9999;
       display: none;
+      opacity: 0;
       transition: opacity 0.3s ease;
+      cursor: pointer;
     }
 
     .mobile-menu-overlay.active {
       display: block;
       opacity: 1;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-menu-overlay {
+        transition: none;
+      }
     }
 
     .mobile-menu-header {
@@ -206,15 +224,33 @@
       color: #666;
       padding: 5px;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      min-width: 44px; /* Touch-friendly target */
+      min-height: 44px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background-color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .mobile-menu-close:hover {
+    .mobile-menu-close:hover,
+    .mobile-menu-close:focus {
       background: #f5f5f5;
+      outline: 2px solid #28a745;
+      outline-offset: 2px;
+    }
+
+    .mobile-menu-close:active {
+      background: #e9ecef;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-menu-close {
+        transition: none;
+      }
     }
 
     .mobile-menu-content {
@@ -245,12 +281,28 @@
       color: #333;
       font-size: 1rem;
       transition: all 0.2s ease;
+      min-height: 44px; /* Touch-friendly target */
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .mobile-menu-link:hover {
+    .mobile-menu-link:hover,
+    .mobile-menu-link:focus {
       background: #f8f9fa;
       color: #28a745;
       text-decoration: none;
+      outline: none;
+    }
+
+    .mobile-menu-link:active {
+      background: #e9ecef;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-menu-link {
+        transition: none;
+      }
     }
 
     .mobile-menu-link i {
@@ -268,6 +320,39 @@
 
     .custom-menu-toggle:focus {
       box-shadow: none;
+    }
+
+    /* Ensure hamburger button is touch-friendly */
+    .navbar-toggler {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      position: relative;
+    }
+
+    .navbar-toggler:focus {
+      outline: 2px solid #28a745;
+      outline-offset: 2px;
+    }
+
+    .navbar-toggler:active {
+      opacity: 0.7;
+    }
+
+    .navbar-toggler-icon {
+      width: 24px;
+      height: 24px;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100%;
     }
 
     /* Responsive adjustments */
@@ -293,6 +378,53 @@
         bottom: 10px;
         right: 10px;
         font-size: 14px;
+      }
+    }
+
+    /* Ensure mobile menu is above all other content */
+    @media (max-width: 991.98px) {
+      .mobile-menu,
+      .mobile-menu-overlay {
+        position: fixed;
+      }
+      
+      .mobile-menu {
+        z-index: 10000;
+      }
+      
+      .mobile-menu-overlay {
+        z-index: 9999;
+      }
+      
+      /* Ensure navbar toggler is accessible */
+      .navbar-toggler {
+        z-index: 10001;
+        position: relative;
+      }
+      
+      /* Ensure navbar container properly displays hamburger and notification bell */
+      .navbar .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+      }
+      
+      /* Ensure notification bell and hamburger don't overlap */
+      .notification-bell-mobile {
+        order: 2;
+        margin-left: auto;
+        margin-right: 10px;
+      }
+      
+      .navbar-toggler {
+        order: 3;
+        margin-left: 0;
+      }
+      
+      .navbar-brand {
+        order: 1;
+        flex-shrink: 0;
       }
     }
     
@@ -323,7 +455,7 @@
       </div>
       {% endif %}
       
-      <button class="navbar-toggler" type="button" id="mobileMenuToggle">
+      <button class="navbar-toggler" type="button" id="mobileMenuToggle" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobileMenu">
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -411,15 +543,15 @@
   </nav>
 
   <!-- Custom Mobile Menu -->
-  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-  <div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay" aria-hidden="true"></div>
+  <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation" aria-hidden="true">
     <div class="mobile-menu-header">
       <div class="mobile-menu-logo">
         <img src="/media/logo.png" alt="PetRescue Logo" height="40">
         <span class="mobile-menu-title">PetRescue</span>
       </div>
       <div class="mobile-menu-actions">
-        <button class="mobile-menu-close" id="mobileMenuClose">
+        <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close mobile menu">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -558,7 +690,7 @@
           <p>Helping pets find their way home and connecting animals with loving families.</p>
           <div class="d-flex gap-2">
             <a href="#" class="text-decoration-none"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" class="text-decoration-none"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-decoration-none"><i class="fab fa-x-twitter"></i></a>
             <a href="#" class="text-decoration-none"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
@@ -624,6 +756,155 @@
     scrollTopBtn.addEventListener('click', function() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
+
+    // Mobile Menu Toggle Functionality
+    (function() {
+      'use strict';
+      
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+      const mobileMenuClose = document.getElementById('mobileMenuClose');
+      const body = document.body;
+      
+      // Check if user prefers reduced motion
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      // Function to open mobile menu
+      function openMobileMenu() {
+        if (!mobileMenu || !mobileMenuOverlay) return;
+        
+        // Add active classes
+        mobileMenu.classList.add('active');
+        mobileMenuOverlay.classList.add('active');
+        
+        // Update ARIA attributes
+        mobileMenu.setAttribute('aria-hidden', 'false');
+        mobileMenuOverlay.setAttribute('aria-hidden', 'false');
+        if (mobileMenuToggle) {
+          mobileMenuToggle.setAttribute('aria-expanded', 'true');
+        }
+        
+        // Prevent body scroll
+        body.style.overflow = 'hidden';
+        
+        // Focus on close button for accessibility
+        if (mobileMenuClose) {
+          setTimeout(() => {
+            mobileMenuClose.focus();
+          }, 100);
+        }
+      }
+      
+      // Function to close mobile menu
+      function closeMobileMenu() {
+        if (!mobileMenu || !mobileMenuOverlay) return;
+        
+        // Remove active classes
+        mobileMenu.classList.remove('active');
+        mobileMenuOverlay.classList.remove('active');
+        
+        // Update ARIA attributes
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        mobileMenuOverlay.setAttribute('aria-hidden', 'true');
+        if (mobileMenuToggle) {
+          mobileMenuToggle.setAttribute('aria-expanded', 'false');
+          // Return focus to toggle button
+          mobileMenuToggle.focus();
+        }
+        
+        // Restore body scroll
+        body.style.overflow = '';
+      }
+      
+      // Function to toggle mobile menu
+      function toggleMobileMenu() {
+        const isOpen = mobileMenu && mobileMenu.classList.contains('active');
+        if (isOpen) {
+          closeMobileMenu();
+        } else {
+          openMobileMenu();
+        }
+      }
+      
+      // Event listeners
+      if (mobileMenuToggle) {
+        // Click/touch event
+        mobileMenuToggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleMobileMenu();
+        });
+        
+        // Keyboard support (Enter and Space)
+        mobileMenuToggle.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleMobileMenu();
+          }
+        });
+      }
+      
+      if (mobileMenuClose) {
+        // Click/touch event
+        mobileMenuClose.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeMobileMenu();
+        });
+        
+        // Keyboard support
+        mobileMenuClose.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            closeMobileMenu();
+          }
+        });
+      }
+      
+      if (mobileMenuOverlay) {
+        // Close menu when clicking on overlay
+        mobileMenuOverlay.addEventListener('click', function(e) {
+          e.preventDefault();
+          closeMobileMenu();
+        });
+      }
+      
+      // Close menu on Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('active')) {
+          e.preventDefault();
+          closeMobileMenu();
+        }
+      });
+      
+      // Close menu when clicking on menu links (optional - allows navigation)
+      const mobileMenuLinks = mobileMenu ? mobileMenu.querySelectorAll('.mobile-menu-link') : [];
+      mobileMenuLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          // Close menu after a short delay to allow navigation
+          setTimeout(() => {
+            closeMobileMenu();
+          }, 100);
+        });
+      });
+      
+      // Ensure menu is closed on page load
+      if (mobileMenu) {
+        closeMobileMenu();
+      }
+      
+      // Handle window resize - close menu if switching to desktop view
+      let resizeTimer;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          if (window.innerWidth > 992 && mobileMenu && mobileMenu.classList.contains('active')) {
+            closeMobileMenu();
+          }
+        }, 250);
+      });
+    })();
   </script>
 </body>
 </html>
