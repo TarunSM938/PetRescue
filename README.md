@@ -1,6 +1,6 @@
 # PetRescue
 
-PetRescue is a Django web application designed to help connect lost pets with their owners and facilitate pet adoptions. The platform provides a comprehensive solution for reporting lost/found pets, searching for missing animals, and supporting animal welfare through community engagement.
+PetRescue is a Django web application designed to help connect lost pets with their owners. The platform provides a comprehensive solution for reporting lost/found pets, searching for missing animals, and supporting animal welfare through community engagement.
 
 ## Features
 
