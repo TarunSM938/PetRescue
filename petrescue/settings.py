@@ -14,25 +14,39 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+def env_list(name, default=''):
+    value = os.environ.get(name, default)
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: Keep the secret key used in production secret!
-# In production, this should be set as an environment variable
-SECRET_KEY = 'django-insecure-#lko!(m-&aap17+z1=u!b0&lu%l_dq@*oha5(0tozqjxswz)95'
+# SECURITY WARNING: Keep the secret key used in production secret.
+LOCAL_SECRET_KEY = 'django-insecure-local-dev-only-change-me'
+SECRET_KEY = os.environ.get('SECRET_KEY', LOCAL_SECRET_KEY)
 
-# SECURITY WARNING: Don't run with debug turned on in production!
-# Set to False in production environment
-DEBUG = True
+# SECURITY WARNING: Don't run with debug turned on in production.
+DEBUG = env_bool('DEBUG', default=True)
 
-# Hosts allowed to access the application
-# In production, add your domain names here
-ALLOWED_HOSTS = []
+if not DEBUG and SECRET_KEY == LOCAL_SECRET_KEY:
+    raise ImproperlyConfigured('SECRET_KEY must be set when DEBUG=False.')
+
+# Hosts allowed to access the application.
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', default='localhost,127.0.0.1')
 
 
 # Application definition
@@ -88,18 +102,40 @@ WSGI_APPLICATION = 'petrescue.wsgi.application'
 
 # Database configuration
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# Using MySQL for production-like environment
+DB_ENGINE = os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3')
+DB_NAME = os.environ.get('DB_NAME')
+
+if DB_ENGINE == 'django.db.backends.sqlite3':
+    DB_NAME = DB_NAME or str(BASE_DIR / 'db.sqlite3')
+else:
+    DB_NAME = DB_NAME or 'petrescue_db'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'petrescue_db',
-        'USER': 'root',
-        'PASSWORD': '*Tarusm9380',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': DB_ENGINE,
+        'NAME': DB_NAME,
     }
 }
+
+if DB_ENGINE != 'django.db.backends.sqlite3':
+    DATABASES['default'].update({
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+    })
+
+    if not DEBUG:
+        required_db_settings = ['DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST']
+        missing_db_settings = [
+            setting for setting in required_db_settings
+            if not os.environ.get(setting)
+        ]
+        if missing_db_settings:
+            missing = ', '.join(missing_db_settings)
+            raise ImproperlyConfigured(
+                f'{missing} must be set when DEBUG=False and using a non-SQLite database.'
+            )
 
 
 # Password validation
